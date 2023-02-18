@@ -7663,6 +7663,15 @@ Function DrawMenu()
 						MainMenuOpen = True
 						MainMenuTab = 0
 						CurrSave = ""
+						RunStartTime = 0
+						LoadStartTime = 0
+						LoadTime = 0
+						;ShouldIncreaseLoadTime = False
+						PlayTime = 0
+						ShouldIncreasePlayTime = False
+						GameTime = 0
+						RunFinished = False
+						SpeedrunEnding = ""
 						FlushKeys()
 					EndIf
 				EndIf
