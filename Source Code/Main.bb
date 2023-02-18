@@ -8985,8 +8985,8 @@ Function NullGame(playbuttonsfx%=True)
 	QuitMSG% = -1
 	AchievementsMenu% = -1
 	
-	MusicVolume# = PrevMusicVolume
-	SFXVolume# = PrevSFXVolume
+	;MusicVolume# = PrevMusicVolume ; This will cause music volume to reset back to the value that it was when the game was launched.
+	SFXVolume# = PrevSFXVolume      ; SFXVolume seems fine though :/
 	DeafPlayer% = False
 	DeafTimer# = 0.0
 	
