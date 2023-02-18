@@ -239,7 +239,7 @@ Function UpdateMainMenu()
 				Case 2
 					CurrLoadGamePage = 0
 					MainMenuTab = 0
-				Case 3,5,6,7 ;save the options
+				Case 3,5,6,7,8 ;save the options
 					SaveOptionsINI()
 					
 					UserTrackCheck% = 0
@@ -549,7 +549,7 @@ Function UpdateMainMenu()
 				
 				
 				;[End Block]
-			Case 3,5,6,7 ;options
+			Case 3,5,6,7,8 ;options
 				;[Block]
 				
 				x = 159 * MenuScale
@@ -583,7 +583,7 @@ Function UpdateMainMenu()
 				If DrawButton(x+20*MenuScale,y+15*MenuScale,width/5,height/2, "GRAPHICS", False) Then MainMenuTab = 3
 				If DrawButton(x+160*MenuScale,y+15*MenuScale,width/5,height/2, "AUDIO", False) Then MainMenuTab = 5
 				If DrawButton(x+300*MenuScale,y+15*MenuScale,width/5,height/2, "CONTROLS", False) Then MainMenuTab = 6
-				If DrawButton(x+440*MenuScale,y+15*MenuScale,width/5,height/2, "ADVANCED", False) Then MainMenuTab = 7
+				If DrawButton(x+440*MenuScale,y+15*MenuScale,width/5,height/2, "ADVANCED", False) Then MainMenuTab = 7				
 				
 				AASetFont Font1
 				y = y + 70 * MenuScale
@@ -910,7 +910,7 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 7 ;Advanced
 					;[Block]
-					height = 370 * MenuScale
+					height = 320 * MenuScale
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -1017,15 +1017,50 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"antialiastext")
 					EndIf
 					
-					;Speedrun Timer in game or not
-					
-					y = y + 40 * MenuScale
-					
+					;Speedrun Settings
+										
 					Color 255, 255, 255
-					AAText(x + 20 * MenuScale, y, "Display Timer in Game:")
-					SpeedrunTimer% = DrawTick(x + 310 * MenuScale, y + MenuScale, SpeedrunTimer%)
+					If DrawButton(x, y * 1.05, width, height * 0.12, "SPEEDRUN SETTINGS", False) Then MainMenuTab = 8					
 					
 					;[End Block]
+				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
+					;[Block]
+					height = 220 * MenuScale ; Height of white box around settings
+					DrawFrame(x, y, width, height)	
+					
+					y = y + 20*MenuScale
+					
+					AAText(x + 20 * MenuScale, y, "Display Timer in Game:")
+					SpeedrunTimer% = DrawTick(x + 310 * MenuScale, y, SpeedrunTimer%)
+					
+					y = y + 35 * MenuScale
+					
+					AAText(x + 20 * MenuScale, y, "Enter values from 0 To 255.")
+					
+					;TimerR
+					y = y + 10 * MenuScale					
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Timer R")
+					TimerRText = InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale, TimerR,50)
+					TimerR = Max(Min(Int(TimerRText), 255), 0)
+										
+					;TimerG			
+					y = y + 20 * MenuScale
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Timer G")
+					TimerGText = InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale, TimerG,51)		
+					TimerG = Max(Min(Int(TimerGText), 255), 0)
+										
+					;TimerB
+					y = y + 20 * MenuScale								
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Timer B")
+					TimerBText = InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale, TimerB,52)		
+					TimerB = Max(Min(Int(TimerBText), 255), 0)
+					
+					y = y + 30 * MenuScale
+					AASetFont ConsoleFont
+					Color TimerR, TimerG, TimerB
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "This is the color of your timer.")
+
+					;[EndBlock]
 				EndIf
 				;[End Block]
 			Case 4 ; load map

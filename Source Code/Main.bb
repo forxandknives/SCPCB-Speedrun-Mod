@@ -367,6 +367,12 @@ Global RunFinished% = False
 Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
+Global TimerR = GetINIInt(OptionFile, "options", "timer r")
+Global TimerRText = Str(TimerR)
+Global TimerG = GetINIInt(OptionFile, "options", "timer g")
+Global TimerGText = Str(TimerG)
+Global TimerB = GetINIInt(OptionFile, "options", "timer b")
+Global TimerBText = Str(TimerB)
 
 Global GarbagePlayTime% ; This is never used
 
@@ -4659,10 +4665,16 @@ Function DrawGUI()
 	Local seconds% = (GameTime / 1000) Mod 60
 	Local minutes% = Int((Gametime / 1000) / 60)
 		
+	Local secondsString$ = Str(seconds)
+		
+	If seconds < 10 Then
+		secondsString = "0" + secondsString
+	EndIf
+		
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then
-		Color 255, 255, 255
+		Color TimerR, TimerG, TimerB
 		AASetFont ConsoleFont
-		AAText (GraphicWidth/2), (GraphicHeight * 0.10), Str(minutes) + ":" + Str(seconds) + "." + Str(ms), True	
+		AAText (GraphicWidth/2), (GraphicHeight * 0.10), Str(minutes) + ":" + secondsString + "." + Str(ms), True	
 	EndIf
 			
 	If RunFinished Then
@@ -11234,6 +11246,9 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "enable vram", EnableVRam)
 	PutINIValue(OptionFile, "options", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "options", "speedrun timer", SpeedrunTimer)
+	PutINIValue(OptionFile, "options", "timer r", TimerR)
+	PutINIValue(OptionFile, "options", "timer g", TimerG)
+	PutINIValue(OptionFile, "options", "timer b", TimerB)		
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
 	PutINIValue(OptionFile, "audio", "sound volume", PrevSFXVolume)
