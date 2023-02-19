@@ -357,6 +357,7 @@ Dim RadioCHN%(8)
 
 Dim OldAiPics%(5)
 
+;Speedrun stuff
 Global RunStartTime%
 Global LoadStartTime%
 Global LoadTime%
@@ -367,12 +368,26 @@ Global RunFinished% = False
 Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
-Global TimerR = GetINIInt(OptionFile, "options", "timer r")
-Global TimerRText = Str(TimerR)
-Global TimerG = GetINIInt(OptionFile, "options", "timer g")
-Global TimerGText = Str(TimerG)
-Global TimerB = GetINIInt(OptionFile, "options", "timer b")
-Global TimerBText = Str(TimerB)
+
+Global TimerR% = GetINIInt(OptionFile, "options", "timer r")
+Global TimerRText$ = Str(TimerR)
+Global TimerG% = GetINIInt(OptionFile, "options", "timer g")
+Global TimerGText$ = Str(TimerG)
+Global TimerB% = GetINIInt(OptionFile, "options", "timer b")
+Global TimerBText$ = Str(TimerB)
+
+; Timer Position Slider variable is the float number for where to position timer on screen.
+; Ex. If X slider is 0.50, we put the timer at the center of the screen along the X axis. 
+; If X slider is 0.25 it will center the text at the first quarter of the screen. 
+; We are basically doing the width/heigh of the screen times our float value. 
+; Positioning for X and Y start at the top left corner of the screen. 
+;
+; TimerX and TimerY are the actual position of the text on the screen in pixels. 
+
+Global TimerXSlider# = GetINIFloat(OptionFile, "options", "timer x")
+Global TimerX% = GraphicWidth * TimerXSlider
+Global TimerYSlider# = GetINIFloat(OptionFile, "options", "timer y")
+Global TimerY% = GraphicHeight * TimerYSlider
 
 Global GarbagePlayTime% ; This is never used
 
@@ -4673,7 +4688,7 @@ Function DrawGUI()
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then
 		Color TimerR, TimerG, TimerB
 		AASetFont ConsoleFont
-		AAText (GraphicWidth/2), (GraphicHeight * 0.10), Str(minutes) + ":" + secondsString + "." + Str(ms), True	
+		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Str(ms), True	
 	EndIf
 			
 	If RunFinished Then
@@ -11255,7 +11270,9 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "speedrun timer", SpeedrunTimer)
 	PutINIValue(OptionFile, "options", "timer r", TimerR)
 	PutINIValue(OptionFile, "options", "timer g", TimerG)
-	PutINIValue(OptionFile, "options", "timer b", TimerB)		
+	PutINIValue(OptionFile, "options", "timer b", TimerB)
+	PutINIValue(OptionFile, "options", "timer x", TimerXSlider)
+	PutINIValue(OptionFile, "options", "timer y", TimerYSlider)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
 	PutINIValue(OptionFile, "audio", "sound volume", PrevSFXVolume)

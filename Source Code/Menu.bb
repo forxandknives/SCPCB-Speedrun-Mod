@@ -1025,7 +1025,7 @@ Function UpdateMainMenu()
 					;[End Block]
 				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
 					;[Block]
-					height = 220 * MenuScale ; Height of white box around settings
+					height = 300 * MenuScale ; Height of white box around settings
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -1059,6 +1059,27 @@ Function UpdateMainMenu()
 					AASetFont ConsoleFont
 					Color TimerR, TimerG, TimerB
 					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "This is the color of your timer.")
+					
+					y = y + 50 * MenuScale
+					
+					Color 255, 255, 255
+					AASetFont Font1
+									
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Timer X Position:")
+					TimerXSlider = (SlideBar(x + 310*MenuScale, y + 20 * MenuScale, 150*MenuScale, TimerXSlider * 100.0)/100.0)
+					TimerX = TimerXSlider * GraphicWidth
+					
+					y = y + 40 * MenuScale
+
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Timer Y Position:")					
+					TimerYSlider = (SlideBar(x + 310*MenuScale, y + 20 * MenuScale, 150*MenuScale, TimerYSlider * 100.0)/100.0)
+					TimerY = TimerYSlider * GraphicHeight
+
+					y = y + 30 * MenuScale
+					
+					Color TimerR, TimerG, TimerB
+					AASetFont ConsoleFont
+					AAText(TimerX, TimerY, "YOUR TIMER IS HERE", True, True)
 
 					;[EndBlock]
 				EndIf
