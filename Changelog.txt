@@ -1,4 +1,16 @@
-﻿v1.3.11
+﻿Speedrun Mod v0.0.2
+- Added speedrun settings page under the advanced tab of main menu.
+- Added ability to display timer in game or not.
+- Added ability to change color of timer.
+- Added ability to change the position of the timer in game. 
+- Fixed bugged gas mask texture.
+- Fixed music volume resetting when exiting from a save. 
+
+Speedrun Mod v0.0.1
+- Added an in-game timer to get an accurate game time of your speedrun from start to finish.
+- Added pop up showing run ending and final time when run is over. 
+
+v1.3.11
 Save files from version 1.3.10 are compatible with this version.
 
 - Added a mouse smoothing option.
