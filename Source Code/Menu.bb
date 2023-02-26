@@ -564,26 +564,30 @@ Function UpdateMainMenu()
 				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
-				width = 580 * MenuScale
+				width = 750 * MenuScale
 				height = 60 * MenuScale
 				DrawFrame(x, y, width, height)
 				
 				Color 0,255,0
 				If MainMenuTab = 3
-					Rect(x+15*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+15*MenuScale,y+10*MenuScale,(width/6)+10*MenuScale,(height/2)+10*MenuScale,True)
 				ElseIf MainMenuTab = 5
-					Rect(x+155*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+155*MenuScale,y+10*MenuScale,(width/6)+10*MenuScale,(height/2)+10*MenuScale,True)
 				ElseIf MainMenuTab = 6
-					Rect(x+295*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+295*MenuScale,y+10*MenuScale,(width/6)+10*MenuScale,(height/2)+10*MenuScale,True)
 				ElseIf MainMenuTab = 7
-					Rect(x+435*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+435*MenuScale,y+10*MenuScale,(width/6)+10*MenuScale,(height/2)+10*MenuScale,True)
+				ElseIf MainMenuTab = 8
+					Rect(x+575*MenuScale,y+10*MenuScale,(width/6)+10*MenuScale,(height/2)+10*MenuScale,True)
+
 				EndIf
-				
+												
 				Color 255,255,255
-				If DrawButton(x+20*MenuScale,y+15*MenuScale,width/5,height/2, "GRAPHICS", False) Then MainMenuTab = 3
-				If DrawButton(x+160*MenuScale,y+15*MenuScale,width/5,height/2, "AUDIO", False) Then MainMenuTab = 5
-				If DrawButton(x+300*MenuScale,y+15*MenuScale,width/5,height/2, "CONTROLS", False) Then MainMenuTab = 6
-				If DrawButton(x+440*MenuScale,y+15*MenuScale,width/5,height/2, "ADVANCED", False) Then MainMenuTab = 7				
+				If DrawButton(x+20*MenuScale,y+15*MenuScale,width/6,height/2, "GRAPHICS", False) Then MainMenuTab = 3
+				If DrawButton(x+160*MenuScale,y+15*MenuScale,width/6,height/2, "AUDIO", False) Then MainMenuTab = 5
+				If DrawButton(x+300*MenuScale,y+15*MenuScale,width/6,height/2, "CONTROLS", False) Then MainMenuTab = 6
+				If DrawButton(x+440*MenuScale,y+15*MenuScale,width/6,height/2, "ADVANCED", False) Then MainMenuTab = 7				
+				If DrawButton(x+580*MenuScale,y+15*MenuScale,width/6,height/2, "SPEEDRUN", False) Then MainMenuTab = 8				
 				
 				AASetFont Font1
 				y = y + 70 * MenuScale
@@ -1017,12 +1021,6 @@ Function UpdateMainMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"antialiastext")
 					EndIf
 					
-					;Speedrun Settings
-										
-					Color 255, 255, 255
-					If DrawButton(x, y * 1.05, width, height * 0.12, "SPEEDRUN SETTINGS", False) Then MainMenuTab = 8					
-					
-					;[End Block]
 				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
 					;[Block]
 					height = 300 * MenuScale ; Height of white box around settings

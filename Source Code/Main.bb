@@ -7556,6 +7556,9 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"hud")
 					EndIf
 					
+					;Speedrun settings button					
+					
+					
 					y = y + 30*MenuScale
 					
 					Color 255,255,255
@@ -7659,6 +7662,10 @@ Function DrawMenu()
 					SpeedrunTimer% = DrawTick(x + 270 * MenuScale, y + MenuScale, SpeedrunTimer%)
 									
 					;[End Block]
+				Case 5:
+					;[Block]
+					
+					;[End Block]			
 			End Select
 		ElseIf AchievementsMenu <= 0 And OptionsMenu <= 0 And QuitMSG > 0 And KillTimer >= 0
 			Local QuitButton% = 60 
