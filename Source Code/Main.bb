@@ -4687,14 +4687,14 @@ Function DrawGUI()
 		
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then
 		Color TimerR, TimerG, TimerB
-		AASetFont ConsoleFont
+		AASetFont Font2
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Str(ms), True	
 	EndIf
 			
 	If RunFinished Then
 		Color 0, 255, 0
 		AASetFont Font2
-		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + Str(seconds) + "." + Str(ms), True, True
+		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + secondsString + "." + Str(ms), True, True
 	EndIf
 	
 	If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
@@ -7556,9 +7556,9 @@ Function DrawMenu()
 						DrawOptionsTooltip(tx,ty,tw,th,"hud")
 					EndIf
 					
-					;Speedrun settings button					
-					
-					
+					;Speedrun settings button						
+					If DrawButton(x+325*MenuScale,y,100*MenuScale,30*MenuScale,"SPEEDRUN",False) Then OptionsMenu = 5			
+									
 					y = y + 30*MenuScale
 					
 					Color 255,255,255
@@ -7653,17 +7653,61 @@ Function DrawMenu()
 					EndIf
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"antialiastext")
-					EndIf
+					EndIf													
+					;[End Block]
 					
-					y = y + 30*MenuScale
+				Case 5: ;Speedrun settings in game.
+					;[Block]
+					AASetFont Font1
+
+					y = y + 50*MenuScale
 					
 					Color 255,255,255
 					AAText(x, y, "Display Timer in Game:")
 					SpeedrunTimer% = DrawTick(x + 270 * MenuScale, y + MenuScale, SpeedrunTimer%)
-									
-					;[End Block]
-				Case 5:
-					;[Block]
+					
+					y = y + 50 * MenuScale
+					
+					AAText(x, y, "Enter values from 0 To 255.")
+					
+					;TimerR
+					y = y + 30 * MenuScale					
+					AAText(x, y, "Timer R")
+					TimerRText = InputBox(x + 150 * MenuScale, y,100*MenuScale,20*MenuScale, TimerR,50)
+					TimerR = Max(Min(Int(TimerRText), 255), 0)
+										
+					;TimerG			
+					y = y + 30 * MenuScale
+					AAText(x, y, "Timer G")
+					TimerGText = InputBox(x + 150 * MenuScale, y,100*MenuScale,20*MenuScale, TimerG,51)		
+					TimerG = Max(Min(Int(TimerGText), 255), 0)
+										
+					;TimerB
+					y = y + 30 * MenuScale								
+					AAText(x, y, "Timer B")
+					TimerBText = InputBox(x + 150 * MenuScale, y,100*MenuScale,20*MenuScale, TimerB,52)		
+					TimerB = Max(Min(Int(TimerBText), 255), 0)
+
+					y = y + 30 * MenuScale
+					AASetFont ConsoleFont
+					Color TimerR, TimerG, TimerB
+					AAText(x, y, "This is the color of your timer.")
+					
+					y = y + 50 * MenuScale
+					
+					Color 255, 255, 255
+					AASetFont Font1
+					
+					;Here
+					AAText(x, y, "Timer X Position:")
+					TimerXSlider = (SlideBar(x + 250*MenuScale, y, 100*MenuScale, TimerXSlider * 100.0)/100.0)
+					TimerX = TimerXSlider * GraphicWidth
+					
+					y = y + 40 * MenuScale
+
+					AAText(x, y, "Timer Y Position:")					
+					TimerYSlider = (SlideBar(x + 250*MenuScale, y, 100*MenuScale, TimerYSlider * 100.0)/100.0)
+					TimerY = TimerYSlider * GraphicHeight
 					
 					;[End Block]			
 			End Select
