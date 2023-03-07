@@ -118,7 +118,7 @@ Type Rooms
 	Field found%
 	
 	Field obj%
-	Field x#, y#, z#
+	Field x%, y%, z%
 	Field angle%
 	Field RoomTemplate.RoomTemplates
 	
@@ -184,6 +184,18 @@ Function GenerateSeedNumber(seed$)
  		shift=(shift+1) Mod 24
 	Next
  	Return temp
+End Function
+
+Function GenerateSeed()
+	seed = ""
+	n = Rand(4,8)
+	For i = 1 To n
+		If Rand(3)=1 Then
+ 			seed = seed + Rand(0,9)
+		Else
+			seed = seed + Chr(Rand(97,122))
+		EndIf
+	Next
 End Function
 
 LoadRoomTemplates("..\Data\rooms.ini")
@@ -1007,7 +1019,6 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 				;PositionEntity(r\obj, x, y, z)
 				FillRoom(r)
 				
-				CalculateRoomExtents(r)
 				Return r
 			EndIf
 		Next
@@ -1041,7 +1052,6 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 					;PositionEntity(r\obj, x, y, z)
 					FillRoom(r)
 
-					CalculateRoomExtents(r)
 					Return r	
 				End If
 			EndIf
@@ -1083,7 +1093,6 @@ Function PreventRoomOverlap(r.Rooms)
 		;Room is a ROOM2, let's check if turning it 180 degrees fixes the overlapping issue
 		r\angle = r\angle + 180
 		RotateEntity r\obj,0,r\angle,0
-		CalculateRoomExtents(r)
 						
 		For r2 = Each Rooms
 			If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
@@ -2060,3 +2069,64 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 		Next
 	Next		
 End Function
+
+Function ResetMap()
+	Local r.Rooms, rt.RoomTemplates, z.MapZones, wp.Waypoints
+	Local f.Forest, g.Grids
+	
+	For rt.RoomTemplates = Each RoomTemplates
+		;rt\obj = 0
+	Next
+	
+	Delete Each Rooms	
+	
+	For z.MapZones = Each MapZones
+		Delete z
+	Next
+	
+	For wp.WayPoints = Each WayPoints
+		Delete wp
+	Next
+	
+	For f.Forest = Each Forest
+		Delete f
+	Next
+	
+	For g.Grids = Each Grids
+		Delete g
+	Next
+	
+End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
