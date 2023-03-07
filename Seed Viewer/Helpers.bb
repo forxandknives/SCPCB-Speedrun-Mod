@@ -109,6 +109,7 @@ Function GetINIInt%(file$, section$, parameter$, defaultvalue% = 0)
 End Function
 
 Function UpdateINIFile$(filename$)
+	If roomsLineCount = 748 Then Return
 	Local file.INIFile = Null
 	For k.INIFile = Each INIFile
 		If k\name = Lower(filename) Then
@@ -120,6 +121,7 @@ Function UpdateINIFile$(filename$)
 	
 	If file\bank<>0 Then FreeBank file\bank
 	Local f% = ReadFile(file\name)
+	
 	Local fleSize% = 1
 	While fleSize<FileSize(file\name)
 		fleSize=fleSize*2
@@ -131,6 +133,7 @@ Function UpdateINIFile$(filename$)
 		file\size=file\size+1
 	Wend
 	CloseFile(f)
+	
 End Function
 
 Function ReadINILine$(file.INIFile)
@@ -151,3 +154,26 @@ Function ReadINILine$(file.INIFile)
 	file\bankOffset = offset
 	Return retStr
 End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

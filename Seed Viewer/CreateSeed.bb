@@ -58,6 +58,7 @@ Function LoadRoomTemplates(file$)
 	
 	Local f = OpenFile(file)
 	
+	DebugLog "Starting LoadRoomTemplates."
 	While Not Eof(f)
 		TemporaryString = Trim(ReadLine(f))
 		If Left(TemporaryString,1) = "[" Then
@@ -68,7 +69,7 @@ Function LoadRoomTemplates(file$)
 			rt\Name = Lower(TemporaryString)
 			
 			StrTemp = Lower(GetINIString(file, TemporaryString, "shape"))
-			
+							
 			Select StrTemp
 				Case "room1", "1"
 					rt\Shape = ROOM1
@@ -93,8 +94,10 @@ Function LoadRoomTemplates(file$)
 			rt\UseLightCones = GetINIInt(file, TemporaryString, "usevolumelighting")
 			rt\DisableOverlapCheck = GetINIInt(file, TemporaryString, "disableoverlapcheck")
 		EndIf
+		; Temporary work around for an EOF error. UpdateINIFile is running when it should not I think :/
+		roomsLineCount = roomsLineCount+ 1
+		If roomsLineCount = 748 Then Exit
 	Wend
-	
 	i = 1
 	Repeat
 		StrTemp = GetINIString(file, "room ambience", "ambience"+i)
@@ -184,7 +187,6 @@ Function GenerateSeedNumber(seed$)
 End Function
 
 LoadRoomTemplates("..\Data\rooms.ini")
-
 Const ZONEAMOUNT = 3
 
 Global MapHeight% = 18

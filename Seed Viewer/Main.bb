@@ -16,6 +16,8 @@ SetBuffer FrontBuffer()
 
 Color 255,255,255
 
+Global roomsLineCount% = 1
+
 Global screenWidth% = GraphicsWidth()
 Global screenHeight% = GraphicsHeight()
 
@@ -34,6 +36,11 @@ Global selectedRoom$ = "amogus"
 
 Global mapWidthPixels% = cellWidth * MapWidth
 Global mapHeightPixels% = cellHeight * MapHeight
+
+For r.Rooms = Each Rooms
+	r\x = r\x / 8
+	r\z = r\z / 8
+Next
 
 While Not KeyDown(1)
 
@@ -55,12 +62,6 @@ While Not KeyDown(1)
 
 	Color 255,255,255
 	For r.Rooms = Each Rooms
-		roomX% = r\x / 8
-		roomY% = r\z / 8
-		
-		If r\RoomTemplate\Name = "lockroom" Then
-			Print("X: " + r\x + " Y: " + r\z)
-		EndIf
 		
 		x% = mouse_x / cellWidth
 		y% = mouse_y / cellHeight
@@ -69,8 +70,8 @@ While Not KeyDown(1)
 			selectedRoom = r\RoomTemplate\Name
 		EndIf
 		
-		y_pos% = roomY * cellHeight
-		x_pos% = mapWidthPixels - (roomX * cellWidth)
+		y_pos% = r\z * cellHeight
+		x_pos% = mapWidthPixels - (r\x * cellWidth)
 		
 		Rect(x_pos, y_pos, cellWidth, cellHeight, 1)
 	Next
