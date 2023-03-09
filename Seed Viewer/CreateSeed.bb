@@ -1227,7 +1227,7 @@ Function FillRoom(r.Rooms)
 				Local fr.Forest = New Forest
 				r\fr=fr
 				GenForestGrid(fr)
-				;PlaceForest(fr,r\x,r\y+30.0,r\z,r)
+				PlaceForest(fr,r\x,r\y+30.0,r\z,r)
 			;[EndBlock
 			EndIf
 		Case "lockroom"
@@ -1237,7 +1237,7 @@ Function FillRoom(r.Rooms)
 			;[Block]
 			For i = 0 To 5
 				ri = Rand(2, 3);de.Decals = CreateDecal(Rand(2,3), r\x+Rnd(-392,520)*RoomScale, 3.0*RoomScale+Rnd(0,0.001), r\z+Rnd(-392,520)*RoomScale,90,Rnd(360),0)
-				rf = Rnd(0, 1)
+				rf = Rnd(-392, 520)
 				rf = Rnd(0, 1)
 				rf = Rnd(0, 1)
 				rf = Rnd(0, 1)
@@ -2097,8 +2097,6 @@ Function ResetMap()
 	Next
 	
 End Function
-
-
 
 
 
