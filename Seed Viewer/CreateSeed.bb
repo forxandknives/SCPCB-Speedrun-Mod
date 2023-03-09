@@ -146,6 +146,10 @@ Type Rooms
 	Field MaxX#, MaxY#, MaxZ#
 End Type 
 
+Type Doors
+	Field open%, angle%
+End Type 
+
 Const gridsz% = 19
 
 Type Grids
@@ -183,6 +187,7 @@ Function GenerateSeedNumber(seed$)
  		temp = temp Xor (Asc(Mid(seed,i,1)) Shl shift)
  		shift=(shift+1) Mod 24
 	Next
+	DebugLog "GENERATED SEED NUMBER OF: " + temp
  	Return temp
 End Function
 
@@ -229,6 +234,10 @@ Function CreateMap(RandomSeed$)
 	Local zone%
 	
 	SeedRnd GenerateSeedNumber(RandomSeed)
+	
+	For i = 0 To 3
+		AccessCode = AccessCode + Rand(1,9)*(10^i)
+	Next
 	
 	Dim MapName$(MapWidth, MapHeight)
 	
@@ -842,7 +851,7 @@ Function CreateMap(RandomSeed$)
 		Next
 	Next
 	
-	
+	Local d.Doors
 	Local shouldSpawnDoor%
 	For y = MapHeight To 0 Step -1
 		
@@ -885,8 +894,8 @@ Function CreateMap(RandomSeed$)
 						If shouldSpawnDoor
 							If (x+1)<(MapWidth+1)
 								If MapTemp(x + 1, y) > 0 Then
-									ri = Rand(0, 1);d.Doors = CreateDoor(r\zone, Float(x) * spacing + spacing / 2.0, 0, Float(y) * spacing, 90, r, Max(Rand(-3, 1), 0), temp)
-									;r\AdjDoor[0] = d
+									ri = Rand(-3, 1);d.Doors = CreateDoor(r\zone, Float(x) * spacing + spacing / 2.0, 0, Float(y) * spacing, 90, r, Max(Rand(-3, 1), 0), temp)
+									d = CreateDoor()
 								EndIf
 							EndIf
 						EndIf
@@ -915,8 +924,8 @@ Function CreateMap(RandomSeed$)
 						If shouldSpawnDoor
 							If (y+1)<(MapHeight+1)
 								If MapTemp(x, y + 1) > 0 Then
-									ri = Rand(0, 1); d.Doors = CreateDoor(r\zone, Float(x) * spacing, 0, Float(y) * spacing + spacing / 2.0, 0, r, Max(Rand(-3, 1), 0), temp)
-									;r\AdjDoor[3] = d
+									ri = Rand(-3, 1)
+									d = CreateDoor(); d.Doors = CreateDoor(r\zone, Float(x) * spacing, 0, Float(y) * spacing + spacing / 2.0, 0, r, Max(Rand(-3, 1), 0), temp)
 								EndIf
 							EndIf
 						EndIf
@@ -997,7 +1006,7 @@ Function SetRoom(room_name$,room_type%,pos%,min_pos%,max_pos%) ;place a room wit
 End Function
 
 Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
-	CatchErrors("Uncaught (CreateRoom)")
+CatchErrors("Uncaught (CreateRoom)")
 	Local r.Rooms = New Rooms
 	Local rt.RoomTemplates
 	
@@ -1009,7 +1018,9 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 		name = Lower(name)
 		For rt.RoomTemplates = Each RoomTemplates
 			If rt\Name = name Then
-				r\RoomTemplate = rt										
+				r\RoomTemplate = rt
+				
+				;If rt\obj=0 Then LoadRoomMesh(rt)
 				
 				;r\obj = CopyEntity(rt\obj)
 				;ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
@@ -1019,6 +1030,11 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 				;PositionEntity(r\obj, x, y, z)
 				FillRoom(r)
 				
+				;If r\RoomTemplate\UseLightCones
+				;	AddLightCones(r)
+				;EndIf
+				
+				CalculateRoomExtents(r)
 				Return r
 			EndIf
 		Next
@@ -1042,7 +1058,9 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 			If rt\zone[i]=zone And rt\Shape = roomshape Then
 				temp=temp+rt\Commonness
 				If RandomRoom > temp - rt\Commonness And RandomRoom <= temp Then
-					r\RoomTemplate = rt					
+					r\RoomTemplate = rt
+					
+					;If rt\obj=0 Then LoadRoomMesh(rt)
 					
 					;r\obj = CopyEntity(rt\obj)
 					;ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
@@ -1051,14 +1069,35 @@ Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
 					
 					;PositionEntity(r\obj, x, y, z)
 					FillRoom(r)
-
+					
+					;If r\RoomTemplate\UseLightCones
+					;	AddLightCones(r)
+					;EndIf
+					
+					CalculateRoomExtents(r)
 					Return r	
 				End If
 			EndIf
 		Next
 	Next
-	CatchErrors("Uncaugh (CreateRoom)")
+	
+	CatchErrors("CreateRoom")
 End Function
+
+Function CreateDoor.Doors(dopen% = False,  big% = False)
+	Local d.Doors = New Doors
+	
+	d\angle = angle
+	d\open = dopen		
+	
+	If d\open And big = False And Rand(8) = 1 Then ;d\AutoClose = True
+	
+	EndIf
+		
+	Return d
+	
+End Function
+
 
 Function PreventRoomOverlap(r.Rooms)
 	If r\RoomTemplate\DisableOverlapCheck Then Return
@@ -1210,6 +1249,13 @@ Function CheckRoomOverlap(r1.Rooms, r2.Rooms)
 End Function
 
 Function FillRoom(r.Rooms)
+
+	;
+	;	EVERY TIME WE CALL CreateItem() WE HAVE TO DO 1 Rand(360) 
+	;	
+	;
+	
+	Local d.doors
 	Local r2.Rooms
 	Local i%
 	Local xtemp%, ytemp%, ztemp%
@@ -1222,75 +1268,131 @@ Function FillRoom(r.Rooms)
 		Case "room860"
 			;[Block]
 			
+			d = CreateDoor(False,False)
+			d = CreateDoor(True,False)
+
+			d = CreateDoor(False,False)
+			d = CreateDoor(False,False)
+			
 			;the forest
 			If I_Zone\HasCustomForest = False Then
 				Local fr.Forest = New Forest
 				r\fr=fr
 				GenForestGrid(fr)
-				PlaceForest(fr,r\x,r\y+30.0,r\z,r)
-			;[EndBlock
+				;PlaceForest(fr,r\x,r\y+30.0,r\z,r)
 			EndIf
+			ri = Rand(360);it = CreateItem("Document SCP-860-1", "paper", r\x + 672.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 335.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Document SCP-860", "paper", r\x + 1152.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 384.0 * RoomScale)
+
+			;[EndBlock]
 		Case "lockroom"
 			;[Block]
+			d = CreateDoor(True)
+			
+			d = CreateDoor(True)
 			;[End Block]
 		Case "lockroom2"
 			;[Block]
 			For i = 0 To 5
 				ri = Rand(2, 3);de.Decals = CreateDecal(Rand(2,3), r\x+Rnd(-392,520)*RoomScale, 3.0*RoomScale+Rnd(0,0.001), r\z+Rnd(-392,520)*RoomScale,90,Rnd(360),0)
-				rf = Rnd(-392, 520)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
+				rf# = Rnd(-392, 520)
+				rf# = Rnd(0, 0.001)
+				rf# = Rnd(-392, 520)
+				rf# = Rnd(360)
 				
-				rf = Rnd(0, 1); de\Size = Rnd(0.3,0.6)
+				rf# = Rnd(0.3, 0.6); de\Size = Rnd(0.3,0.6)
 				
-				ri = Rand(0, 1);CreateDecal(Rand(15,16), r\x+Rnd(-392,520)*RoomScale, 3.0*RoomScale+Rnd(0,0.001), r\z+Rnd(-392,520)*RoomScale,90,Rnd(360),0)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
+				ri = Rand(15, 16);CreateDecal(Rand(15,16), r\x+Rnd(-392,520)*RoomScale, 3.0*RoomScale+Rnd(0,0.001), r\z+Rnd(-392,520)*RoomScale,90,Rnd(360),0)
+				rf# = Rnd(-392, 520)
+				rf# = Rnd(0, 0.001)
+				rf# = Rnd(-392, 520)
+				rf# = Rnd(360)
+								
+				rf# = Rnd(0.1, 0.6);de\Size = Rnd(0.1,0.6)
 				
-				rf = Rnd(0, 1);de\Size = Rnd(0.1,0.6)
-				
-				ri = Rand(0, 1);CreateDecal(Rand(15,16), r\x+Rnd(-0.5,0.5), 3.0*RoomScale+Rnd(0,0.001), r\z+Rnd(-0.5,0.5),90,Rnd(360),0)				
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)
-				rf = Rnd(0, 1)												
+				ri = Rand(15, 16);CreateDecal(Rand(15,16), r\x+Rnd(-0.5,0.5), 3.0*RoomScale+Rnd(0,0.001), r\z+Rnd(-0.5,0.5),90,Rnd(360),0)				
+				rf# = Rnd(-392, 520)
+				rf# = Rnd(0, 0.001)
+				rf# = Rnd(-392, 520)
+				rf# = Rnd(360)
 
-				rf = Rnd(0, 1);de\Size = Rnd(0.1,0.6)
+				rf# = Rnd(0.1, 0.6);de\Size = Rnd(0.1,0.6)
 			Next
 			
 			;[End Block]
 		Case "gatea"
-			;[Block]						
+			;[Block]	
+			d = CreateDoor(False)					
+			
+			d = CreateDoor(False)					
+			
+			d = CreateDoor(False, False)
+			
+			d = CreateDoor(False, False)
+			
+			For r2.Rooms = Each Rooms
+				If r\RoomTemplate\Name = "gateaentrance" Then
+					d = CreateDoor(False)
+				EndIf
+			Next
 			;[End Block]
 		Case "gateaentrance"
 			;[Block]
+			d = CreateDoor(True)
+			d = CreateDoor(False, True)
 			;[End Block]
 		Case "exit1"
 			;[Block]
+			d = CreateDoor(False, True)
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
 			;[End Block]
 		Case "roompj"
 			;[Block]
+			ri = Rand(360);it = CreateItem("Document SCP-372", "paper", r\x + 800.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 1108.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Radio Transceiver", "radio", r\x + 800.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 944.0 * RoomScale)
+			d = CreateDoor(True, True)
 			;[End Block]
 		Case "room079"
 			;[Block]
-			
-			rf = Rnd(0, 1);de.Decals = CreateDecal(3,  r\x + 1184.0*RoomScale, -448.0*RoomScale+0.01, r\z+1792.0*RoomScale,90,Rnd(360),0)
-			
+			d = CreateDoor(False, True)
+			rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x + 1184.0*RoomScale, -448.0*RoomScale+0.01, r\z+1792.0*RoomScale,90,Rnd(360),0)
+			d = CreateDoor(False, True)
+			d = CreateDoor(False, False)
 			;[End Block]
 		Case "checkpoint1"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			If MapTemp(Floor(r\x / 8.0),Floor(r\z /8.0)-1)=0 Then
+				d = CreateDoor(False)
+			EndIf
 			;[End Block]
 		Case "checkpoint2"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			If MapTemp(Floor(r\x / 8.0),Floor(r\z /8.0)-1)=0 Then
+				d = CreateDoor(False)
+			EndIf			
 			;[End Block]
 		Case "room2pit"
 			;[Block]
 			;[End Block]
 		Case "room2testroom2"
 			;[Block]
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Level 2 Key Card", "key2", r\x - 914.0 * RoomScale, r\y + 137.0 * RoomScale, r\z + 61.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x - 312.0 * RoomScale, r\y + 264.0 * RoomScale, r\z + 176.0 * RoomScale)
 			;[End Block]
 		Case "room3tunnel"
 			;[Block]
@@ -1301,60 +1403,146 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "room2storage"
 			;[Block]
+			d = CreateDoor()
+			d = CreateDoor()
+			d = CreateDoor()
+			d = CreateDoor()
+			d = CreateDoor()
+			d = CreateDoor()
+				
+			ri = Rand(360);it = CreateItem("Document SCP-939", "paper", r\x + 352.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 256.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 352.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 448.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Empty Cup", "emptycup", r\x-672*RoomScale, 240*RoomScale, r\z+288.0*RoomScale)
+			ri = Rand(360);it = CreateItem("Level 1 Key Card", "key1", r\x - 672.0 * RoomScale, r\y + 240.0 * RoomScale, r\z + 224.0 * RoomScale)
 			;[End Block]
 		Case "room2sroom"
 			;[Block]
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Some SCP-420-J", "420", r\x + 1776.0 * RoomScale, r\y + 400.0 * RoomScale, r\z + 427.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Some SCP-420-J", "420", r\x + 1808.0 * RoomScale, r\y + 400.0 * RoomScale, r\z + 435.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Level 5 Key Card", "key5", r\x + 2232.0 * RoomScale, r\y + 392.0 * RoomScale, r\z + 387.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Nuclear Device Document", "paper", r\x + 2248.0 * RoomScale, r\y + 440.0 * RoomScale, r\z + 372.0 * RoomScale)
+			ri = Rand(360);
 			;[End Block]
 		Case "room2shaft"
-			;[Block]
-            
-            rf = Rnd(0, 1);de.Decals = CreateDecal(3,  r\x + 1334.0*RoomScale, -796.0*RoomScale+0.01, r\z-220.0*RoomScale,90,Rnd(360),0)
+			;[Block]       
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			     
+			ri = Rand(360);it = CreateItem("Level 3 Key Card", "key3", r\x + 1119.0 * RoomScale, r\y + 233.0 * RoomScale, r\z + 494.0 * RoomScale)	
+			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x + 1035.0 * RoomScale, r\y + 145.0 * RoomScale, r\z + 56.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 1930.0 * RoomScale, r\y + 97.0 * RoomScale, r\z + 256.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 1061.0 * RoomScale, r\y + 161.0 * RoomScale, r\z + 494.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("ReVision Eyedrops", "eyedrops", r\x + 1930.0*RoomScale, r\y + 225.0 * RoomScale, r\z + 128.0*RoomScale)
 
+            rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x + 1334.0*RoomScale, -796.0*RoomScale+0.01, r\z-220.0*RoomScale,90,Rnd(360),0)
 			;[End Block]
         Case "room2poffices"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Mysterious Note", "paper", r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 544.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Ballistic Vest", "vest", r\x + 608.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 32.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Incident Report SCP-106-0204", "paper", r\x + 704.0 * RoomScale, r\y + 183.0 * RoomScale, r\z - 576.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Journal Page", "paper", r\x + 912 * RoomScale, r\y + 176.0 * RoomScale, r\z - 160.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x + 912.0 * RoomScale, r\y + 112.0 * RoomScale, r\z - 336.0 * RoomScale)
 			;[End Block]
 		Case "room2poffices2"
 			;[Block]
 			
-			ri = Rand(0, 1);de.Decals = CreateDecal(0, r\x - 808.0 * RoomScale, 0.005, r\z - 72.0 * RoomScale, 90, 360), 0)
-
-			ri = Rand(0, 1);de.Decals = CreateDecal(2, r\x - 808.0 * RoomScale, 0.01, r\z - 72.0 * RoomScale, 90, Rand(360), 0)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
 			
-			ri = Rand(0, 1);de.Decals = CreateDecal(0, r\x - 432.0 * RoomScale, 0.01, r\z, 90, Rand(360), 0)
+			ri = Rand(360);de.Decals = CreateDecal(0, r\x - 808.0 * RoomScale, 0.005, r\z - 72.0 * RoomScale, 90, Rand(360), 0)
+
+			ri = Rand(360);de.Decals = CreateDecal(2, r\x - 808.0 * RoomScale, 0.01, r\z - 72.0 * RoomScale, 90, Rand(360), 0)
+			
+			ri = Rand(360);de.Decals = CreateDecal(0, r\x - 432.0 * RoomScale, 0.01, r\z, 90, Rand(360), 0)
+			
+			ri = Rand(360);it = CreateItem("Dr. L's Burnt Note", "paper", r\x - 688.0 * RoomScale, 1.0, r\z - 16.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Dr L's Burnt Note", "paper", r\x - 808.0 * RoomScale, 1.0, r\z - 72.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("The Modular Site Project", "paper", r\x + 622.0*RoomScale, r\y + 125.0*RoomScale, r\z - 73.0*RoomScale)
 			
 			;[End Block]
 		Case "room2elevator"
 			;[Block]
+			d = CreateDoor(False)
 			;[End Block]
 		Case "room2cafeteria"
 			;[Block]
+			ri = Rand(360);it = CreateItem("cup", "cup", r\x-508.0*RoomScale, -187*RoomScale, r\z+284.0*RoomScale, 240,175,70)			
+			ri = Rand(360);it = CreateItem("cup", "cup", r\x+1412 * RoomScale, -187*RoomScale, r\z-716.0 * RoomScale, 87,62,45)			
+			ri = Rand(360);it = CreateItem("Empty Cup", "emptycup", r\x-540*RoomScale, -187*RoomScale, r\z+124.0*RoomScale)			
+			ri = Rand(360);it = CreateItem("Quarter", "25ct", r\x-447.0*RoomScale, r\y-334.0*RoomScale, r\z+36.0*RoomScale)
+			ri = Rand(360);it = CreateItem("Quarter", "25ct", r\x+1409.0*RoomScale, r\y-334.0*RoomScale, r\z-732.0*RoomScale)
 			;[End Block]
 		Case "room2nuke"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("Nuclear Device Document", "paper", r\x - 768.0 * RoomScale, r\y + 1684.0 * RoomScale, r\z - 768.0 * RoomScale)		
+			ri = Rand(360);it = CreateItem("Ballistic Vest", "vest", r\x - 944.0 * RoomScale, r\y + 1652.0 * RoomScale, r\z - 656.0 * RoomScale)
 			;[End Block]
 		Case "room2tunnel"
-			;[Block]
+			;[Block]			
+			d = CreateDoor(True)
+			d = CreateDoor(True)
+			d = CreateDoor(True, False)
 			
-			ri = Rand(0, 1);de.Decals = CreateDecal(0, r\x + 64.0 * RoomScale, 0.005, r\z + 144.0 * RoomScale, 90, Rand(360), 0)
+			ri = Rand(360);de.Decals = CreateDecal(0, r\x + 64.0 * RoomScale, 0.005, r\z + 144.0 * RoomScale, 90, Rand(360), 0)
 
+			ri = Rand(360);it = CreateItem("Scorched Note", "paper", r\x + 64.0 * RoomScale, r\y +144.0 * RoomScale, r\z - 384.0 * RoomScale)
 			;[End Block]
 		Case "008"
 			;[Block]
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("Hazmat Suit", "hazmatsuit", r\x - 76.0 * RoomScale, 0.5, r\z - 396.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Document SCP-008", "paper", r\x - 245.0 * RoomScale, r\y + 192.0 * RoomScale, r\z + 368.0 * RoomScale)
 			;[End Block]
 		Case "room035"
 			;[Block]
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("SCP-035 Addendum", "paper", r\x + 248.0 * RoomScale, r\y + 220.0 * RoomScale, r\z + 576.0 * RoomScale)		
+			ri = Rand(360);it = CreateItem("Radio Transceiver", "radio", r\x - 544.0 * RoomScale, 0.5, r\z + 704.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("SCP-500-01", "scp500", r\x + 1168*RoomScale, 224*RoomScale, r\z+576*RoomScale)			
+			ri = Rand(360);it = CreateItem("Metal Panel", "scp148", r\x - 360 * RoomScale, 0.5, r\z + 644 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Document SCP-035", "paper", r\x + 1168.0 * RoomScale, 104.0 * RoomScale, r\z + 608.0 * RoomScale)
 			;[End Block]
 		Case "room513"
 			;[Block]
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("SCP-513", "scp513", r\x - 32.0 * RoomScale, r\y + 196.0 * RoomScale, r\z + 688.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Blood-stained Note", "paper", r\x + 736.0 * RoomScale,1.0, r\z + 48.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Document SCP-513", "paper", r\x - 480.0 * RoomScale, 104.0*RoomScale, r\z - 176.0 * RoomScale)
 			;[End Block]
 		Case "room966"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 320.0 * RoomScale, 0.5, r\z + 704.0 * RoomScale)
 			;[End Block]
 		Case "room3storage"
-			;[Block]
-			
-			ri = Rand(0, 1)
+			;[Block]		
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(True)	
+			d = CreateDoor(False)
+			ri = Rand(3)
 			;Select Rand(3)
 			;	Case 1
 			;		x# = 2312
@@ -1367,21 +1555,50 @@ Function FillRoom(r.Rooms)
 			;		z#=2808
 			;End Select
 			
-			rf = Rnd(0, 1);de.Decals = CreateDecal(3,  r\x + x*RoomScale, -5632.0*RoomScale+0.01, r\z+z*RoomScale,90,Rnd(360),0)
+			ri = Rand(360);it.Items = CreateItem("Black Severed Hand", "hand2", r\x + x*RoomScale, -5596.0*RoomScale+1.0, r\z+z*RoomScale)			
+			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 1936.0 * RoomScale, r\y - 5496.0 * RoomScale, r\z - 944.0 * RoomScale)
 			
+			rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x + x*RoomScale, -5632.0*RoomScale+0.01, r\z+z*RoomScale,90,Rnd(360),0)
+			
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
 			;[End Block]
 		Case "room049"
 			;[Block]
-
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-049", "paper", r\x - 608.0 * RoomScale, r\y - 3332.0 * RoomScale, r\z + 876.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Level 4 Key Card", "key4", r\x - 512.0 * RoomScale, r\y - 3412.0 * RoomScale, r\z + 864.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x +385.0 * RoomScale, r\y - 3412.0 * RoomScale, r\z + 271.0 * RoomScale)
+			
+			d = CreateDoor(True, True)
+			
+			d = CreateDoor(False)
+			d = CreateDoor(False)
 			;[End Block]
 		Case "room2_2"
 			;[Block]
 			;[End Block]
 		Case "room012"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-012", "paper", r\x - 56.0 * RoomScale, r\y - 576.0 * RoomScale, r\z - 408.0 * RoomScale)			
+			ri = Rand(360);it.Items = CreateItem("Severed Hand", "hand", r\x - 784*RoomScale, -576*RoomScale+0.3, r\z+640*RoomScale)
 						
 			rf = Rnd(0, 1);de.Decals = CreateDecal(3,  r\x - 784*RoomScale, -768*RoomScale+0.01, r\z+640*RoomScale,90,Rnd(360),0)
-
 			;[End Block]
 		Case "tunnel2"
 			;[Block]
@@ -1394,165 +1611,263 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "room2servers"
 			;[Block]
+			d = CreateDoor(False)
+			
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
+			d = CreateDoor(False, False)
 			;[End Block]
 		Case "room3servers"
-			;[Block]
+			;[Block]			
+			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x - 132.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)
+
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x - 76.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)
+			EndIf
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("9V Battery", "bat", r\x - 76.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)
-			;EndIf
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x - 196.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)
+			EndIf
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("9V Battery", "bat", r\x - 196.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)
-			;EndIf
-			
+			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x + 124.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)					
 			;[End Block]
 		Case "room3servers2"
 			;[Block]	
+			ri = Rand(360);it = CreateItem("Document SCP-970", "paper", r\x + 960.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 251.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Gas Mask", "gasmask", r\x + 954.0 * RoomScale, r\y - 504.0 * RoomScale, r\z + 235.0 * RoomScale)
 			;[End Block]
 		Case "testroom"
 			;[Block]
+			d = CreateDoor(False)
+			d = CreateDoor(True)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-682", "paper", r\x + 656.0 * RoomScale, r\y - 1200.0 * RoomScale, r\z - 16.0 * RoomScale)
 			;[End Block]
 		Case "room2closets"
 			;[Block]
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("9V Battery", "bat", r\x + 730.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 496.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)
-			;EndIf
+			ri = Rand(360);it = CreateItem("Document SCP-1048", "paper", r\x + 736.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 736.0 * RoomScale)						
+			ri = Rand(360);it = CreateItem("Gas Mask", "gasmask", r\x + 736.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 544.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 736.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 448.0 * RoomScale)
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("9V Battery", "bat", r\x + 740.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 560.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)
-			;EndIf
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 730.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 496.0 * RoomScale)
+			EndIf
 			
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 740.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 560.0 * RoomScale)			
+			EndIf
+			
+			ri = Rand(360);it = CreateItem("Level 1 Key Card", "key1", r\x + 736.0 * RoomScale, r\y + 240.0 * RoomScale, r\z + 752.0 * RoomScale)	
+			ri = Rand(360);Local clipboard.Items = CreateItem("Clipboard","clipboard",r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z -480.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Incident Report SCP-1048-A", "paper",r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z -480.0 * RoomScale)			
+			
+			d = CreateDoor(False)
 			;[End Block]
 		Case "room2offices"
 			;[Block]
+			ri = Rand(360);it = CreateItem("Document SCP-106", "paper", r\x + 404.0 * RoomScale, r\y + 145.0 * RoomScale, r\z + 559.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Level 2 Key Card", "key2", r\x - 156.0 * RoomScale, r\y + 151.0 * RoomScale, r\z + 72.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x + 305.0 * RoomScale, r\y + 153.0 * RoomScale, r\z + 944.0 * RoomScale)		
+			ri = Rand(360);it = CreateItem("Notification", "paper", r\x -137.0 * RoomScale, r\y + 153.0 * RoomScale, r\z + 464.0 * RoomScale)
 			;[End Block]
 		Case "room2offices2"
 			;[Block]
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("Document SCP-860", "paper", r\x - 800.0 * RoomScale, r\y - 48.0 * RoomScale, r\z - 464.0 * RoomScale)
-			;Else
-			;	it = CreateItem("SCP-093 Recovered Materials", "paper", r\x - 800.0 * RoomScale, r\y - 48.0 * RoomScale, r\z - 464.0 * RoomScale)
-			;EndIf
+			ri = Rand(360);it = CreateItem("Level 1 Key Card", "key1", r\x - 368.0 * RoomScale, r\y - 48.0 * RoomScale, r\z + 80.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Document SCP-895", "paper", r\x - 800.0 * RoomScale, r\y - 48.0 * RoomScale, r\z + 368.0 * RoomScale)
 			
-			ri = Rand(0, 1);temp = Rand(1,4)
-
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("Document SCP-860", "paper", r\x - 800.0 * RoomScale, r\y - 48.0 * RoomScale, r\z - 464.0 * RoomScale)
+			Else
+				ri = Rand(360);it = CreateItem("SCP-093 Recovered Materials", "paper", r\x - 800.0 * RoomScale, r\y - 48.0 * RoomScale, r\z - 464.0 * RoomScale)
+			EndIf
+			
+			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x - 336.0 * RoomScale, r\y - 48.0 * RoomScale, r\z - 480.0 * RoomScale)
+			
+			ri = Rand(1, 4);temp = Rand(1,4)
 			;[End Block]
 		Case "room2offices3"
 			;[Block]
 			
-			ri = Rand(0, 1)
-			;If Rand(2)=1 Then 
-			;	it = CreateItem("Mobile Task Forces", "paper", r\x + 744.0 * RoomScale, r\y +240.0 * RoomScale, r\z + 944.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)	
-			;Else
-			;	it = CreateItem("Security Clearance Levels", "paper", r\x + 680.0 * RoomScale, r\y +240.0 * RoomScale, r\z + 944.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)			
-			;EndIf			
+			If Rand(2)=1 Then 
+				ri = Rand(360);it = CreateItem("Mobile Task Forces", "paper", r\x + 744.0 * RoomScale, r\y +240.0 * RoomScale, r\z + 944.0 * RoomScale)
+			Else
+				ri = Rand(360);it = CreateItem("Security Clearance Levels", "paper", r\x + 680.0 * RoomScale, r\y +240.0 * RoomScale, r\z + 944.0 * RoomScale)
+			EndIf
 			
-			ri = Rand(0, 1)
-			;For i = 0 To Rand(0,1)
-			;	it = CreateItem("ReVision Eyedrops", "eyedrops", r\x - 1529.0*RoomScale, r\y + 563.0 * RoomScale, r\z - 572.0*RoomScale + i*0.05)
-			;	EntityParent(it\collider, r\obj)				
-			;Next
+			ri = Rand(360);it = CreateItem("Object Classes", "paper", r\x + 160.0 * RoomScale, r\y +240.0 * RoomScale, r\z + 568.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Document", "paper", r\x -1440.0 * RoomScale, r\y +624.0 * RoomScale, r\z + 152.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Radio Transceiver", "radio", r\x - 1184.0 * RoomScale, r\y + 480.0 * RoomScale, r\z - 800.0 * RoomScale)
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("9V Battery", "bat", r\x - 1540.0 * RoomScale, r\y + 603.0 * RoomScale, r\z - 340.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)
-			;EndIf
+			For i = 0 To Rand(0,1)
+				ri = Rand(360);it = CreateItem("ReVision Eyedrops", "eyedrops", r\x - 1529.0*RoomScale, r\y + 563.0 * RoomScale, r\z - 572.0*RoomScale + i*0.05)
+			Next
 			
-			ri = Rand(0, 1)
-			;If Rand(2) = 1 Then
-			;	it = CreateItem("9V Battery", "bat", r\x - 1529.0 * RoomScale, r\y + 603.0 * RoomScale, r\z - 308.0 * RoomScale)
-			;	EntityParent(it\collider, r\obj)
-			;EndIf
+			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x - 1545.0 * RoomScale, r\y + 603.0 * RoomScale, r\z - 372.0 * RoomScale)
+			
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x - 1540.0 * RoomScale, r\y + 603.0 * RoomScale, r\z - 340.0 * RoomScale)
+			EndIf
+			
+			If Rand(2) = 1 Then
+				ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x - 1529.0 * RoomScale, r\y + 603.0 * RoomScale, r\z - 308.0 * RoomScale)
+			EndIf
+
+			d = CreateDoor(True)
 
 			;[End Block]
 		Case "start"
 			;[Block]
 			
-			ri = Rand(0, 1);de.Decals = CreateDecal(0, r\x + 272.0 * RoomScale, 0.005, r\z + 262.0 * RoomScale, 90, Rand(360), 0)
+			d = CreateDoor(True, True)
 			
-			ri = Rand(0, 1);de.Decals = CreateDecal(0, r\x + 456.0 * RoomScale, 0.005, r\z + 135.0 * RoomScale, 90, Rand(360), 0)
+			d = CreateDoor(False)
+			
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			
+			ri = Rand(360);de.Decals = CreateDecal(0, r\x + 272.0 * RoomScale, 0.005, r\z + 262.0 * RoomScale, 90, Rand(360), 0)
+			
+			ri = Rand(360);de.Decals = CreateDecal(0, r\x + 456.0 * RoomScale, 0.005, r\z + 135.0 * RoomScale, 90, Rand(360), 0)
 
 			;[End Block]
 		Case "room2scps"
 			;[Block]
-						
+			
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
+			
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
+			
+			ri = Rand(360);it = CreateItem("SCP-714", "scp714", r\x - 552.0 * RoomScale, r\y + 220.0 * RoomScale, r\z - 760.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("SCP-1025", "scp1025", r\x + 552.0 * RoomScale, r\y + 224.0 * RoomScale, r\z - 758.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("SCP-860", "scp860", r\x + 568.0 * RoomScale, r\y + 178.0 * RoomScale, r\z + 760.0 * RoomScale)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-714", "paper", r\x - 728.0 * RoomScale, r\y + 288.0 * RoomScale, r\z - 360.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Document SCP-427", "paper", r\x - 608.0 * RoomScale, r\y + 66.0 * RoomScale, r\z + 636.0 * RoomScale)			
+
 			For i = 0 To 14
-				
-				ri = Rand(0, 1);de.Decals = CreateDecal(Rand(15,16),r\x+dx#*RoomScale,0.005,r\z+dz#*RoomScale,90,Rand(360),0)
-				ri = Rand(0, 1)
+				ri = Rand(15,16);de.Decals = CreateDecal(Rand(15,16),r\x+dx#*RoomScale,0.005,r\z+dz#*RoomScale,90,Rand(360),0)
+				ri = Rand(360)
 				
 				If i > 10 Then
-					rf = Rnd(0, 1);de\Size = Rnd(0.2,0.25)
+					rf# = Rnd(0.2,0.25)
 				Else
-					rf = Rnd(0, 1);de\Size = Rnd(0.1,0.17)
+					rf# = Rnd(0.1,0.17)
 				EndIf
 			Next
-			
+						
 			;[End Block]
 		Case "room205"
 			;[Block]	
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
 			;[End Block]
 		Case "endroom"
 			;[Block]
+			d = CreateDoor(False, True)
 			;[End Block]
 		Case "endroomc"
 			;[Block]
+			d = CreateDoor(False)
 			;[End Block]
 		Case "coffin"
 			;[Block]
+			
+			d = CreateDoor(False, True)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-895", "paper", r\x - 688.0 * RoomScale, r\y + 133.0 * RoomScale, r\z - 304.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Level 3 Key Card", "key3", r\x + 240.0 * RoomScale, r\y -1456.0 * RoomScale, r\z + 2064.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 280.0 * RoomScale, r\y -1456.0 * RoomScale, r\z + 2164.0 * RoomScale)
 			;[End Block]
 		Case "room2tesla","room2tesla_lcz","room2tesla_hcz"
 			;[Block]
 			;[End Block]
 		Case "room2doors"
 			;[Block]
+			d = CreateDoor(True)
+			
+			d = CreateDoor(True)
 			;[End Block]
 		Case "914"
 			;[Block]
+			
+			d = CreateDoor(False, True)
+			
+			d = CreateDoor(True)
+			d = CreateDoor(True)
+			
+			ri = Rand(360);it = CreateItem("Addendum: 5/14 Test Log", "paper", r\x +954.0 * RoomScale, r\y +228.0 * RoomScale, r\z + 127.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x + 960.0 * RoomScale, r\y + 112.0 * RoomScale, r\z - 40.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Dr. L's Note", "paper", r\x - 928.0 * RoomScale, 160.0 * RoomScale, r\z - 160.0 * RoomScale)
 			;[End Block]
 		Case "173"
 			;[Block]
 			
-			ri = Rand(0, 1);de.Decals = CreateDecal(Rand(4, 5), EntityX(r\Objects[5], True), 0.002, EntityZ(r\Objects[5], True), 90, Rnd(360), 0)
-			rf = Rnd(0, 1)
+			d = CreateDoor(False, True)
 			
-			ri = Rand(0, 1)
-			rf = Rnd(0, 1)			
-			rf = Rnd(0, 1)
-			rf = Rnd(0, 1)
-			rf = Rnd(0, 1)
-			rf = Rnd(0, 1)
-			rf = Rnd(0, 1)											
-			;For xtemp% = 0 To 1
-			;	For ztemp% = 0 To 1
-			;		de.Decals = CreateDecal(Rand(4, 6), r\x + 700.0 * RoomScale + xtemp * 700.0 * RoomScale + Rnd(-0.5, 0.5), Rnd(0.001, 0.0018), r\z + 600 * ztemp * RoomScale + Rnd(-0.5, 0.5), 90, Rnd(360), 0)
-			;		de\Size = Rnd(0.5, 0.8)
-			;		de\Alpha = Rnd(0.8, 1.0)
-			;		ScaleSprite(de\obj, de\Size, de\Size)
-			;	Next
-			;Next
+			ri = Rand(4, 5);de.Decals = CreateDecal(Rand(4, 5), EntityX(r\Objects[5], True), 0.002, EntityZ(r\Objects[5], True), 90, Rnd(360), 0)
+			rf# = Rnd(360)
+														
+			For xtemp% = 0 To 1
+				For ztemp% = 0 To 1
+					ri = Rand(4,6);de.Decals = CreateDecal(Rand(4, 6), r\x + 700.0 * RoomScale + xtemp * 700.0 * RoomScale + Rnd(-0.5, 0.5), Rnd(0.001, 0.0018), r\z + 600 * ztemp * RoomScale + Rnd(-0.5, 0.5), 90, Rnd(360), 0)
+					rf# = Rnd(-0.5, 0.5)
+					rf# = Rnd(0.001, 0.0018)
+					rf# = Rnd(-0.5, 0.5)
+					rf# = Rnd(360)
+				Next
+			Next
 			
+			d = CreateDoor(True, False)
+			
+			d = CreateDoor(True)
+			d = CreateDoor(True)
+			d = CreateDoor(True)
+			
+			d = CreateDoor(False)
+			d = CreateDoor(True)
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			
+			For ztemp = 0 To 1
+				d = CreateDoor(False) 
+				
+				d = CreateDoor(False)
+				
+				For xtemp = 0 To 2
+					d = CreateDoor(False)
+				Next					
+				
+				For xtemp = 0 To 4
+					d = CreateDoor(False)
+				Next	
+			Next
+			
+			ri = Rand(360);CreateItem("Class D Orientation Leaflet", "paper", r\x-(2914+1024)*RoomScale, 170.0*RoomScale, r\z+40*RoomScale)			
 			;[End Block]
 		Case "room2ccont"
 			;[Block]
+			
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Note from Daniel", "paper", r\x-400.0*RoomScale,1040.0*RoomScale,r\z+115.0*RoomScale)
 			;[End Block]
 		Case "room106"
 			;[Block]
+			ri = Rand(360);it = CreateItem("Level 5 Key Card", "key5", r\x - 752.0 * RoomScale, r\y - 592 * RoomScale, r\z + 3026.0 * RoomScale)						
+			ri = Rand(360);it = CreateItem("Dr. Allok's Note", "paper", r\x - 416.0 * RoomScale, r\y - 576 * RoomScale, r\z + 2492.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Recall Protocol RP-106-N", "paper", r\x + 268.0 * RoomScale, r\y - 576 * RoomScale, r\z + 2593.0 * RoomScale)			
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
 			;[End Block]
 		Case "room1archive"
 			;[Block]
@@ -1564,55 +1879,53 @@ Function FillRoom(r.Rooms)
 							Case (chance<0)
 								Exit
 							Case (chance<40) ;40% chance for a document
-								
-								ri = Rand(0,1)
-								;Select Rand(1,6)
-								;	Case 1
-								;		tempstr=tempstr+"1123"
-								;	Case 2
-								;		tempstr=tempstr+"1048"
-								;	Case 3
-								;		tempstr=tempstr+"939"
-								;	Case 4
-								;		tempstr=tempstr+"682"
-								;	Case 5
-								;		tempstr=tempstr+"079"
-								;	Case 6
-								;		tempstr=tempstr+"096"
-								;	Case 6
-								;		tempstr=tempstr+"966"
-								;End Select
-								
-							Case (chance>=40) And (chance<45) ;5% chance for a key card							
-								ri = Rand(0, 1);temp3%=Rand(1,2)
-							Case (chance>=45) And (chance<50) ;5% chance for a medkit
-							Case (chance>=50) And (chance<60) ;10% chance for a battery
-							Case (chance>=60) And (chance<70) ;10% chance for an SNAV
-							Case (chance>=70) And (chance<85) ;15% chance for a radio
-							Case (chance>=85) And (chance<95) ;10% chance for a clipboard
+								ri = Rand(1,6);Select Rand(1,6)
+							Case (chance>=40) And (chance<45) ;5% chance for a key card
+								temp3%=Rand(1,2)
 							Case (chance>=95) And (chance=<100) ;5% chance for misc
-								ri = Rand(0, 1);temp3%=Rand(1,3)
+								temp3%=Rand(1,3)
 						End Select
-
-						rf = Rnd(0, 1);z# = (480.0 - 352.0*ztemp + Rnd(-96.0,96.0)) * RoomScale
 						
+						ri = Rand(360);it = CreateItem(tempstr,tempstr2,r\x+x,y,r\z+z)
 					Next
 				Next
-			Next
+			Next	
 			
+			d = CreateDoor(False, False)
+				
 			;[End Block]
 		Case "room2test1074"
 			;[Block]
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(True, False)
+			d = CreateDoor(True, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-1074","paper",r\x + 300.0 * RoomScale,r\y+20.0*RoomScale,r\z + 671.0*RoomScale)
 			;[End Block]
 		Case "room1123"
 			;[Block]
+			ri = Rand(360);it = CreateItem("Document SCP-1123", "paper", r\x + 511.0 * RoomScale, r\y + 125.0 * RoomScale, r\z - 936.0 * RoomScale)					
+			ri = Rand(360);it = CreateItem("SCP-1123", "1123", r\x + 832.0 * RoomScale, r\y + 166.0 * RoomScale, r\z + 784.0 * RoomScale)			
+			ri = Rand(360);it = CreateItem("Leaflet", "paper", r\x - 816.0 * RoomScale, r\y + 704.0 * RoomScale, r\z+ 888.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Gas Mask", "gasmask", r\x + 457.0 * RoomScale, r\y + 150.0 * RoomScale, r\z + 960.0 * RoomScale)
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
 			;[End Block]
 		Case "pocketdimension"
 			;[Block]		
 			
+			ri = Rand(360);CreateItem("Burnt Note", "paper", EntityX(r\obj),0.5,EntityZ(r\obj)+3.5)
+			
+			d = CreateDoor(False)
+			d = CreateDoor(False)
+			
 			For i = 1 To 8
 				If i < 6 Then 
-					rf = Rnd(0 , 1);de\Size = Rnd(0.5, 0.5)
+					rf# = Rnd(0.5 , 0.5);de\Size = Rnd(0.5, 0.5)
 				EndIf				
 			Next
 			
@@ -1629,14 +1942,24 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "room2servers2"
 			;[Block]
+			
+			d = CreateDoor(False, False)
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 56.0154 * RoomScale, r\y - 648.0 * RoomScale, r\z + 749.638 * RoomScale)
 			;[End Block]
 		Case "room2gw","room2gw_b"
 		    ;[Block]
 			If r\RoomTemplate\Name = "room2gw_b"
 				
-				rf = Rnd(0, 1);de.Decals = CreateDecal(3,  r\x - 156.825*RoomScale, -37.3458*RoomScale, r\z+121.364*RoomScale,90,Rnd(360),0)
+				rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x - 156.825*RoomScale, -37.3458*RoomScale, r\z+121.364*RoomScale,90,Rnd(360),0)
 
 			EndIf
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
 			
 			If r\RoomTemplate\Name = "room2gw"
 				
@@ -1659,21 +1982,47 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "room3gw"
 	        ;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
 	        ;[End Block]
 		Case "room1162"
 			;[Block]
+			
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("Document SCP-1162", "paper", r\x + 863.227 * RoomScale, r\y + 152.0 * RoomScale, r\z - 953.231 * RoomScale)
 			;[End Block]
 		Case "room2scps2"
 			;[Block]
+			
+			d = CreateDoor(False, False)
+			
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			
+			ri = Rand(360);it = CreateItem("SCP-1499", "scp1499", r\x + 600.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 228.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Document SCP-1499", "paper", r\x + 840.0 * RoomScale, r\y + 260.0 * RoomScale, r\z + 224.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Document SCP-500", "paper", r\x + 1152.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 336.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Emily Ross' Badge", "badge", r\x + 364.0 * RoomScale, r\y + 5.0 * RoomScale, r\z + 716.0 * RoomScale)
 			;[End Block]
 		Case "room3offices"
-			;[Block]			
+			;[Block]		
+			d = CreateDoor(False, False)	
 			;[End Block]
 		Case "room2offices4"
 			;[Block]
+			
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("Sticky Note", "paper", r\x - 991.0*RoomScale, r\y - 242.0*RoomScale, r\z + 904.0*RoomScale)
 			;[End Block]
 		Case "room2sl"
 			;[Block]
+			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)
+			d = CreateDoor()
 			;[End Block]
 		Case "room2_4"
 			;[Block]
@@ -1683,12 +2032,23 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "lockroom3"
 			;[Block]
+			d = CreateDoor(True)
+			d = CreateDoor(True)
 			;[End Block]
 		Case "medibay"
 			;[Block]
+			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x - 506.0 * RoomScale, r\y + 192.0 * RoomScale, r\z - 322.0 * RoomScale)
+			ri = Rand(360);it = CreateItem("Syringe", "syringe", r\x - 333.0 * RoomScale, r\y + 100.0 * RoomScale, r\z + 97.3 * RoomScale)
+			ri = Rand(360);it = CreateItem("Syringe", "syringe", r\x - 340.0 * RoomScale, r\y + 100.0 * RoomScale, r\z + 52.3 * RoomScale)
+			
+			d = CreateDoor(False, False)
 			;[End Block]
 		Case "room2cpit"
 			;[Block]
+			
+			d = CreateDoor(False)
+			
+			ri = Rand(360);it = CreateItem("Dr L's Note", "paper", r\x - 160.0 * RoomScale, 32.0 * RoomScale, r\z - 353.0 * RoomScale)
 			;[End Block]
 		Case "dimension1499"
 			;[Block]
@@ -2072,13 +2432,17 @@ End Function
 
 Function ResetMap()
 	Local r.Rooms, rt.RoomTemplates, z.MapZones, wp.Waypoints
-	Local f.Forest, g.Grids
+	Local f.Forest, g.Grids, d.Doors
 	
 	For rt.RoomTemplates = Each RoomTemplates
 		;rt\obj = 0
 	Next
 	
 	Delete Each Rooms	
+	
+	For d.Doors = Each Doors
+		Delete d
+	Next
 	
 	For z.MapZones = Each MapZones
 		Delete z
@@ -2097,7 +2461,6 @@ Function ResetMap()
 	Next
 	
 End Function
-
 
 
 
