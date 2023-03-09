@@ -233,11 +233,7 @@ Function CreateMap(RandomSeed$)
 	
 	Local zone%
 	
-	SeedRnd GenerateSeedNumber(RandomSeed)
-	
-	For i = 0 To 3
-		AccessCode = AccessCode + Rand(1,9)*(10^i)
-	Next
+	SeedRnd GenerateSeedNumber(RandomSeed)	
 	
 	Dim MapName$(MapWidth, MapHeight)
 	
@@ -658,6 +654,8 @@ Function CreateMap(RandomSeed$)
 	
 	;----------------------- luodaan kartta --------------------------------
 	
+	DebugLog "GETTING RANDOM FLOAT AFTER SET ROOMS AND BEFORE CREATING ROOMS: " + Rnd(0, 1000000)
+	
 	temp = 0
 	Local r.Rooms, spacing# = 8.0
 	For y = MapHeight - 1 To 1 Step - 1
@@ -1034,7 +1032,7 @@ CatchErrors("Uncaught (CreateRoom)")
 				;	AddLightCones(r)
 				;EndIf
 				
-				CalculateRoomExtents(r)
+				;CalculateRoomExtents(r)
 				Return r
 			EndIf
 		Next
@@ -1074,7 +1072,7 @@ CatchErrors("Uncaught (CreateRoom)")
 					;	AddLightCones(r)
 					;EndIf
 					
-					CalculateRoomExtents(r)
+					;CalculateRoomExtents(r)
 					Return r	
 				End If
 			EndIf
@@ -1279,7 +1277,7 @@ Function FillRoom(r.Rooms)
 				Local fr.Forest = New Forest
 				r\fr=fr
 				GenForestGrid(fr)
-				;PlaceForest(fr,r\x,r\y+30.0,r\z,r)
+				PlaceForest(fr,r\x,r\y+30.0,r\z,r)
 			EndIf
 			ri = Rand(360);it = CreateItem("Document SCP-860-1", "paper", r\x + 672.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 335.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Document SCP-860", "paper", r\x + 1152.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 384.0 * RoomScale)
@@ -2275,7 +2273,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 		If fr\TileTexture[i]<>0 Then FreeEntity fr\TileTexture[i] : fr\TileTexture[i]=0
 	Next
 	
-	fr\Forest_Pivot=CreatePivot()
+	;fr\Forest_Pivot=CreatePivot()
 	PositionEntity fr\Forest_Pivot,x,y,z,True
 	
 	;load assets
@@ -2461,7 +2459,6 @@ Function ResetMap()
 	Next
 	
 End Function
-
 
 
 
