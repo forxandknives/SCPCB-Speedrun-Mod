@@ -1,4 +1,11 @@
 Const gridsize = 10
+Const deviation_chance% = 40 ;out of 100
+Const branch_chance% = 65
+Const branch_max_life% = 4
+Const branch_die_chance% = 18
+Const max_deviation_distance% = 3
+Const return_chance% = 27
+Const center = 5 ;(gridsize-1) / 2
 
 Type Forest
 	Field TileMesh%[6]
@@ -13,6 +20,8 @@ Type Forest
 	
 	Field ID%
 End Type
+
+Const MaxRoomLights = 32
 
 Const ROOM1% = 1, ROOM2% = 2, ROOM2C% = 3, ROOM3% = 4, ROOM4% = 5
 
@@ -130,6 +139,8 @@ Type Rooms
 	
 	Field grid.Grids
 	
+	Field Lights%[MaxRoomLights]
+	
 	Field Adjacent.Rooms[4]	
 	Field NonFreeAble%[10]
 	Field Textures%[10]
@@ -159,6 +170,33 @@ Type Grids
 	Field Entities%[gridsz*gridsz]
 	Field waypoints.WayPoints[gridsz*gridsz]
 End Type
+
+Type LightTemplates
+	Field roomtemplate.RoomTemplates
+	Field ltype%
+	Field x#, y#, z#
+	Field range#
+	Field r%, g%, b%
+	
+	Field pitch#, yaw#
+	Field innerconeangle%, outerconeangle#
+End Type 
+
+Function AddTempLight.LightTemplates(rt.RoomTemplates, x#, y#, z#, ltype%, range#, r%, g%, b%)
+	lt.lighttemplates = New LightTemplates
+	lt\roomtemplate = rt
+	lt\x = x
+	lt\y = y
+	lt\z = z
+	lt\ltype = ltype
+	lt\range = range
+	lt\r = r
+	lt\g = g
+	lt\b = b
+	
+	Return lt
+End Function
+
 
 Type WayPoints
 	Field obj
@@ -654,7 +692,7 @@ Function CreateMap(RandomSeed$)
 	
 	;----------------------- luodaan kartta --------------------------------
 	
-	DebugLog "GETTING RANDOM FLOAT AFTER SET ROOMS AND BEFORE CREATING ROOMS: " + Rnd(0, 1000000)
+	DebugLog "GETTING RANDOM FLOAT BEFORE CREATING ROOMS: " + Rnd(0, 1000000)
 	
 	temp = 0
 	Local r.Rooms, spacing# = 8.0
@@ -772,6 +810,8 @@ Function CreateMap(RandomSeed$)
 			
 		Next
 	Next		
+	
+	DebugLog "GETTING RANDOM FLOAT AFTER CREATING ROOMS: " + Rnd(0, 1000000)
 	
 	r = CreateRoom(0, ROOM1, (MapWidth-1) * 8, 500, 8, "gatea")
 	MapRoomID(ROOM1)=MapRoomID(ROOM1)+1
@@ -1253,6 +1293,8 @@ Function FillRoom(r.Rooms)
 	;	
 	;
 	
+	Local lightAmount% = 0
+	
 	Local d.doors
 	Local r2.Rooms
 	Local i%
@@ -1281,13 +1323,16 @@ Function FillRoom(r.Rooms)
 			EndIf
 			ri = Rand(360);it = CreateItem("Document SCP-860-1", "paper", r\x + 672.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 335.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Document SCP-860", "paper", r\x + 1152.0 * RoomScale, r\y + 176.0 * RoomScale, r\z - 384.0 * RoomScale)
-
+			
+			lightAmount = 4
 			;[EndBlock]
 		Case "lockroom"
 			;[Block]
 			d = CreateDoor(True)
 			
 			d = CreateDoor(True)
+			
+			lightAmount = 4 
 			;[End Block]
 		Case "lockroom2"
 			;[Block]
@@ -1317,6 +1362,7 @@ Function FillRoom(r.Rooms)
 				rf# = Rnd(0.1, 0.6);de\Size = Rnd(0.1,0.6)
 			Next
 			
+			lightAmount = 6
 			;[End Block]
 		Case "gatea"
 			;[Block]	
@@ -1333,11 +1379,15 @@ Function FillRoom(r.Rooms)
 					d = CreateDoor(False)
 				EndIf
 			Next
+			
+			lightAmount = 12
 			;[End Block]
 		Case "gateaentrance"
 			;[Block]
 			d = CreateDoor(True)
 			d = CreateDoor(False, True)
+			
+			lightAmount = 4
 			;[End Block]
 		Case "exit1"
 			;[Block]
@@ -1348,12 +1398,17 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False)
 			d = CreateDoor(False, False)
 			d = CreateDoor(False, False)
+			
+			lightAmount = 15
 			;[End Block]
 		Case "roompj"
 			;[Block]
 			ri = Rand(360);it = CreateItem("Document SCP-372", "paper", r\x + 800.0 * RoomScale, r\y + 176.0 * RoomScale, r\z + 1108.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Radio Transceiver", "radio", r\x + 800.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 944.0 * RoomScale)
+			
 			d = CreateDoor(True, True)
+			
+			lightAmount = 8
 			;[End Block]
 		Case "room079"
 			;[Block]
@@ -1361,6 +1416,8 @@ Function FillRoom(r.Rooms)
 			rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x + 1184.0*RoomScale, -448.0*RoomScale+0.01, r\z+1792.0*RoomScale,90,Rnd(360),0)
 			d = CreateDoor(False, True)
 			d = CreateDoor(False, False)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "checkpoint1"
 			;[Block]
@@ -1370,6 +1427,8 @@ Function FillRoom(r.Rooms)
 			If MapTemp(Floor(r\x / 8.0),Floor(r\z /8.0)-1)=0 Then
 				d = CreateDoor(False)
 			EndIf
+			
+			lightAmount = 2
 			;[End Block]
 		Case "checkpoint2"
 			;[Block]
@@ -1378,10 +1437,13 @@ Function FillRoom(r.Rooms)
 			
 			If MapTemp(Floor(r\x / 8.0),Floor(r\z /8.0)-1)=0 Then
 				d = CreateDoor(False)
-			EndIf			
+			EndIf		
+			
+			lightAmount = 2	
 			;[End Block]
 		Case "room2pit"
 			;[Block]
+			lightAmount = 6
 			;[End Block]
 		Case "room2testroom2"
 			;[Block]
@@ -1391,10 +1453,12 @@ Function FillRoom(r.Rooms)
 			
 			ri = Rand(360);it = CreateItem("Level 2 Key Card", "key2", r\x - 914.0 * RoomScale, r\y + 137.0 * RoomScale, r\z + 61.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x - 312.0 * RoomScale, r\y + 264.0 * RoomScale, r\z + 176.0 * RoomScale)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room3tunnel"
 			;[Block]
-			
+			lightAmount = 5
 			;[End Block]
 		Case "room2toilets"
 			;[Block]
@@ -1412,6 +1476,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("9V Battery", "bat", r\x + 352.0 * RoomScale, r\y + 112.0 * RoomScale, r\z + 448.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Empty Cup", "emptycup", r\x-672*RoomScale, 240*RoomScale, r\z+288.0*RoomScale)
 			ri = Rand(360);it = CreateItem("Level 1 Key Card", "key1", r\x - 672.0 * RoomScale, r\y + 240.0 * RoomScale, r\z + 224.0 * RoomScale)
+			
+			lightAmount = 10
 			;[End Block]
 		Case "room2sroom"
 			;[Block]
@@ -1422,6 +1488,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Level 5 Key Card", "key5", r\x + 2232.0 * RoomScale, r\y + 392.0 * RoomScale, r\z + 387.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Nuclear Device Document", "paper", r\x + 2248.0 * RoomScale, r\y + 440.0 * RoomScale, r\z + 372.0 * RoomScale)
 			ri = Rand(360);
+			
+			lightAmount = 4
 			;[End Block]
 		Case "room2shaft"
 			;[Block]       
@@ -1435,6 +1503,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("ReVision Eyedrops", "eyedrops", r\x + 1930.0*RoomScale, r\y + 225.0 * RoomScale, r\z + 128.0*RoomScale)
 
             rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x + 1334.0*RoomScale, -796.0*RoomScale+0.01, r\z-220.0*RoomScale,90,Rnd(360),0)
+			
+			lightAmount = 5
 			;[End Block]
         Case "room2poffices"
 			;[Block]
@@ -1447,6 +1517,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Incident Report SCP-106-0204", "paper", r\x + 704.0 * RoomScale, r\y + 183.0 * RoomScale, r\z - 576.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Journal Page", "paper", r\x + 912 * RoomScale, r\y + 176.0 * RoomScale, r\z - 160.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x + 912.0 * RoomScale, r\y + 112.0 * RoomScale, r\z - 336.0 * RoomScale)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "room2poffices2"
 			;[Block]
@@ -1464,10 +1536,13 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Dr L's Burnt Note", "paper", r\x - 808.0 * RoomScale, 1.0, r\z - 72.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("The Modular Site Project", "paper", r\x + 622.0*RoomScale, r\y + 125.0*RoomScale, r\z - 73.0*RoomScale)
 			
+			lightAmount = 4
 			;[End Block]
 		Case "room2elevator"
 			;[Block]
 			d = CreateDoor(False)
+			
+			lightAmount = 3
 			;[End Block]
 		Case "room2cafeteria"
 			;[Block]
@@ -1476,6 +1551,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Empty Cup", "emptycup", r\x-540*RoomScale, -187*RoomScale, r\z+124.0*RoomScale)			
 			ri = Rand(360);it = CreateItem("Quarter", "25ct", r\x-447.0*RoomScale, r\y-334.0*RoomScale, r\z+36.0*RoomScale)
 			ri = Rand(360);it = CreateItem("Quarter", "25ct", r\x+1409.0*RoomScale, r\y-334.0*RoomScale, r\z-732.0*RoomScale)
+			
+			lightAmount = 7
 			;[End Block]
 		Case "room2nuke"
 			;[Block]
@@ -1486,6 +1563,8 @@ Function FillRoom(r.Rooms)
 			
 			ri = Rand(360);it = CreateItem("Nuclear Device Document", "paper", r\x - 768.0 * RoomScale, r\y + 1684.0 * RoomScale, r\z - 768.0 * RoomScale)		
 			ri = Rand(360);it = CreateItem("Ballistic Vest", "vest", r\x - 944.0 * RoomScale, r\y + 1652.0 * RoomScale, r\z - 656.0 * RoomScale)
+			
+			lightAmount = 14
 			;[End Block]
 		Case "room2tunnel"
 			;[Block]			
@@ -1496,6 +1575,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);de.Decals = CreateDecal(0, r\x + 64.0 * RoomScale, 0.005, r\z + 144.0 * RoomScale, 90, Rand(360), 0)
 
 			ri = Rand(360);it = CreateItem("Scorched Note", "paper", r\x + 64.0 * RoomScale, r\y +144.0 * RoomScale, r\z - 384.0 * RoomScale)
+			
+			lightAmount = 4
 			;[End Block]
 		Case "008"
 			;[Block]
@@ -1505,6 +1586,8 @@ Function FillRoom(r.Rooms)
 			
 			ri = Rand(360);it = CreateItem("Hazmat Suit", "hazmatsuit", r\x - 76.0 * RoomScale, 0.5, r\z - 396.0 * RoomScale)			
 			ri = Rand(360);it = CreateItem("Document SCP-008", "paper", r\x - 245.0 * RoomScale, r\y + 192.0 * RoomScale, r\z + 368.0 * RoomScale)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "room035"
 			;[Block]
@@ -1518,6 +1601,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("SCP-500-01", "scp500", r\x + 1168*RoomScale, 224*RoomScale, r\z+576*RoomScale)			
 			ri = Rand(360);it = CreateItem("Metal Panel", "scp148", r\x - 360 * RoomScale, 0.5, r\z + 644 * RoomScale)			
 			ri = Rand(360);it = CreateItem("Document SCP-035", "paper", r\x + 1168.0 * RoomScale, 104.0 * RoomScale, r\z + 608.0 * RoomScale)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "room513"
 			;[Block]
@@ -1526,6 +1611,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("SCP-513", "scp513", r\x - 32.0 * RoomScale, r\y + 196.0 * RoomScale, r\z + 688.0 * RoomScale)			
 			ri = Rand(360);it = CreateItem("Blood-stained Note", "paper", r\x + 736.0 * RoomScale,1.0, r\z + 48.0 * RoomScale)			
 			ri = Rand(360);it = CreateItem("Document SCP-513", "paper", r\x - 480.0 * RoomScale, 104.0*RoomScale, r\z - 176.0 * RoomScale)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room966"
 			;[Block]
@@ -1533,6 +1620,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False, False)
 			
 			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 320.0 * RoomScale, 0.5, r\z + 704.0 * RoomScale)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "room3storage"
 			;[Block]		
@@ -1540,6 +1629,7 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False)
 			d = CreateDoor(True)	
 			d = CreateDoor(False)
+			
 			ri = Rand(3)
 			;Select Rand(3)
 			;	Case 1
@@ -1551,7 +1641,7 @@ Function FillRoom(r.Rooms)
 			;	Case 3
 			;		x# = 2824
 			;		z#=2808
-			;End Select
+			;End Select					
 			
 			ri = Rand(360);it.Items = CreateItem("Black Severed Hand", "hand2", r\x + x*RoomScale, -5596.0*RoomScale+1.0, r\z+z*RoomScale)			
 			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 1936.0 * RoomScale, r\y - 5496.0 * RoomScale, r\z - 944.0 * RoomScale)
@@ -1559,9 +1649,14 @@ Function FillRoom(r.Rooms)
 			rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x + x*RoomScale, -5632.0*RoomScale+0.01, r\z+z*RoomScale,90,Rnd(360),0)
 			
 			d = CreateDoor(False)
+					
 			d = CreateDoor(False)
+						
 			d = CreateDoor(False)
+						
 			d = CreateDoor(False)
+			
+			lightAmount = 32
 			;[End Block]
 		Case "room049"
 			;[Block]
@@ -1584,6 +1679,8 @@ Function FillRoom(r.Rooms)
 			
 			d = CreateDoor(False)
 			d = CreateDoor(False)
+			
+			lightAmount = 26
 			;[End Block]
 		Case "room2_2"
 			;[Block]
@@ -1597,15 +1694,20 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it.Items = CreateItem("Severed Hand", "hand", r\x - 784*RoomScale, -576*RoomScale+0.3, r\z+640*RoomScale)
 						
 			rf = Rnd(0, 1);de.Decals = CreateDecal(3,  r\x - 784*RoomScale, -768*RoomScale+0.01, r\z+640*RoomScale,90,Rnd(360),0)
+			
+			lightAmount = 4
 			;[End Block]
 		Case "tunnel2"
 			;[Block]
+			lightAmount = 5
 			;[End Block]
 		Case "room2pipes"
 			;[Block]
+			lightAmount = 6
 			;[End Block]
 		Case "room3pit"
 			;[Block]
+			lightAmount = 12
 			;[End Block]
 		Case "room2servers"
 			;[Block]
@@ -1614,6 +1716,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(True, False)
 			d = CreateDoor(True, False)
 			d = CreateDoor(False, False)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "room3servers"
 			;[Block]			
@@ -1628,11 +1732,15 @@ Function FillRoom(r.Rooms)
 			EndIf
 			
 			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x + 124.0 * RoomScale, r\y - 368.0 * RoomScale, r\z - 648.0 * RoomScale)					
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room3servers2"
 			;[Block]	
 			ri = Rand(360);it = CreateItem("Document SCP-970", "paper", r\x + 960.0 * RoomScale, r\y - 448.0 * RoomScale, r\z + 251.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Gas Mask", "gasmask", r\x + 954.0 * RoomScale, r\y - 504.0 * RoomScale, r\z + 235.0 * RoomScale)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "testroom"
 			;[Block]
@@ -1640,6 +1748,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(True)
 			
 			ri = Rand(360);it = CreateItem("Document SCP-682", "paper", r\x + 656.0 * RoomScale, r\y - 1200.0 * RoomScale, r\z - 16.0 * RoomScale)
+			
+			lightAmount = 23
 			;[End Block]
 		Case "room2closets"
 			;[Block]
@@ -1661,6 +1771,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Incident Report SCP-1048-A", "paper",r\x + 736.0 * RoomScale, r\y + 224.0 * RoomScale, r\z -480.0 * RoomScale)			
 			
 			d = CreateDoor(False)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room2offices"
 			;[Block]
@@ -1668,6 +1780,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Level 2 Key Card", "key2", r\x - 156.0 * RoomScale, r\y + 151.0 * RoomScale, r\z + 72.0 * RoomScale)			
 			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x + 305.0 * RoomScale, r\y + 153.0 * RoomScale, r\z + 944.0 * RoomScale)		
 			ri = Rand(360);it = CreateItem("Notification", "paper", r\x -137.0 * RoomScale, r\y + 153.0 * RoomScale, r\z + 464.0 * RoomScale)
+			
+			lightAmount = 4
 			;[End Block]
 		Case "room2offices2"
 			;[Block]
@@ -1731,6 +1845,8 @@ Function FillRoom(r.Rooms)
 			
 			ri = Rand(360);de.Decals = CreateDecal(0, r\x + 456.0 * RoomScale, 0.005, r\z + 135.0 * RoomScale, 90, Rand(360), 0)
 
+			lightAmount = 9
+
 			;[End Block]
 		Case "room2scps"
 			;[Block]
@@ -1760,16 +1876,22 @@ Function FillRoom(r.Rooms)
 					rf# = Rnd(0.1,0.17)
 				EndIf
 			Next
-						
+				
+				
+			lightAmount = 6		
 			;[End Block]
 		Case "room205"
 			;[Block]	
 			d = CreateDoor(True, False)
 			d = CreateDoor(True, False)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "endroom"
 			;[Block]
 			d = CreateDoor(False, True)
+			
+			lightAmount = 3
 			;[End Block]
 		Case "endroomc"
 			;[Block]
@@ -1783,15 +1905,25 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Document SCP-895", "paper", r\x - 688.0 * RoomScale, r\y + 133.0 * RoomScale, r\z - 304.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Level 3 Key Card", "key3", r\x + 240.0 * RoomScale, r\y -1456.0 * RoomScale, r\z + 2064.0 * RoomScale)			
 			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 280.0 * RoomScale, r\y -1456.0 * RoomScale, r\z + 2164.0 * RoomScale)
+			
+			lightAmount = 9
 			;[End Block]
-		Case "room2tesla","room2tesla_lcz","room2tesla_hcz"
+		Case "room2tesla","room2tesla_lcz","room2tesla_hcz"		
 			;[Block]
+			If r\RoomTemplate\Name = "room2tesla_lcz" Then
+				lightAmount = 8
+			ElseIf r\RoomTemplate\Name = "room2tesla_hcz" Then
+				lightAmount = 10
+			EndIf
+			;NEED TO ADD ROOM2TESLA LIGHT AMOUNT IN HERE
 			;[End Block]
 		Case "room2doors"
 			;[Block]
 			d = CreateDoor(True)
 			
 			d = CreateDoor(True)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "914"
 			;[Block]
@@ -1804,6 +1936,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Addendum: 5/14 Test Log", "paper", r\x +954.0 * RoomScale, r\y +228.0 * RoomScale, r\z + 127.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("First Aid Kit", "firstaid", r\x + 960.0 * RoomScale, r\y + 112.0 * RoomScale, r\z - 40.0 * RoomScale)			
 			ri = Rand(360);it = CreateItem("Dr. L's Note", "paper", r\x - 928.0 * RoomScale, 160.0 * RoomScale, r\z - 160.0 * RoomScale)
+			
+			lightAmount = 9
 			;[End Block]
 		Case "173"
 			;[Block]
@@ -1856,6 +1990,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False, False)
 			
 			ri = Rand(360);it = CreateItem("Note from Daniel", "paper", r\x-400.0*RoomScale,1040.0*RoomScale,r\z+115.0*RoomScale)
+			
+			lightAmount = 9
 			;[End Block]
 		Case "room106"
 			;[Block]
@@ -1866,6 +2002,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False, False)
 			d = CreateDoor(False, False)
 			d = CreateDoor(False, False)
+			
+			lightAmount = 14
 			;[End Block]
 		Case "room1archive"
 			;[Block]
@@ -1884,6 +2022,9 @@ Function FillRoom(r.Rooms)
 								temp3%=Rand(1,3)
 						End Select
 						
+						rf# = Rnd(-96.0, 96.0);z# = (480.0 - 352.0*ztemp + Rnd(-96.0,96.0)) * RoomScale
+
+						
 						ri = Rand(360);it = CreateItem(tempstr,tempstr2,r\x+x,y,r\z+z)
 					Next
 				Next
@@ -1891,6 +2032,7 @@ Function FillRoom(r.Rooms)
 			
 			d = CreateDoor(False, False)
 				
+			lightAmount = 2
 			;[End Block]
 		Case "room2test1074"
 			;[Block]
@@ -1912,6 +2054,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False, False)
 			d = CreateDoor(False, False)
 			d = CreateDoor(False, False)
+			
+			lightAmount = 20
 			;[End Block]
 		Case "pocketdimension"
 			;[Block]		
@@ -1927,16 +2071,21 @@ Function FillRoom(r.Rooms)
 				EndIf				
 			Next
 			
+			lightAmount = 1
 			;[End Block]
 		Case "room3z3"
 			;[Block]
 			;[End Block]
 		Case "room2_3","room3_3"
 			;[Block]
+			If r\RoomTemplate\Name = "room3_3" Then
+				lightAmount = 5
+			EndIf 
 			;[End Block]
 		;New rooms (in SCP:CB 1.3) - ENDSHN
 		Case "room1lifts"
 			;[Block]
+			lightAmount = 1
 			;[End Block]
 		Case "room2servers2"
 			;[Block]
@@ -1947,13 +2096,19 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False, False)
 			
 			ri = Rand(360);it = CreateItem("Night Vision Goggles", "nvgoggles", r\x + 56.0154 * RoomScale, r\y - 648.0 * RoomScale, r\z + 749.638 * RoomScale)
+			
+			ri = Rand(245);RotateEntity it\collider, 0, r\angle+Rand(245), 0		
+			
+			lightAmount = 4
 			;[End Block]
 		Case "room2gw","room2gw_b"
 		    ;[Block]
 			If r\RoomTemplate\Name = "room2gw_b"
 				
 				rf# = Rnd(360);de.Decals = CreateDecal(3,  r\x - 156.825*RoomScale, -37.3458*RoomScale, r\z+121.364*RoomScale,90,Rnd(360),0)
-
+				
+				lightAmount = 2
+				;Amogus()
 			EndIf
 			
 			d = CreateDoor(False, False)
@@ -1975,6 +2130,9 @@ Function FillRoom(r.Rooms)
 				;	room2gw_z# = r\z
 				;	FreeEntity r\RoomDoors[1]\obj2 : r\RoomDoors[1]\obj2 = 0
 				;EndIf
+				
+				;NEED TO ADD LIGHT AMOUNT FOR ROOM2GW
+				
 			EndIf
 			
 			;[End Block]
@@ -1991,6 +2149,8 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False, False)
 			
 			ri = Rand(360);it = CreateItem("Document SCP-1162", "paper", r\x + 863.227 * RoomScale, r\y + 152.0 * RoomScale, r\z - 953.231 * RoomScale)
+			
+			lightAmount = 5
 			;[End Block]
 		Case "room2scps2"
 			;[Block]
@@ -2004,10 +2164,14 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Document SCP-1499", "paper", r\x + 840.0 * RoomScale, r\y + 260.0 * RoomScale, r\z + 224.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Document SCP-500", "paper", r\x + 1152.0 * RoomScale, r\y + 224.0 * RoomScale, r\z + 336.0 * RoomScale)
 			ri = Rand(360);it = CreateItem("Emily Ross' Badge", "badge", r\x + 364.0 * RoomScale, r\y + 5.0 * RoomScale, r\z + 716.0 * RoomScale)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room3offices"
 			;[Block]		
 			d = CreateDoor(False, False)	
+			
+			lightAmount = 1
 			;[End Block]
 		Case "room2offices4"
 			;[Block]
@@ -2015,18 +2179,24 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False)
 			
 			ri = Rand(360);it = CreateItem("Sticky Note", "paper", r\x - 991.0*RoomScale, r\y - 242.0*RoomScale, r\z + 904.0*RoomScale)
+
+			lightAmount = 5
 			;[End Block]
 		Case "room2sl"
 			;[Block]
 			d = CreateDoor(False, False)
 			d = CreateDoor(False, False)
 			d = CreateDoor()
+			
+			lightAmount = 7
 			;[End Block]
 		Case "room2_4"
 			;[Block]
+			lightAmount = 3
 			;[End Block]
 		Case "room3z2"
 			;[Block]
+			lightAmount = 3
 			;[End Block]
 		Case "lockroom3"
 			;[Block]
@@ -2040,6 +2210,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("Syringe", "syringe", r\x - 340.0 * RoomScale, r\y + 100.0 * RoomScale, r\z + 52.3 * RoomScale)
 			
 			d = CreateDoor(False, False)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room2cpit"
 			;[Block]
@@ -2047,11 +2219,66 @@ Function FillRoom(r.Rooms)
 			d = CreateDoor(False)
 			
 			ri = Rand(360);it = CreateItem("Dr L's Note", "paper", r\x - 160.0 * RoomScale, 32.0 * RoomScale, r\z - 353.0 * RoomScale)
+			
+			lightAmount = 10
 			;[End Block]
 		Case "dimension1499"
 			;[Block]
+			lightAmount = 0
 			;[End Block]
+		Case "room3"
+			;[Block]
+			lightAmount = 4
+			;[EndBlock]
+		Case "room3_2"
+			;[Block]
+			lightAmount = 3
+			;[EndBlock]
+		Case "room2"
+			;[Block]
+			lightAmount = 2
+			;[EndBlock]
+		Case "room2_5"
+			;[Block]
+			lightAmount = 3
+			;[EndBlock]
+		Case "room4info"
+			;[Block]
+			lightAmount = 5
+			;[EndBlock]
+		Case "room2pipes2"
+			;[Block]
+			lightAmount = 6
+			;[EndBlock]
+		Case "tunnel"
+			;[Block]
+			lightAmount = 4
+			;[EndBlock]
+		Case "room4tunnels"
+			;[Block]
+			lightAmount = 6
+			;[EndBlock]
+		Case "room4pit"
+			;[Block]
+			lightAmount = 16
+			;[EndBlock]
+		Case "room3poffices"
+			;[Block]
+			lightAmount = 5
+			;[EndBlock]
+		Case "room4z3"
+			;[Block]
+			lightAmount = 2
+			;[EndBlock]
 	End Select	
+	
+	For lights = 0 To lightAmount-1
+		newlt = AddLight(r)
+	Next
+	
+	lightAmount = 0
+	
+	DebugLog "GETTING RANDOM FLOAT AT END OF FILLROOM " + r\RoomTemplate\Name + ": " + Rnd(0,100000) + "++++++++++++++++++++++++++++++++++++++++"
 End Function
 
 Function CalculateRoomExtents(r.Rooms)
@@ -2087,6 +2314,7 @@ Function CalculateRoomExtents(r.Rooms)
 End Function
 
 Function GenForestGrid(fr.Forest)
+	CatchErrors("Uncaught (GenForestGrid)")
 	fr\ID=LastForestID+1
 	LastForestID=LastForestID+1
 	
@@ -2250,14 +2478,17 @@ Function GenForestGrid(fr.Forest)
 		Next
 	Next
 	
+	CatchErrors("GenForestGrid")	
 End Function
 
 Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
+	CatchErrors("Uncaught (PlaceForest)")
 	;local variables
 	Local tx%,ty%
 	Local tile_size#=12.0
 	Local tile_type%
 	Local tile_entity%,detail_entity%
+	Local rf#
 	
 	Local tempf1#,tempf2#,tempf3#
 	Local i%
@@ -2274,11 +2505,56 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 	Next
 	
 	;fr\Forest_Pivot=CreatePivot()
-	PositionEntity fr\Forest_Pivot,x,y,z,True
+	;PositionEntity fr\Forest_Pivot,x,y,z,True
 	
 	;load assets
 	
 	Local hmap[ROOM4], mask[ROOM4]
+	;Local GroundTexture = LoadTexture_Strict("GFX\map\forest\forestfloor.jpg")
+	;TextureBlend GroundTexture, FE_ALPHACURRENT
+	;Local PathTexture = LoadTexture_Strict("GFX\map\forest\forestpath.jpg")
+	;TextureBlend PathTexture, FE_ALPHACURRENT
+	
+	hmap[ROOM1]=LoadImage_Strict("..\GFX\map\forest\forest1h.png")
+	;mask[ROOM1]=LoadTexture_Strict("GFX\map\forest\forest1h_mask.png",1+2)
+	
+	hmap[ROOM2]=LoadImage_Strict("..\GFX\map\forest\forest2h.png")
+	;mask[ROOM2]=LoadTexture_Strict("GFX\map\forest\forest2h_mask.png",1+2)
+	
+	hmap[ROOM2C]=LoadImage_Strict("..\GFX\map\forest\forest2Ch.png")
+	;mask[ROOM2C]=LoadTexture_Strict("GFX\map\forest\forest2Ch_mask.png",1+2)
+	
+	hmap[ROOM3]=LoadImage_Strict("..\GFX\map\forest\forest3h.png")
+	;mask[ROOM3]=LoadTexture_Strict("GFX\map\forest\forest3h_mask.png",1+2)
+	
+	hmap[ROOM4]=LoadImage_Strict("..\GFX\map\forest\forest4h.png")
+	;mask[ROOM4]=LoadTexture_Strict("GFX\map\forest\forest4h_mask.png",1+2)
+	
+	For i = ROOM1 To ROOM4
+		;TextureBlend mask[i], FE_ALPHAMODULATE
+		
+		;fr\TileMesh[i]=load_terrain(hmap[i],0.03,GroundTexture,PathTexture,mask[i])
+	Next
+	
+	;detail meshes
+	;fr\DetailMesh[0]=LoadMesh_strict("GFX\map\forest\detail\860_1_tree1.b3d")
+	;fr\DetailMesh[1]=LoadMesh_strict("GFX\map\forest\detail\860_1_tree1_leaves.b3d")
+	;fr\DetailMesh[1]=LoadMesh_Strict("GFX\map\forest\detail\treetest4.b3d");1.b3d)
+	;EntityParent fr\DetailMesh[1],fr\DetailMesh[0]
+	;fr\DetailMesh[2]=LoadMesh_Strict("GFX\map\forest\detail\rock.b3d")
+	;fr\DetailMesh[3]=LoadMesh_Strict("GFX\map\forest\detail\rock2.b3d")
+	;fr\DetailMesh[4]=LoadMesh_Strict("GFX\map\forest\detail\treetest5.b3d")
+	;fr\DetailMesh[5]=LoadMesh_Strict("GFX\map\forest\wall.b3d")
+	
+	For i%=ROOM1 To ROOM4
+		;HideEntity fr\TileMesh[i]
+	Next
+	For i%=1 To 5
+		;HideEntity fr\DetailMesh[i]
+	Next
+	
+	tempf3 = 29.0;tempf3=MeshWidth(fr\TileMesh[ROOM1])
+	tempf1=tile_size/tempf3
 	
 	For tx%=1 To gridsize-1
 		For ty%=1 To gridsize-1
@@ -2296,7 +2572,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 				Local angle%=0
 				Select tile_type
 					Case 1
-						tile_entity = CopyEntity(fr\TileMesh[ROOM1])
+						;tile_entity = CopyEntity(fr\TileMesh[ROOM1])
 						
 						If fr\grid[((ty+1)*gridsize)+tx]>0 Then
 							angle = 180
@@ -2309,14 +2585,14 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 						tile_type = ROOM1
 					Case 2
 						If fr\grid[((ty-1)*gridsize)+tx]>0 And fr\grid[((ty+1)*gridsize)+tx]>0 Then
-							tile_entity = CopyEntity(fr\TileMesh[ROOM2])
+							;tile_entity = CopyEntity(fr\TileMesh[ROOM2])
 							tile_type = ROOM2
 						ElseIf fr\grid[(ty*gridsize)+tx+1]>0 And fr\grid[(ty*gridsize)+tx-1]>0
-							tile_entity = CopyEntity(fr\TileMesh[ROOM2])
+							;tile_entity = CopyEntity(fr\TileMesh[ROOM2])
 							angle = 90
 							tile_type = ROOM2
 						Else
-							tile_entity = CopyEntity(fr\TileMesh[ROOM2C])
+							;tile_entity = CopyEntity(fr\TileMesh[ROOM2C])
 							If fr\grid[(ty*gridsize)+tx-1]>0 And fr\grid[((ty+1)*gridsize)+tx]>0 Then
 								angle = 180
 							ElseIf fr\grid[(ty*gridsize)+tx+1]>0 And fr\grid[((ty-1)*gridsize)+tx]>0
@@ -2329,7 +2605,7 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 							tile_type = ROOM2C
 						EndIf
 					Case 3
-						tile_entity = CopyEntity(fr\TileMesh[ROOM3])
+						;tile_entity = CopyEntity(fr\TileMesh[ROOM3])
 						
 						If fr\grid[((ty-1)*gridsize)+tx]=0 Then
 							angle = 180
@@ -2341,14 +2617,24 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 						
 						tile_type = ROOM3
 					Case 4
-						tile_entity = CopyEntity(fr\TileMesh[ROOM4])	
+						;tile_entity = CopyEntity(fr\TileMesh[ROOM4])	
 						tile_type = ROOM4
 					Default 
 						DebugLog "tile_type: "+tile_type
 				End Select
 				
 				If tile_type > 0 Then 
-															
+					
+					Local itemPlaced[4]
+					;2, 5, 8
+					;Local it.Items = Null
+					If (ty Mod 3)=2 And itemPlaced[Floor(ty/3)]=False Then
+						itemPlaced[Floor(ty/3)]=True
+						Local ri% = Rand(360);it.Items = CreateItem("Log #"+Int(Floor(ty/3)+1), "paper", 0,0.5,0)
+						;EntityType(it\collider, HIT_ITEM)
+						;EntityParent(it\collider, tile_entity)
+					EndIf
+					
 					;place trees and other details
 					;only placed on spots where the value of the heightmap is above 100
 					SetBuffer ImageBuffer(hmap[tile_type])
@@ -2361,79 +2647,139 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 							If ColorRed()>Rand(100,260) Then
 								Select Rand(0,7)
 									Case 0,1,2,3,4,5,6 ;create a tree
-										detail_entity=CopyEntity(fr\DetailMesh[1])
+										;detail_entity=CopyEntity(fr\DetailMesh[1])
 										;EntityType detail_entity,HIT_MAP
 										tempf2=Rnd(0.25,0.4)
 										
 										For i = 0 To 3
-											d=CopyEntity(fr\DetailMesh[4])
+											;d=CopyEntity(fr\DetailMesh[4])
 											;ScaleEntity d,tempf2*1.1,tempf2,tempf2*1.1,True
-											RotateEntity d, 0, 90*i+Rnd(-20,20), 0
-											EntityParent(d,detail_entity)
+											rf# = Rnd(-20, 20);RotateEntity d, 0, 90*i+Rnd(-20,20), 0
+											;EntityParent(d,detail_entity)
 											
-											EntityFX d, 1;+8
+											;EntityFX d, 1;+8
 										Next
 										
-										ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
+										;ScaleEntity detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True
+										rf# = Rnd(3.0, 3.2);PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True
 										
-										RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
+										rf# = Rnd(-5, 5)
+										rf# = Rnd(360.0);RotateEntity detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True
 										
 										;EntityAutoFade(detail_entity,4.0,6.0)
 									Case 7 ;add a rock
-										detail_entity=CopyEntity(fr\DetailMesh[2])
+										;detail_entity=CopyEntity(fr\DetailMesh[2])
 										;EntityType detail_entity,HIT_MAP
 										tempf2=Rnd(0.01,0.012)
+										
 										;ScaleEntity detail_entity,tempf2,tempf2*Rnd(1.0,2.0),tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										;PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 										
-										EntityFX detail_entity, 1
+										;EntityFX detail_entity, 1
 										
-										RotateEntity detail_entity,0.0,Rnd(360.0),0.0,True
+										rf# = Rnd(360.0);RotateEntity detail_entity,0.0,Rnd(360.0),0.0,True
 									Case 6 ;add a stump
-										detail_entity=CopyEntity(fr\DetailMesh[4])
+										;detail_entity=CopyEntity(fr\DetailMesh[4])
 										;EntityType detail_entity,HIT_MAP
 										tempf2=Rnd(0.1,0.12)
-										ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
+										;ScaleEntity detail_entity,tempf2,tempf2,tempf2,True
 										
-										PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
+										;PositionEntity detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True
 								End Select
 								
-								EntityFX detail_entity, 1
+								;EntityFX detail_entity, 1
 								;PositionEntity detail_entity,Rnd(0.0,tempf3)-(tempf3/2.0),ColorRed()*0.03-0.05,Rnd(0.0,tempf3)-(tempf3/2.0),True
-								EntityParent detail_entity,tile_entity
+								
+								;EntityParent detail_entity,tile_entity
 							EndIf
 						Next
 					Next
 					SetBuffer BackBuffer()
 					
-					TurnEntity tile_entity, 0, angle, 0
+					;TurnEntity tile_entity, 0, angle, 0
 					
-					PositionEntity tile_entity,x+(tx*tile_size),y,z+(ty*tile_size),True
+					;PositionEntity tile_entity,x+(tx*tile_size),y,z+(ty*tile_size),True
 					
-					ScaleEntity tile_entity,tempf1,tempf1,tempf1
-					EntityType tile_entity,HIT_MAP
-					EntityFX tile_entity,1
-					EntityParent tile_entity,fr\Forest_Pivot
-					EntityPickMode tile_entity,2				
+					;ScaleEntity tile_entity,tempf1,tempf1,tempf1
+					;EntityType tile_entity,HIT_MAP
+					;EntityFX tile_entity,1
+					;EntityParent tile_entity,fr\Forest_Pivot
+					;EntityPickMode tile_entity,2
 					
-					fr\TileEntities[tx+(ty*gridsize)] = tile_entity
+					;If it<>Null Then EntityParent it\collider,0
+					
+					;fr\TileEntities[tx+(ty*gridsize)] = tile_entity
 				Else
 					DebugLog "INVALID TILE @ ("+tx+", "+ty+ "): "+tile_type
 				EndIf
 			EndIf
 			
 		Next
-	Next		
+	Next
+	
+	;place the wall		
+	For i = 0 To 1
+		ty = ((gridsize-1)*i)
+		
+		For tx = 1 To gridsize-1
+			If fr\grid[(ty*gridsize)+tx]=3 Then
+				;fr\DetailEntities[i]=CopyEntity(fr\DetailMesh[5])
+				;ScaleEntity fr\DetailEntities[i],RoomScale,RoomScale,RoomScale
+				
+				;fr\Door[i] = CopyEntity(r\Objects[3])
+				;PositionEntity fr\Door[i],72*RoomScale,32.0*RoomScale,0,True
+				;RotateEntity fr\Door[i], 0,180,0
+				;ScaleEntity fr\Door[i],48*RoomScale,45*RoomScale,48*RoomScale,True
+				;EntityParent fr\Door[i],fr\DetailEntities[i]
+				;SetAnimTime fr\Door[i], 0
+				
+				;frame = CopyEntity(r\Objects[2],fr\Door[i])
+				;PositionEntity frame,0,32.0*RoomScale,0,True
+				;ScaleEntity frame,48*RoomScale,45*RoomScale,48*RoomScale,True
+				;EntityParent frame,fr\DetailEntities[i]
+				
+				;EntityType fr\DetailEntities[i],HIT_MAP
+				;EntityParent frame,fr\DetailEntities[i]
+				;EntityPickMode fr\DetailEntities[i],2
+				
+				;PositionEntity fr\DetailEntities[i],x+(tx*tile_size),y,z+(ty*tile_size)+(tile_size/2)-(tile_size*i),True
+				;RotateEntity fr\DetailEntities[i],0,180*i,0
+				
+				;EntityParent fr\DetailEntities[i],fr\Forest_Pivot
+			EndIf		
+		Next		
+	Next
+	
+	CatchErrors("PlaceForest")
+	
 End Function
+
+Function AddLight%(room.Rooms)
+	Local i, ri%
+	
+	If room<>Null Then
+		For i = 0 To MaxRoomLights-1
+			If room\Lights[i]=0 Then
+				ri = Rand(360);RotateEntity(room\LightSprites2[i],0,0,Rand(360))
+				
+				ri = Rand(1, 10);room\LightFlicker%[i] = Rand(1,10)
+				
+				Return room\Lights[i]
+			EndIf
+		Next
+	Else
+		Return light
+	EndIf
+End Function
+
 
 Function ResetMap()
 	Local r.Rooms, rt.RoomTemplates, z.MapZones, wp.Waypoints
-	Local f.Forest, g.Grids, d.Doors
+	Local f.Forest, g.Grids, d.Doors, lt.LightTemplates
 	
 	For rt.RoomTemplates = Each RoomTemplates
-		;rt\obj = 0
+		rt\obj = 0
 	Next
 	
 	Delete Each Rooms	
@@ -2458,17 +2804,24 @@ Function ResetMap()
 		Delete g
 	Next
 	
+	For lt.LightTemplates = Each LightTemplates
+		Delete lt
+	Next
+	
 End Function
 
+Function LoadImage_Strict(file$)
+	If FileType(file$)<>1 Then RuntimeError "Image " + Chr(34) + file$ + Chr(34) + " missing. "
+	tmp = LoadImage(file$)
+	Return tmp
+	;attempt to load the image again
+	If tmp = 0 Then tmp2 = LoadImage(file)
+	DebugLog "Attempting to load again: "+file
+	Return tmp2
+End Function
 
-
-
-
-
-
-
-
-
+Function EndOfPage()
+End Function
 
 
 
