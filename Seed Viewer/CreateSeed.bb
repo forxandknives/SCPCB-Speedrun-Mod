@@ -26,6 +26,7 @@ Const MaxRoomLights = 32
 Const ROOM1% = 1, ROOM2% = 2, ROOM2C% = 3, ROOM3% = 4, ROOM4% = 5
 
 Global RoomTempID%
+
 Type RoomTemplates
 	Field obj%, id%
 	Field objPath$
@@ -121,13 +122,31 @@ Function LoadRoomTemplates(file$)
 	CatchErrors("LoadRoomTemplates")
 End Function
 
+Function LoadRoomMesh(rt.RoomTemplates)
+	
+	;If Instr(rt\objPath,".rmesh")<>0 Then ;file is roommesh
+	;	rt\obj = LoadRMesh(rt\objPath, rt)
+	;Else ;file is b3d
+	;	If rt\objPath <> "" Then rt\obj = LoadWorld(rt\objPath, rt) Else rt\obj = CreatePivot()
+	;EndIf
+	
+	;If (Not rt\obj) Then RuntimeError "Failed to load map file "+Chr(34)+mapfile+Chr(34)+"."
+	
+	rt\obj = CreatePivot()
+	
+	CalculateRoomTemplateExtents(rt)
+	
+	HideEntity(rt\obj)
+	
+End Function
+
 Type Rooms
 	Field zone%
 	
 	Field found%
 	
 	Field obj%
-	Field x%, y%, z%
+	Field x#, y#, z#
 	Field angle%
 	Field RoomTemplate.RoomTemplates
 	
@@ -170,33 +189,6 @@ Type Grids
 	Field Entities%[gridsz*gridsz]
 	Field waypoints.WayPoints[gridsz*gridsz]
 End Type
-
-Type LightTemplates
-	Field roomtemplate.RoomTemplates
-	Field ltype%
-	Field x#, y#, z#
-	Field range#
-	Field r%, g%, b%
-	
-	Field pitch#, yaw#
-	Field innerconeangle%, outerconeangle#
-End Type 
-
-Function AddTempLight.LightTemplates(rt.RoomTemplates, x#, y#, z#, ltype%, range#, r%, g%, b%)
-	lt.lighttemplates = New LightTemplates
-	lt\roomtemplate = rt
-	lt\x = x
-	lt\y = y
-	lt\z = z
-	lt\ltype = ltype
-	lt\range = range
-	lt\r = r
-	lt\g = g
-	lt\b = b
-	
-	Return lt
-End Function
-
 
 Type WayPoints
 	Field obj
@@ -259,6 +251,12 @@ End Function
 
 Function CreateMap(RandomSeed$)
 	DebugLog ("Generating a map using the seed "+RandomSeed)
+	
+	Dim MapTemp%(MapWidth+1, MapHeight+1)
+	Dim MapFound%(MapWidth+1, MapHeight+1)
+	Dim MapName$(MapWidth, MapHeight)
+	Dim MapRoomID%(ROOM4 + 1)
+	Dim MapRoom$(ROOM4 + 1, 0)
 	
 	I_Zone\Transition[0] = 13
 	I_Zone\Transition[1] = 7
@@ -655,7 +653,7 @@ Function CreateMap(RandomSeed$)
 	SetRoom("room2shaft",ROOM2,Room2Amount[0]+Floor(0.6*Float(Room2Amount[1])),min_pos,max_pos)
 	SetRoom("testroom", ROOM2, Room2Amount[0]+Floor(0.7*Float(Room2Amount[1])),min_pos,max_pos)
 	SetRoom("room2servers", ROOM2, Room2Amount[0]+Floor(0.9*Room2Amount[1]),min_pos,max_pos)
-	
+		
 	MapRoom(ROOM3, Room3Amount[0]+Floor(0.3*Float(Room3Amount[1]))) = "room513"
 	MapRoom(ROOM3, Room3Amount[0]+Floor(0.6*Float(Room3Amount[1]))) = "room966"
 	
@@ -690,10 +688,7 @@ Function CreateMap(RandomSeed$)
 	;MapRoom(ROOM3, Room3Amount[0]+Room3Amount[1]) = "room3gw"
 	MapRoom(ROOM3, Room3Amount[0]+Room3Amount[1]+Floor(0.5*Float(Room3Amount[2]))) = "room3offices"
 	
-	;----------------------- luodaan kartta --------------------------------
-	
-	DebugLog "GETTING RANDOM FLOAT BEFORE CREATING ROOMS: " + Rnd(0, 1000000)
-	
+	;----------------------- luodaan kartta --------------------------------	
 	temp = 0
 	Local r.Rooms, spacing# = 8.0
 	For y = MapHeight - 1 To 1 Step - 1
@@ -730,13 +725,13 @@ Function CreateMap(RandomSeed$)
 						DebugLog "r\zone is: " + r\zone
 						If MapTemp(x, y + 1) Then
 							r\angle = 180 
-							;TurnEntity(r\obj, 0, r\angle, 0)
+							TurnEntity(r\obj, 0, r\angle, 0)
 						ElseIf MapTemp(x - 1, y)
 							r\angle = 270
-							;TurnEntity(r\obj, 0, r\angle, 0)
+							TurnEntity(r\obj, 0, r\angle, 0)
 						ElseIf MapTemp(x + 1, y)
 							r\angle = 90
-							;TurnEntity(r\obj, 0, r\angle, 0)
+							TurnEntity(r\obj, 0, r\angle, 0)
 						Else 
 							r\angle = 0
 						End If
@@ -748,7 +743,7 @@ Function CreateMap(RandomSeed$)
 							EndIf
 							r = CreateRoom(zone, ROOM2, x * 8, 0, y * 8, MapName(x, y))
 							If Rand(2) = 1 Then r\angle = 90 Else r\angle = 270
-							;TurnEntity(r\obj, 0, r\angle, 0)
+							TurnEntity(r\obj, 0, r\angle, 0)
 							MapRoomID(ROOM2)=MapRoomID(ROOM2)+1
 						ElseIf MapTemp(x, y - 1)>0 And MapTemp(x, y + 1)>0
 							If MapRoomID(ROOM2) < MaxRooms And MapName(x,y) = ""  Then
@@ -756,7 +751,7 @@ Function CreateMap(RandomSeed$)
 							EndIf
 							r = CreateRoom(zone, ROOM2, x * 8, 0, y * 8, MapName(x, y))
 							If Rand(2) = 1 Then r\angle = 180 Else r\angle = 0
-							;TurnEntity(r\obj, 0, r\angle, 0)
+							TurnEntity(r\obj, 0, r\angle, 0)
 							MapRoomID(ROOM2)=MapRoomID(ROOM2)+1
 						Else
 							If MapRoomID(ROOM2C) < MaxRooms And MapName(x,y) = ""  Then
@@ -766,14 +761,14 @@ Function CreateMap(RandomSeed$)
 							If MapTemp(x - 1, y)>0 And MapTemp(x, y + 1)>0 Then
 								r = CreateRoom(zone, ROOM2C, x * 8, 0, y * 8, MapName(x, y))
 								r\angle = 180
-								;TurnEntity(r\obj, 0, r\angle, 0)
+								TurnEntity(r\obj, 0, r\angle, 0)
 							ElseIf MapTemp(x + 1, y)>0 And MapTemp(x, y + 1)>0
 								r = CreateRoom(zone, ROOM2C, x * 8, 0, y * 8, MapName(x, y))
 								r\angle = 90
-								;TurnEntity(r\obj, 0, r\angle, 0)
+								TurnEntity(r\obj, 0, r\angle, 0)
 							ElseIf MapTemp(x - 1, y)>0 And MapTemp(x, y - 1)>0
 								r = CreateRoom(zone, ROOM2C, x * 8, 0, y * 8, MapName(x, y))
-								;TurnEntity(r\obj, 0, 270, 0)
+								TurnEntity(r\obj, 0, 270, 0)
 								r\angle = 270
 							Else
 								r = CreateRoom(zone, ROOM2C, x * 8, 0, y * 8, MapName(x, y))
@@ -787,13 +782,13 @@ Function CreateMap(RandomSeed$)
 						
 						r = CreateRoom(zone, ROOM3, x * 8, 0, y * 8, MapName(x, y))
 						If (Not MapTemp(x, y - 1)) Then
-							;TurnEntity(r\obj, 0, 180, 0)
+							TurnEntity(r\obj, 0, 180, 0)
 							r\angle = 180
 						ElseIf (Not MapTemp(x - 1, y))
-							;TurnEntity(r\obj, 0, 90, 0)
+							TurnEntity(r\obj, 0, 90, 0)
 							r\angle = 90
 						ElseIf (Not MapTemp(x + 1, y))
-							;TurnEntity(r\obj, 0, -90, 0)
+							TurnEntity(r\obj, 0, -90, 0)
 							r\angle = 270
 						End If
 						MapRoomID(ROOM3)=MapRoomID(ROOM3)+1
@@ -809,9 +804,7 @@ Function CreateMap(RandomSeed$)
 			EndIf
 			
 		Next
-	Next		
-	
-	DebugLog "GETTING RANDOM FLOAT AFTER CREATING ROOMS: " + Rnd(0, 1000000)
+	Next			
 	
 	r = CreateRoom(0, ROOM1, (MapWidth-1) * 8, 500, 8, "gatea")
 	MapRoomID(ROOM1)=MapRoomID(ROOM1)+1
@@ -828,6 +821,9 @@ Function CreateMap(RandomSeed$)
 	MapRoomID(ROOM1)=MapRoomID(ROOM1)+1
 	
 	For r.Rooms = Each Rooms
+		DebugLog "PREVENTINGOVERLAP: " + r\RoomTemplate\Name + " X: " + r\x + " MinX: " + r\MinX + " MaxX: " + r\MaxX
+		DebugLog "PREVENTINGOVERLAP: " + r\RoomTemplate\Name + " Y: " + r\y + " MinY: " + r\MinY + " MaxY: " + r\MaxY
+		DebugLog "PREVENTINGOVERLAP: " + r\RoomTemplate\Name + " Z: " + r\z + " MinZ: " + r\MinZ + " MaxZ: " + r\MaxZ
 		PreventRoomOverlap(r)
 	Next
 	
@@ -1008,7 +1004,7 @@ Function CreateMap(RandomSeed$)
 			EndIf
 			If (r\Adjacent[0]<>Null) And (r\Adjacent[1]<>Null) And (r\Adjacent[2]<>Null) And (r\Adjacent[3]<>Null) Then Exit
 		Next
-	Next
+	Next		
 	
 End Function
 
@@ -1044,13 +1040,13 @@ Function SetRoom(room_name$,room_type%,pos%,min_pos%,max_pos%) ;place a room wit
 End Function
 
 Function CreateRoom.Rooms(zone%, roomshape%, x#, y#, z#, name$ = "")
-CatchErrors("Uncaught (CreateRoom)")
+	CatchErrors("Uncaught (CreateRoom)")
 	Local r.Rooms = New Rooms
 	Local rt.RoomTemplates
 	
 	r\zone = zone
 	
-	r\x = x : r\y = y : r\z = z
+	r\x = x : r\y = y : r\z = z		
 	
 	If name <> "" Then
 		name = Lower(name)
@@ -1058,21 +1054,26 @@ CatchErrors("Uncaught (CreateRoom)")
 			If rt\Name = name Then
 				r\RoomTemplate = rt
 				
-				;If rt\obj=0 Then LoadRoomMesh(rt)
+				If rt\obj=0 Then LoadRoomMesh(rt)
+					;rt\obj = CreatePivot()
+					;CalculateRoomTemplateExtents(rt);LoadRoomMesh(rt)
+					;HideEntity(rt\obj)				
+				;EndIf
 				
-				;r\obj = CopyEntity(rt\obj)
-				;ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
+				r\obj = CopyEntity(rt\obj)
+				ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
 				;EntityType(r\obj, HIT_MAP)
 				;EntityPickMode(r\obj, 2)
 				
-				;PositionEntity(r\obj, x, y, z)
+				PositionEntity(r\obj, x, y, z)
+				DebugLog "r\obj position:" + EntityX(r\obj) + ":" + EntityY(r\obj) + ":" + EntityZ(r\obj)
 				FillRoom(r)
 				
 				;If r\RoomTemplate\UseLightCones
 				;	AddLightCones(r)
-				;EndIf
+				;EndIf				
 				
-				;CalculateRoomExtents(r)
+				CalculateRoomExtents(r)
 				Return r
 			EndIf
 		Next
@@ -1098,26 +1099,30 @@ CatchErrors("Uncaught (CreateRoom)")
 				If RandomRoom > temp - rt\Commonness And RandomRoom <= temp Then
 					r\RoomTemplate = rt
 					
-					;If rt\obj=0 Then LoadRoomMesh(rt)
+					If rt\obj=0 Then LoadRoomMesh(rt)
+						;rt\obj = CreatePivot()
+						;CalculateRoomTemplateExtents(rt);LoadRoomMesh(rt)
+						;HideEntity(rt\obj)
+					;EndIf
 					
-					;r\obj = CopyEntity(rt\obj)
-					;ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
-					;EntityType(r\obj, HIT_MAP)
-					;EntityPickMode(r\obj, 2)
+					r\obj = CopyEntity(rt\obj)
+					ScaleEntity(r\obj, RoomScale, RoomScale, RoomScale)
+					EntityType(r\obj, HIT_MAP)
+					EntityPickMode(r\obj, 2)
 					
-					;PositionEntity(r\obj, x, y, z)
+					PositionEntity(r\obj, x, y, z)
 					FillRoom(r)
 					
 					;If r\RoomTemplate\UseLightCones
 					;	AddLightCones(r)
-					;EndIf
+					;EndIf					
 					
-					;CalculateRoomExtents(r)
+					CalculateRoomExtents(r)
 					Return r	
 				End If
 			EndIf
 		Next
-	Next
+	Next		
 	
 	CatchErrors("CreateRoom")
 End Function
@@ -1148,7 +1153,7 @@ Function PreventRoomOverlap(r.Rooms)
 	If r\RoomTemplate\Name = "checkpoint1" Or r\RoomTemplate\Name = "checkpoint2" Or r\RoomTemplate\Name = "start" Then Return True
 	
 	;First, check if the room is actually intersecting at all
-	For r2 = Each Rooms
+	For r2 = Each Rooms						
 		If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
 			If CheckRoomOverlap(r, r2) Then
 				isIntersecting = True
@@ -1161,7 +1166,7 @@ Function PreventRoomOverlap(r.Rooms)
 	If (Not isIntersecting)
 		Return True
 	EndIf
-	
+			
 	;Room is interseting: First, check if the given room is a ROOM2, so we could potentially just turn it by 180 degrees
 	isIntersecting = False
 	Local x% = r\x/8.0
@@ -1170,6 +1175,7 @@ Function PreventRoomOverlap(r.Rooms)
 		;Room is a ROOM2, let's check if turning it 180 degrees fixes the overlapping issue
 		r\angle = r\angle + 180
 		RotateEntity r\obj,0,r\angle,0
+		CalculateRoomExtents(r)
 						
 		For r2 = Each Rooms
 			If r2 <> r And (Not r2\RoomTemplate\DisableOverlapCheck) Then
@@ -1178,6 +1184,7 @@ Function PreventRoomOverlap(r.Rooms)
 					isIntersecting = True
 					r\angle = r\angle - 180
 					RotateEntity r\obj,0,r\angle,0
+					CalculateRoomExtents(r)
 					Exit
 				EndIf
 			EndIf
@@ -1213,12 +1220,16 @@ Function PreventRoomOverlap(r.Rooms)
 				r\angle = rot2
 				PositionEntity r\obj,r\x,r\y,r\z
 				RotateEntity r\obj,0,r\angle,0
+				CalculateRoomExtents(r)
 				
 				r2\x = x*8.0
 				r2\z = y*8.0
 				r2\angle = rot
 				PositionEntity r2\obj,r2\x,r2\y,r2\z
 				RotateEntity r2\obj,0,r2\angle,0
+				CalculateRoomExtents(r2)
+				
+				DebugLog "Replaced rooms: " + r\RoomTemplate\Name + " and " + r2\RoomTemplate\Name
 				
 				;make sure neither room overlaps with anything after the swap
 				For r3 = Each Rooms
@@ -1245,14 +1256,19 @@ Function PreventRoomOverlap(r.Rooms)
 					r\angle = rot
 					PositionEntity r\obj,r\x,r\y,r\z
 					RotateEntity r\obj,0,r\angle,0
+					CalculateRoomExtents(r)
 					
 					r2\x = x2*8.0
 					r2\z = y2*8.0
 					r2\angle = rot2
 					PositionEntity r2\obj,r2\x,r2\y,r2\z
 					RotateEntity r2\obj,0,r2\angle,0
+					CalculateRoomExtents(r2)
 					
-					isIntersecting = False
+					isIntersecting = False										
+					
+					DebugLog "UN-REPLACED ROOMS" + r\RoomTemplate\Name + " and " + r2\RoomTemplate\Name					
+					
 				EndIf
 			EndIf
 		EndIf
@@ -1365,20 +1381,22 @@ Function FillRoom(r.Rooms)
 			lightAmount = 6
 			;[End Block]
 		Case "gatea"
-			;[Block]	
+			;[Block]			
+				
 			d = CreateDoor(False)					
 			
 			d = CreateDoor(False)					
 			
 			d = CreateDoor(False, False)
 			
-			d = CreateDoor(False, False)
+			d = CreateDoor(False, False)			
 			
+			;We can probably just remove the loop and create a door since the if only is true once.
 			For r2.Rooms = Each Rooms
-				If r\RoomTemplate\Name = "gateaentrance" Then
+				If r2\RoomTemplate\Name = "gateaentrance" Then
 					d = CreateDoor(False)
 				EndIf
-			Next
+			Next		
 			
 			lightAmount = 12
 			;[End Block]
@@ -1684,6 +1702,7 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "room2_2"
 			;[Block]
+			lightAmount = 4
 			;[End Block]
 		Case "room012"
 			;[Block]
@@ -1798,6 +1817,8 @@ Function FillRoom(r.Rooms)
 			ri = Rand(360);it = CreateItem("S-NAV 300 Navigator", "nav", r\x - 336.0 * RoomScale, r\y - 48.0 * RoomScale, r\z - 480.0 * RoomScale)
 			
 			ri = Rand(1, 4);temp = Rand(1,4)
+			
+			lightAmount = 6
 			;[End Block]
 		Case "room2offices3"
 			;[Block]
@@ -1827,7 +1848,8 @@ Function FillRoom(r.Rooms)
 			EndIf
 
 			d = CreateDoor(True)
-
+			
+			lightAmount = 6
 			;[End Block]
 		Case "start"
 			;[Block]
@@ -1914,8 +1936,9 @@ Function FillRoom(r.Rooms)
 				lightAmount = 8
 			ElseIf r\RoomTemplate\Name = "room2tesla_hcz" Then
 				lightAmount = 10
+			ElseIf r\RoomTemplate\Name = "room2tesla" Then
+				lightAmount = 8
 			EndIf
-			;NEED TO ADD ROOM2TESLA LIGHT AMOUNT IN HERE
 			;[End Block]
 		Case "room2doors"
 			;[Block]
@@ -2059,17 +2082,19 @@ Function FillRoom(r.Rooms)
 			;[End Block]
 		Case "pocketdimension"
 			;[Block]		
-			
+						
 			ri = Rand(360);CreateItem("Burnt Note", "paper", EntityX(r\obj),0.5,EntityZ(r\obj)+3.5)
 			
 			d = CreateDoor(False)
 			d = CreateDoor(False)
 			
+			rf# = Rnd(0.8, 0.8)
+									
 			For i = 1 To 8
 				If i < 6 Then 
 					rf# = Rnd(0.5 , 0.5);de\Size = Rnd(0.5, 0.5)
 				EndIf				
-			Next
+			Next			
 			
 			lightAmount = 1
 			;[End Block]
@@ -2080,7 +2105,9 @@ Function FillRoom(r.Rooms)
 			;[Block]
 			If r\RoomTemplate\Name = "room3_3" Then
 				lightAmount = 5
-			EndIf 
+			Else If r\RoomTemplate\Name = "room2_3" Then
+				lightAmount = 0
+			EndIf
 			;[End Block]
 		;New rooms (in SCP:CB 1.3) - ENDSHN
 		Case "room1lifts"
@@ -2131,8 +2158,8 @@ Function FillRoom(r.Rooms)
 				;	FreeEntity r\RoomDoors[1]\obj2 : r\RoomDoors[1]\obj2 = 0
 				;EndIf
 				
-				;NEED TO ADD LIGHT AMOUNT FOR ROOM2GW
-				
+				lightAmount = 2
+								
 			EndIf
 			
 			;[End Block]
@@ -2270,15 +2297,21 @@ Function FillRoom(r.Rooms)
 			;[Block]
 			lightAmount = 2
 			;[EndBlock]
+		Case "room2c"
+			;[Block]
+			lightAmount = 3
+			;[EndBlock]
+		Case "room2z3_2"
+			;[Block]
+			lightAmount = 0
+			;[EndBlock]
 	End Select	
 	
 	For lights = 0 To lightAmount-1
 		newlt = AddLight(r)
 	Next
 	
-	lightAmount = 0
-	
-	DebugLog "GETTING RANDOM FLOAT AT END OF FILLROOM " + r\RoomTemplate\Name + ": " + Rnd(0,100000) + "++++++++++++++++++++++++++++++++++++++++"
+	lightAmount = 0	
 End Function
 
 Function CalculateRoomExtents(r.Rooms)
@@ -2287,14 +2320,25 @@ Function CalculateRoomExtents(r.Rooms)
 	;shrink the extents slightly - we don't care if the overlap is smaller than the thickness of the walls
 	Local shrinkAmount# = 0.05
 	
+	DebugLog "r\obj:" + EntityX(r\obj) + ":" + EntityY(r\obj) + ":" + EntityZ(r\obj)
+	
 	;convert from the rooms local space to world space
-	TFormVector(r\RoomTemplate\MinX, r\RoomTemplate\MinY, r\RoomTemplate\MinZ, r\obj, 0)
+	TFormVector(r\RoomTemplate\MinX, r\RoomTemplate\MinY, r\RoomTemplate\MinZ, r\obj, 0)	
+	
+	DebugLog "MINROOMTEMPLATES: " + r\RoomTemplate\Name + ":" + r\RoomTemplate\MinX + ":" + r\RoomTemplate\MinY + ":" + r\RoomTemplate\MinZ
+	DebugLog "MAXROOMTEMPLATES: " + r\RoomTemplate\Name + ":" + r\RoomTemplate\MaxX + ":" + r\RoomTemplate\MaxY + ":" + r\RoomTemplate\MaxZ
+		
+	DebugLog "MINTFORMVECTORS:" + r\RoomTemplate\Name + ":" + TFormedX() + ":" + TFormedY() + ":" + TFormedZ()
+		
 	r\MinX = TFormedX() + shrinkAmount + r\x
 	r\MinY = TFormedY() + shrinkAmount
 	r\MinZ = TFormedZ() + shrinkAmount + r\z
 	
 	;convert from the rooms local space to world space
 	TFormVector(r\RoomTemplate\MaxX, r\RoomTemplate\MaxY, r\RoomTemplate\MaxZ, r\obj, 0)
+	
+	DebugLog "MAXTFORMVECTORS:" + r\RoomTemplate\Name + ":" + TFormedX() + ":" + TFormedY() + ":" + TFormedZ()
+		
 	r\MaxX = TFormedX() - shrinkAmount + r\x
 	r\MaxY = TFormedY() - shrinkAmount
 	r\MaxZ = TFormedZ() - shrinkAmount + r\z
@@ -2310,7 +2354,659 @@ Function CalculateRoomExtents(r.Rooms)
 		r\MinZ = tempZ
 	EndIf
 	
-	DebugLog("roomextents: "+r\MinX+", "+r\MinY	+", "+r\MinZ	+", "+r\MaxX	+", "+r\MaxY+", "+r\MaxZ)
+	DebugLog("roomextents: " + r\RoomTemplate\Name + ": " +r\MinX+ ", " +r\MinY	+ ", " +r\MinZ	+ ", " +r\MaxX	+ ", " +r\MaxY+ ", " +r\MaxZ)
+	
+End Function
+
+Function CalculateRoomTemplateExtents(r.RoomTemplates)
+	If r\DisableOverlapCheck Then Return
+	
+	;GetMeshExtents(GetChild(r\obj,2))
+	
+	Select r\Name
+		Case "start"
+			Mesh_MinX = -672.0
+			Mesh_MinY = -28.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 5504.0
+			Mesh_MaxY = 1400.0
+			Mesh_MaxZ = 2848.0
+		Case "roompj"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -0.562705
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 960.0
+			Mesh_MaxZ = 1280.0
+		Case "room2"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 304.0
+			Mesh_MaxY = 726.831
+			Mesh_MaxZ = 1024.0
+		Case "room2z3"
+			Mesh_MinX = -256.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 256.0
+			Mesh_MaxY = 438.831
+			Mesh_MaxZ = 1024.0
+		Case "room2c"
+			Mesh_MinX = -320.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 726.831
+			Mesh_MaxZ = 320.0
+		Case "room2c2"
+			Mesh_MinX = -320.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 800.868
+			Mesh_MaxZ = 1024.0
+		Case "room2z3_2"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 304.0
+			Mesh_MaxY = 416.0
+			Mesh_MaxZ = 1024.0
+		Case "room3_2"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 854.831
+			Mesh_MaxZ = 448.0
+		Case "room3_3"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -24.0
+			Mesh_MinZ = -1024.07
+			Mesh_MaxX = 1024.82
+			Mesh_MaxY = 596.239				
+			Mesh_MaxZ = 416.0
+		Case "room2closets"
+			Mesh_MinX = -1972.0
+			Mesh_MinY = -416.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 816.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room2testroom2"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -48.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 352.0
+			Mesh_MaxY = 640.0
+			Mesh_MaxZ = 1024.0
+		Case "room2_4"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 772.0
+			Mesh_MaxY = 706.868
+			Mesh_MaxZ = 1024.0
+		Case "room2_5"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 320.0
+			Mesh_MaxY = 386.868
+			Mesh_MaxZ = 1024.0
+		Case "room3"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 854.831
+			Mesh_MaxZ = 1024.0
+		Case "room4"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 850.455
+			Mesh_MaxZ = 1024.0
+		Case "room2scps"
+			Mesh_MinX = -816.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 816.0
+			Mesh_MaxY = 714.0
+			Mesh_MaxZ = 1024.0
+		Case "room2tesla_lcz"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -64.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 304.0
+			Mesh_MaxY = 714.831
+			Mesh_MaxZ = 1024.0
+		Case "room2storage"
+			Mesh_MinX = -1328.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1328.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room2doors"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 256.0
+			Mesh_MaxY = 640.0
+			Mesh_MaxZ = 1024.0
+		Case "lockroom"
+			Mesh_MinX = -864.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 640.0
+			Mesh_MaxZ = 864.0
+		Case "room2gw_b"
+			Mesh_MinX = -482.0
+			Mesh_MinY = -18.0
+			Mesh_MinZ = -1034.0
+			Mesh_MaxX = 485.0
+			Mesh_MaxY = 575.0
+			Mesh_MaxZ = 1024.0
+		Case "room2gw"
+			Mesh_MinX = -544.0
+			Mesh_MinY = -18.0
+			Mesh_MinZ = -1036.0
+			Mesh_MaxX = 544.0
+			Mesh_MaxY = 575.0
+			Mesh_MaxZ = 1024.0
+		Case "914"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -0.562705
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 816.0
+			Mesh_MaxZ = 1024.0
+		Case "room1archive"
+			Mesh_MinX = -768.0
+			Mesh_MinY = -16.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 288.0
+			Mesh_MaxY = 600.239
+			Mesh_MaxZ = 752.0
+		Case "room2sl"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -64.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1792.0
+			Mesh_MaxY = 960.0
+			Mesh_MaxZ = 1024.0
+		Case "room012"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -800.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 816.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room2scps2"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -9.6
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1264.0
+			Mesh_MaxY = 706.868
+			Mesh_MaxZ = 1026.3
+		Case "room2_2"		
+			Mesh_MinX = -800.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 304.0
+			Mesh_MaxY = 726.831
+			Mesh_MaxZ = 1024.0
+		Case "room205"
+			Mesh_MinX = -1792.0
+			Mesh_MinY = -160.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 800.0
+			Mesh_MaxY = 1184.0
+			Mesh_MaxZ = 864.0
+		Case "room4info"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -20.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 596.239
+			Mesh_MaxZ = 1024.0
+		Case "room1123"
+			Mesh_MinX = -928.0
+			Mesh_MinY = -0.0000610352
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 980.851
+			Mesh_MaxZ = 1024.0
+		Case "room2elevator"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1056.0
+			Mesh_MaxY = 854.831
+			Mesh_MaxZ = 1024.0
+		Case "room2_3"
+			Mesh_MinX = -416.0
+			Mesh_MinY = -20.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 416.0
+			Mesh_MaxY = 596.239
+			Mesh_MaxZ = 1024.0
+		Case "room1162"
+			Mesh_MinX = -320.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1027.8
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 752.851
+			Mesh_MaxZ = 320.0
+		Case "checkpoint1"
+			Mesh_MinX = -1104.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1102.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room2pipes"
+			Mesh_MinX = -312.095
+			Mesh_MinY = -449.0
+			Mesh_MinZ = -1026.0
+			Mesh_MaxX = 256.0
+			Mesh_MaxY = 1024.0
+			Mesh_MaxZ = 1024.0
+		Case "room2pipes2"
+			Mesh_MinX = -256.0
+			Mesh_MinY = -448.0
+			Mesh_MinZ = -1026.0
+			Mesh_MaxX = 671.5
+			Mesh_MaxY = 788.0
+			Mesh_MaxZ = 1024.0
+		Case "room2nuke"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1808.0
+			Mesh_MaxY = 2016.0
+			Mesh_MaxZ = 1024.0
+		Case "room2pit"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -448.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 768.0
+			Mesh_MaxY = 448.0
+			Mesh_MaxZ = 1024.0
+		Case "tunnel"
+			Mesh_MinX = -288.0
+			Mesh_MinY = -0.999992
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 288.0
+			Mesh_MaxY = 449.0
+			Mesh_MaxZ = 1024.0
+		Case "room079"
+			Mesh_MinX = -416.0
+			Mesh_MinY = -705.0
+			Mesh_MinZ = -1056.0
+			Mesh_MaxX = 2240.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 2048.0
+		Case "room3z2"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 416.0
+			Mesh_MaxZ = 256.0
+		Case "room2tunnel"
+			Mesh_MinX = -880.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 880.0
+			Mesh_MaxY = 512.0
+			Mesh_MaxZ = 1024.0
+		Case "room2ctunnel"
+			Mesh_MinX = -384.0
+			Mesh_MinY = -0.00000762939
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 448.0
+			Mesh_MaxZ = 402.464
+		Case "room4tunnels"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -64.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 738.868
+			Mesh_MaxZ = 1024.0
+		Case "room4pit"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -961.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 385.0
+			Mesh_MaxZ = 1024.0
+		Case "room3tunnel"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -0.00000762939
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 758.831
+			Mesh_MaxZ = 416.0
+		Case "room513"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -1.00003
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 470.831
+			Mesh_MaxZ = 1024.0
+		Case "tunnel2"
+			Mesh_MinX = -336.0
+			Mesh_MinY = -0.94928
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 528.0
+			Mesh_MaxY = 696.0
+			Mesh_MaxZ = 1024.0
+		Case "room106"
+			Mesh_MinX = -1304.0
+			Mesh_MinY = -1296.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 2256.0
+			Mesh_MaxY = 1688.0
+			Mesh_MaxZ = 3120.0
+		Case "008"
+			Mesh_MinX = -608.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 784.0
+			Mesh_MaxY = 1152.0
+			Mesh_MaxZ = 832.0
+		Case "room035"
+			Mesh_MinX = -736.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1248.0
+			Mesh_MaxY = 498.455
+			Mesh_MaxZ = 912.0
+		Case "room2shaft"
+			Mesh_MinX = -256.0
+			Mesh_MinY = -1504.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 2016.0
+			Mesh_MaxY = 1775.0
+			Mesh_MaxZ = 1024.0
+		Case "testroom"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -1281.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 800.0
+			Mesh_MaxZ = 1024.0
+		Case "room2cpit"
+			Mesh_MinX = -568.0
+			Mesh_MinY = -961.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 874.863
+			Mesh_MaxZ = 960.0
+		Case "room2tesla_hcz"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -64.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 304.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room3pit"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -961.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 385.0
+			Mesh_MaxZ = 352.0
+		Case "room2servers"
+			Mesh_MinX = -1664.0
+			Mesh_MinY = -0.0218506
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 224.0
+			Mesh_MaxY = 385.0
+			Mesh_MaxZ = 1024.0
+		Case "coffin"
+			Mesh_MinX = -960.0
+			Mesh_MinY = -1537.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 464.0
+			Mesh_MaxY = 704.0
+			Mesh_MaxZ = 2560.0
+		Case "checkpoint2"
+			Mesh_MinX = -1102.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1104.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1026.0
+		Case "room1lifts"
+			Mesh_MinX = -464.0
+			Mesh_MinY = -36.0181
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 448.0
+			Mesh_MaxY = 466.851
+			Mesh_MaxZ = 105.694
+		Case "endroom"
+			Mesh_MinX = -720.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 784.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1240.0
+		Case "room2poffices"
+			Mesh_MinX = -512.0
+			Mesh_MinY = -0.0000305176
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 976.0
+			Mesh_MaxY = 438.831
+			Mesh_MaxZ = 1024.0
+		Case "room2cafeteria"
+			Mesh_MinX = -1792.0
+			Mesh_MinY = -384.022
+			Mesh_MinZ = -1040.0
+			Mesh_MaxX = 1952.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room2ccont"
+			Mesh_MinX = -2272.0
+			Mesh_MinY = -64.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 1344.0
+			Mesh_MaxZ = 1824.0
+		Case "room2sroom"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -0.0000305176
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 2304.0
+			Mesh_MaxY = 640.0
+			Mesh_MaxZ = 1024.0
+		Case "room4z3"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 1440.0
+			Mesh_MaxZ = 1024.0
+		Case "room2servers2"
+			Mesh_MinX = -1081.5
+			Mesh_MinY = -800.022
+			Mesh_MinZ = -1049.0
+			Mesh_MaxX = 816.0
+			Mesh_MaxY = 464.851
+			Mesh_MaxZ = 1024.0
+		Case "room3servers"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -1536.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 385.0
+			Mesh_MaxZ = 1032.0
+		Case "room2offices"
+			Mesh_MinX = -608.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 422.455
+			Mesh_MaxZ = 1024.0
+		Case "room3offices"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -0.00000190735
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 464.851
+			Mesh_MaxZ = 1036.0
+		Case "room2offices4"
+			Mesh_MinX = -1568.0
+			Mesh_MinY = -416.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 596.0
+			Mesh_MaxY = 708.0
+			Mesh_MaxZ = 1024.0
+		Case "room3servers2"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -1536.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 385.0
+			Mesh_MaxZ = 1032.0
+		Case "lockroom2"
+			Mesh_MinX = -864.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 434.831
+			Mesh_MaxZ = 864.0
+		Case "room860"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1280.0
+			Mesh_MaxY = 726.831
+			Mesh_MaxZ = 1024.0
+		Case "medibay"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -1.84372
+			Mesh_MinZ = -1025.0
+			Mesh_MaxX = 288.0
+			Mesh_MaxY = 386.868
+			Mesh_MaxZ = 1024.0
+		Case "room2poffices2"
+			Mesh_MinX = -1184.0
+			Mesh_MinY = -1.43242
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1216.0
+			Mesh_MaxY = 438.831
+			Mesh_MaxZ = 1024.0
+		Case "gateaentrance"
+			Mesh_MinX = -720.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -1136.0
+			Mesh_MaxX = 1360.0
+			Mesh_MaxY = 1328.0
+			Mesh_MaxZ = 1240.0
+		Case "pocketdimension"
+			Mesh_MinX = -512.0
+			Mesh_MinY = -32.0
+			Mesh_MinZ = -512.0
+			Mesh_MaxX = 512.0
+			Mesh_MaxY = 1024.0
+			Mesh_MaxZ = 512.0
+		Case "dimension1499"
+			Mesh_MinX = -7509.0
+			Mesh_MinY = -672.0
+			Mesh_MinZ = -4207.31
+			Mesh_MaxX = 7509.28
+			Mesh_MaxY = 8928.0
+			Mesh_MaxZ = 4207.0
+		Case "endroom2"
+			Mesh_MinX = -480.0
+			Mesh_MinY = -0.562705
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 464.0
+			Mesh_MaxY = 1056.0
+			Mesh_MaxZ = 376.0
+		Case "room2tesla"
+			Mesh_MinX = -304.0
+			Mesh_MinY = -64.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 304.0
+			Mesh_MaxY = 722.455
+			Mesh_MaxZ = 1024.0
+		Case "room2offices2"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -192.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 288.0
+			Mesh_MaxY = 386.868		
+			Mesh_MaxZ = 1024.0
+		Case "room4_2"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -0.0000038147
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 784.851	
+			Mesh_MaxZ = 1024.0
+		Case "room3z3"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0	
+			Mesh_MaxY = 438.831
+			Mesh_MaxZ = 576.0
+		Case "room2toilets"
+			Mesh_MinX = -320.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1568.0
+			Mesh_MaxY = 386.868
+			Mesh_MaxZ = 1024.0
+		Case "lockroom3"
+			Mesh_MinX = -832.0
+			Mesh_MinY = 0.0
+			Mesh_MinZ = -1030.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 384.0
+			Mesh_MaxZ = 864.0
+		Case "room2cz3"
+			Mesh_MinX = -576.0
+			Mesh_MinY = -1.0
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 1024.0
+			Mesh_MaxY = 438.831
+			Mesh_MaxZ = 576.0
+		Case "room3gw"
+			Mesh_MinX = -1024.0
+			Mesh_MinY = -18.0
+			Mesh_MinZ = -1031.0
+			Mesh_MaxX = 1039.0
+			Mesh_MaxY = 535.0
+			Mesh_MaxZ = 547.552
+		Case "room2offices3"
+			Mesh_MinX = -1600.0
+			Mesh_MinY = -0.0000290604
+			Mesh_MinZ = -1024.0
+			Mesh_MaxX = 768.0
+			Mesh_MaxY = 832.0
+			Mesh_MaxZ = 1024.0
+		Default
+			RuntimeError "Unhandled CalculateRoomTemplateExtents() on room: " + r\Name + " seed: " + seed
+			;DebugLog "ROOMTEMPLATEEXCEPTION ROOM: " + r\Name + " SEED: " + seed			
+	End Select
+	
+	r\MinX = Mesh_MinX
+	r\MinY = Mesh_MinY
+	r\MinZ = Mesh_MinZ
+	r\MaxX = Mesh_MaxX
+	r\MaxY = Mesh_MaxY
+	r\MaxZ = Mesh_MaxZ
+	
+	DebugLog("roomtemplateextents:" + r\Name + ":" +r\MinX+":"+r\MinY	+":"+r\MinZ	+":"+r\MaxX	+":"+r\MaxY+":"+r\MaxZ)
 End Function
 
 Function GenForestGrid(fr.Forest)
@@ -2751,6 +3447,12 @@ Function PlaceForest(fr.Forest,x#,y#,z#,r.Rooms)
 		Next		
 	Next
 	
+	FreeImage hmap[ROOM1]
+	FreeImage hmap[ROOM2]
+	FreeImage hmap[ROOM2C]
+	FreeImage hmap[ROOM3]
+	FreeImage hmap[ROOM4]
+	
 	CatchErrors("PlaceForest")
 	
 End Function
@@ -2776,8 +3478,8 @@ End Function
 
 Function ResetMap()
 	Local r.Rooms, rt.RoomTemplates, z.MapZones, wp.Waypoints
-	Local f.Forest, g.Grids, d.Doors, lt.LightTemplates
-	
+	Local f.Forest, g.Grids, d.Doors
+		
 	For rt.RoomTemplates = Each RoomTemplates
 		rt\obj = 0
 	Next
@@ -2804,10 +3506,8 @@ Function ResetMap()
 		Delete g
 	Next
 	
-	For lt.LightTemplates = Each LightTemplates
-		Delete lt
-	Next
-	
+	ClearWorld
+		
 End Function
 
 Function LoadImage_Strict(file$)
@@ -2822,16 +3522,6 @@ End Function
 
 Function EndOfPage()
 End Function
-
-
-
-
-
-
-
-
-
-
 
 
 
