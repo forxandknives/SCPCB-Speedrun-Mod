@@ -39,7 +39,7 @@ Wend
 ErrorFile = ErrorFile+Str(ErrorFileInd)+".txt"
 
 Global UpdaterFont%
-Global Font1%, Font2%, Font3%, Font4%, Font5%
+Global Font1%, Font2%, Font3%, Font4%, Font5%, FontMono%
 Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
@@ -228,12 +228,13 @@ InitAAFont()
 ;don't match their "internal name" (i.e. their display name in applications
 ;like Word and such). As a workaround, I moved the files and renamed them so they
 ;can load without FastText.
-Font1% = AALoadFont("GFX\font\cour\Courier New.ttf", Int(19 * (GraphicHeight / 1024.0)), 0,0,0)
-Font2% = AALoadFont("GFX\font\courbd\Courier New.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
-Font3% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(22 * (GraphicHeight / 1024.0)), 0,0,0)
-Font4% = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(60 * (GraphicHeight / 1024.0)), 0,0,0)
-Font5% = AALoadFont("GFX\font\Journal\Journal.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
-
+Font1%    = AALoadFont("GFX\font\cour\Courier New.ttf", Int(19 * (GraphicHeight / 1024.0)), 0,0,0)
+Font2%    = AALoadFont("GFX\font\courbd\Courier New.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
+Font3%    = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(22 * (GraphicHeight / 1024.0)), 0,0,0)
+Font4%    = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(60 * (GraphicHeight / 1024.0)), 0,0,0)
+Font5%    = AALoadFont("GFX\font\Journal\Journal.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
+FontMono% = AALoadFont("GFX\font\mono\mono.tff", Int(58 * (GraphicHeight / 1024.0)), 0, 0, 0)
+ 
 Global CreditsFont%,CreditsFont2%
 
 ConsoleFont% = AALoadFont("Blitz", Int(20 * (GraphicHeight / 1024.0)), 0,0,0,1)
@@ -4684,11 +4685,22 @@ Function DrawGUI()
 	If seconds < 10 Then
 		secondsString = "0" + secondsString
 	EndIf
+	
+	Local msString$ = Str(ms)
+	
+	If ms < 10 Then
+		msString = "00" + msString
+	EndIf 
+	
+	If ms < 100 Then
+		msString = "0" + msString
+		
+	EndIf
 		
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then
 		Color TimerR, TimerG, TimerB
-		AASetFont Font2
-		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Str(ms), True	
+		AASetFont FontMono
+		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True	
 	EndIf
 			
 	If RunFinished Then
