@@ -2474,7 +2474,7 @@ Function UpdateNPCs()
 						If dist < 15.0 Then
 							
 							If WrapAngle(EntityYaw(n\Collider)-DeltaYaw(n\Collider, Collider))<90 Then
-								If EntityVisible(Collider, n\Collider) Then n\State = 1
+								If EntityVisible(pvt, Collider) Then n\State = 1
 							EndIf
 							
 						EndIf
