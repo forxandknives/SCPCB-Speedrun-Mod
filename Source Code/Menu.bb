@@ -1076,8 +1076,8 @@ Function UpdateMainMenu()
 					y = y + 30 * MenuScale
 					
 					Color TimerR, TimerG, TimerB
-					AASetFont ConsoleFont
-					AAText(TimerX, TimerY, "YOUR TIMER IS HERE", True, True)
+					AASetFont FontMono
+					AAText(TimerX, TimerY, "1:23.456", True, True)
 
 					;[EndBlock]
 				EndIf
