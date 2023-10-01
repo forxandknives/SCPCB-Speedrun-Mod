@@ -957,7 +957,7 @@ Function UpdateMainMenu()
 					
 					Color 255,255,255
 					AAText(x + 20 * MenuScale, y, "Show FPS:")
-					ShowFPS% = DrawTick(x + 310 * MenuScale, y + MenuScale, ShowFPS%)
+					ShowFPS% = True ; We always show fps ; DrawTick(x + 310 * MenuScale, y + MenuScale, ShowFPS%)
 					If MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"showfps")
 					EndIf
@@ -967,7 +967,7 @@ Function UpdateMainMenu()
 					Color 255,255,255
 					AAText(x + 20 * MenuScale, y, "Framelimit:")
 					Color 255,255,255
-					If DrawTick(x + 310 * MenuScale, y, CurrFrameLimit > 0.0) Then
+					If True Then ; Framelimit is always on now ; DrawTick(x + 310 * MenuScale, y, CurrFrameLimit > 0.0) Then
 						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0)/50.0)
 						;CurrFrameLimit = Max(CurrFrameLimit, 0.1)
 						;Framelimit% = CurrFrameLimit#*100.0

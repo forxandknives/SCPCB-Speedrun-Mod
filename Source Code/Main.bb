@@ -73,7 +73,7 @@ Global SelectedGFXDriver% = Max(GetINIInt(OptionFile, "options", "gfx driver"), 
 Global fresize_image%, fresize_texture%, fresize_texture2%
 Global fresize_cam%
 
-Global ShowFPS = GetINIInt(OptionFile, "options", "show FPS")
+Global ShowFPS = True ; We always show fps ;  = GetINIInt(OptionFile, "options", "show FPS")
 
 Global WireframeState
 Global HalloweenTex
@@ -1121,11 +1121,14 @@ Function UpdateConsole()
 					
 					DropSpeed = 0
 					;[End Block]
-				Case "showfps"
-					;[Block]
-					ShowFPS = Not ShowFPS
-					CreateConsoleMsg("ShowFPS: "+Str(ShowFPS))
-					;[End Block]
+					
+				;WE ARE ALWAYS SHOWING FPS NOW TOO BAD
+				;Case "showfps"
+				;	;[Block]
+				;	ShowFPS = Not ShowFPS
+				;	CreateConsoleMsg("ShowFPS: "+Str(ShowFPS))
+				;	;[End Block]
+				
 				Case "096state"
 					;[Block]
 					For n.NPCs = Each NPCs
@@ -7602,7 +7605,7 @@ Function DrawMenu()
 					
 					Color 255,255,255
 					AAText(x, y, "Show FPS:")
-					ShowFPS% = DrawTick(x + 270 * MenuScale, y, ShowFPS%)
+					ShowFPS% = True ; We always show fps ; DrawTick(x + 270 * MenuScale, y, ShowFPS%)
 					If MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)
 						DrawOptionsTooltip(tx,ty,tw,th,"showfps")
 					EndIf
@@ -7613,7 +7616,7 @@ Function DrawMenu()
 					AAText(x, y, "Framelimit:")
 					
 					Color 255,255,255
-					If DrawTick(x + 270 * MenuScale, y, CurrFrameLimit > 0.0) Then
+					If True Then ; Framelimit is always on now ; DrawTick(x + 270 * MenuScale, y, CurrFrameLimit > 0.0) Then
 						;CurrFrameLimit# = (SlideBar(x + 150*MenuScale, y+30*MenuScale, 100*MenuScale, CurrFrameLimit#*50.0)/50.0)
 						;CurrFrameLimit = Max(CurrFrameLimit, 0.1)
 						;Framelimit% = CurrFrameLimit#*100.0
