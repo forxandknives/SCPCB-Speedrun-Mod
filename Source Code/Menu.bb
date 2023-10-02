@@ -19,6 +19,52 @@ Next
 
 Global RandomSeed$
 
+Global NumberOfSeeds%
+
+Dim SavedSeeds$(NumberOfSeeds)
+
+
+
+Function LoadSavedSeeds()
+	CatchErrors("Uncaught (LoadSavedSeeds()")
+	
+	NumberOfSeeds = 0
+	Local fileLines = ReadFile("Data\seeds.txt")
+	
+	Repeat
+		Local l$ = ReadLine$(fileLines)
+		If l = "" Then 
+			Exit
+		Else 
+			NumberOfSeeds = NumberOfSeeds + 1
+			DebugLog l			
+		EndIf		
+	Forever
+	
+	CloseFile(fileLines)
+		
+	Dim SavedSeeds$(NumberOfSeeds)
+	
+	fileLines = ReadFile("Data\seeds.txt")
+	
+	Local i% = 0
+	Repeat
+		l$ = ReadLine$(fileLines)
+		If l = "" Then 
+			Exit
+		Else 
+			SavedSeeds(i) = l
+		EndIf	
+		i = i + 1	
+	Forever	
+		
+	CloseFile(fileLines)	
+	
+	CatchErrors("LoadSavedSeeds()")
+End Function
+
+
+
 Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
 MenuBlinkTimer%(0) = 1
 MenuBlinkTimer%(1) = 1
@@ -150,7 +196,8 @@ Function UpdateMainMenu()
 						; Here is where the game would check to add those pre-determined seeds like "d9341" and "CRUNCH" etc.
 						; It's all gone now so that the seed is blank, and makes getting into random seed games faster.
 						; Maybe some time later we will add here a box of seeds you can add, and have the game
-						; automatically put the seed into the box so you can start runs faster.										
+						; automatically put the seed into the box so you can start runs faster.				
+						LoadSavedSeeds()						
 						MainMenuTab = 1
 					EndIf
 				Case 1
@@ -194,6 +241,10 @@ Function UpdateMainMenu()
 		
 		DrawFrame(x, y, width, height)
 		
+		; Frame for Seed Selector Text
+		;Local SelectorX% = x + width + 20 * MenuScale + 580 * MenuScale - width - 20 * MenuScale + 20
+		;DrawFrame(SelectorX, y, 580 * MenuScale * 1.5 * MenuScale, height)
+		
 		If DrawButton(x + width + 20 * MenuScale, y, 580 * MenuScale - width - 20 * MenuScale, height, "BACK", False) Then 
 			Select MainMenuTab
 				Case 1
@@ -231,7 +282,14 @@ Function UpdateMainMenu()
 				
 				Color(255, 255, 255)
 				AASetFont Font2
-				AAText(x + width / 2, y + height / 2, "NEW GAME", True, True)
+				AAText(x + width / 2, y + height / 2, "NEW GAME", True, True)				
+				
+				;Seed Selector Text Frame
+				Local SelectorX% = ((x + width + 20 * MenuScale) + (580 * MenuScale - width - 20 * MenuScale)) + 20
+				Local SelectorWidth% = (580 * MenuScale) * 1.5 * MenuScale
+				DrawFrame(SelectorX, y, SelectorWidth, height)
+				AAText(SelectorX + SelectorWidth / 2, y, "Seed Selector", True, False)
+				
 				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
@@ -240,6 +298,18 @@ Function UpdateMainMenu()
 				
 				DrawFrame(x, y, width, height)				
 				
+				;Seed Selector Frame
+				;
+				;
+				;ADD GOOD UI FOR SELECTING A SEED 
+				;
+				;
+				DrawFrame(x + width + 20, y, width * 1.5 * MenuScale, height)
+				Local index%
+				For index = 0 To NumberOfSeeds
+					AAText(x + width + 20, y + 20 * index, SavedSeeds(index), False, False)
+				Next
+								
 				AASetFont Font1
 				
 				AAText (x + 20 * MenuScale, y + 20 * MenuScale, "Name:")
