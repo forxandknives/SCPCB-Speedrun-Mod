@@ -147,47 +147,10 @@ Function UpdateMainMenu()
 					txt = "NEW GAME"
 					RandomSeed = ""
 					If temp Then 
-						If Rand(15)=1 Then 
-							Select Rand(13)
-								Case 1 
-									RandomSeed = "NIL"
-								Case 2
-									RandomSeed = "NO"
-								Case 3
-									RandomSeed = "d9341"
-								Case 4
-									RandomSeed = "5CP_I73"
-								Case 5
-									RandomSeed = "DONTBLINK"
-								Case 6
-									RandomSeed = "CRUNCH"
-								Case 7
-									RandomSeed = "die"
-								Case 8
-									RandomSeed = "HTAED"
-								Case 9
-									RandomSeed = "rustledjim"
-								Case 10
-									RandomSeed = "larry"
-								Case 11
-									RandomSeed = "JORGE"
-								Case 12
-									RandomSeed = "dirtymetal"
-								Case 13
-									RandomSeed = "whatpumpkin"
-							End Select
-						Else
-							n = Rand(4,8)
-							For i = 1 To n
-								If Rand(3)=1 Then
-									RandomSeed = RandomSeed + Rand(0,9)
-								Else
-									RandomSeed = RandomSeed + Chr(Rand(97,122))
-								EndIf
-							Next							
-						EndIf
-						
-						;RandomSeed = MilliSecs()
+						; Here is where the game would check to add those pre-determined seeds like "d9341" and "CRUNCH" etc.
+						; It's all gone now so that the seed is blank, and makes getting into random seed games faster.
+						; Maybe some time later we will add here a box of seeds you can add, and have the game
+						; automatically put the seed into the box so you can start runs faster.										
 						MainMenuTab = 1
 					EndIf
 				Case 1
