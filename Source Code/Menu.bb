@@ -18,6 +18,8 @@ For i = 0 To 3
 Next
 
 Global RandomSeed$
+Global SelectedSeed$ = "" ; For speedrun mod seed selecting.
+Global CurrentPage% = 0
 
 Global NumberOfSeeds%
 
@@ -36,14 +38,13 @@ Function LoadSavedSeeds()
 		If l = "" Then 
 			Exit
 		Else 
-			NumberOfSeeds = NumberOfSeeds + 1
-			DebugLog l			
+			NumberOfSeeds = NumberOfSeeds + 1		
 		EndIf		
 	Forever
 	
 	CloseFile(fileLines)
 		
-	Dim SavedSeeds$(NumberOfSeeds)
+	Dim SavedSeeds$(NumberOfSeeds-1)
 	
 	fileLines = ReadFile("Data\seeds.txt")
 	
@@ -191,7 +192,7 @@ Function UpdateMainMenu()
 			Select i
 				Case 0
 					txt = "NEW GAME"
-					RandomSeed = ""
+					RandomSeed = SelectedSeed
 					If temp Then 
 						; Here is where the game would check to add those pre-determined seeds like "d9341" and "CRUNCH" etc.
 						; It's all gone now so that the seed is blank, and makes getting into random seed games faster.
@@ -288,7 +289,7 @@ Function UpdateMainMenu()
 				Local SelectorX% = ((x + width + 20 * MenuScale) + (580 * MenuScale - width - 20 * MenuScale)) + 20
 				Local SelectorWidth% = (580 * MenuScale) * 1.5 * MenuScale
 				DrawFrame(SelectorX, y, SelectorWidth, height)
-				AAText(SelectorX + SelectorWidth / 2, y, "Seed Selector", True, False)
+				AAText(SelectorX + SelectorWidth / 2, y + height / 2, "Seed Selector", True, True)
 				
 				
 				x = 160 * MenuScale
@@ -298,18 +299,72 @@ Function UpdateMainMenu()
 				
 				DrawFrame(x, y, width, height)				
 				
-				;Seed Selector Frame
-				;
-				;
-				;ADD GOOD UI FOR SELECTING A SEED 
-				;
-				;
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;				
+				
+				;Seed Selector Frame	
 				DrawFrame(x + width + 20, y, width * 1.5 * MenuScale, height)
+				
+				AASetFont Font2
+				
+				Local ButtonWidth%  = (width * 1.5 * MenuScale) / 3 ; 3 because 3 buttons per row
+				Local ButtonHeight% = height / 4 ; 4 because leave some space at the bottom for Page number 
+				Local StartingX% = x + width + 20
+				
+				Local FullPages% = NumberOfSeeds / 9
+				Local SeedsOnLastPage% = NumberOfSeeds Mod 9 ; 1-8
+				Local TotalPages% = Ceil(NumberOfSeeds / 9)
+				
+				Local SeedsPerPage% = 9				
+				
 				Local index%
-				For index = 0 To NumberOfSeeds
-					AAText(x + width + 20, y + 20 * index, SavedSeeds(index), False, False)
-				Next
+				Local seed%
 								
+				Local SeedsThisPage 
+				
+				If Abs((CurrentPage * 9) - NumberOfSeeds) > 9 Then
+					If CurrentPage = 0 Then
+						SeedsThisPage = 9
+					Else 
+						SeedsThisPage = 10
+					EndIf
+				Else
+					SeedsThisPage = Abs((CurrentPage * 9) - NumberOfSeeds) + 1
+				EndIf
+					
+												
+				For index = 0 To Min(SeedsThisPage-1, 8) ; Have to Min() here because it is being buggy on 2nd to last page, showing 10 seeds instead of 9
+					If index = 0 And CurrentPage = 0 Then
+						If DrawButton(StartingX + ((index Mod 3) * ButtonWidth) , y + ((index / 3) * ButtonHeight), ButtonWidth, ButtonHeight, "(Blank Seed)", False) Then
+							SelectedSeed = ""
+							RandomSeed = SelectedSeed
+						EndIf
+					Else 
+						If DrawButton(StartingX + ((index Mod 3) * ButtonWidth) , y + ((index / 3) * ButtonHeight), ButtonWidth, ButtonHeight, SavedSeeds((CurrentPage * SeedsPerPage) + index-1), False) Then
+							SelectedSeed = SavedSeeds((CurrentPage * SeedsPerPage) + index-1) ; index - 1 because of the above comment
+							RandomSeed = SelectedSeed
+						EndIf
+
+					EndIf
+				Next															
+				
+				AASetFont Font2				
+				
+				AAText(StartingX + ((width * 1.5 * MenuScale) / 2), y + (height * 0.875), "Page " + (CurrentPage+1) + "/" + (TotalPages+1), True, True)
+				
+				If DrawButton(StartingX + ((width * 1.5 * MenuScale) * 0.15), y + (height * 0.875) - ((height * 0.1) / 2), height * 0.1, height * 0.1, "<", True) Then
+					If CurrentPage <> 0 Then
+						CurrentPage = CurrentPage - 1
+					EndIf	
+				EndIf
+				;				This height* 0.1 is here because it is not in the correct spot (80% of the way from the left).
+				If DrawButton(StartingX + ((width * 1.5 * MenuScale) * 0.85) - height * 0.1, y + (height * 0.875) - ((height * 0.1) / 2), height * 0.1, height * 0.1, ">", True) Then
+					If CurrentPage <> TotalPages Then
+						CurrentPage = CurrentPage + 1
+					EndIf
+				EndIf 
+
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				
 				AASetFont Font1
 				
 				AAText (x + 20 * MenuScale, y + 20 * MenuScale, "Name:")
