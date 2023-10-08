@@ -24,11 +24,11 @@ Global CurrentPage% = 0
 Global NumberOfSeeds%
 
 Dim SavedSeeds$(NumberOfSeeds)
-
+Dim tempSavedSeeds$(NumberOfSeeds)
 
 
 Function LoadSavedSeeds()
-	CatchErrors("Uncaught (LoadSavedSeeds()")
+	CatchErrors("Uncaught LoadSavedSeeds()")
 	
 	NumberOfSeeds = 0
 	Local fileLines = ReadFile("Data\seeds.txt")
@@ -64,6 +64,38 @@ Function LoadSavedSeeds()
 	CatchErrors("LoadSavedSeeds()")
 End Function
 
+
+Function AddSavedSeed(seedToAdd$)
+	CatchErrors("Uncaught AddSavedSeed()")
+	
+	NumberOfSeeds = NumberOfSeeds + 1
+	Dim tempSavedSeeds$(NumberOfSeeds - 1)
+	
+	Local i%
+	
+	For i = 0 To NumberOfSeeds - 1
+		; this is to save the seeds that we already have
+		If i = NumberOfSeeds-1 Then 
+			tempSavedSeeds(i) = seedToAdd
+		Else
+			tempSavedSeeds(i) = SavedSeeds(i)
+		EndIf	
+	Next
+	
+	Dim SavedSeeds(NumberOfSeeds - 1)
+	
+	Local seedFile = WriteFile("Data\seeds.txt")
+	
+	For i = 0 To NumberOfSeeds - 1
+		SavedSeeds(i) = tempSavedSeeds(i)
+		WriteLine(seedFile, SavedSeeds(i))
+	Next
+	
+	CloseFile(seedFile)
+	
+	CatchErrors("AddSavedSeed()")
+	
+End Function
 
 
 Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
@@ -463,6 +495,15 @@ Function UpdateMainMenu()
 					MainMenuTab = 4
 					LoadSavedMaps()
 				EndIf
+				
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				;Add Seed
+				
+				If DrawButton(StartingX, y + height + 20 * MenuScale, 160 * MenuScale, 70* MenuScale, "Add Seed", False) Then
+					AddSavedSeed(Str MilliSecs())
+				EndIf
+				
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				
 				AASetFont Font2
 				
