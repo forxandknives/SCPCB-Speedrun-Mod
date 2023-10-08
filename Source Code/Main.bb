@@ -4703,7 +4703,7 @@ Function DrawGUI()
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then
 		Color TimerR, TimerG, TimerB
 		AASetFont FontMono
-		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True	
+		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
 	EndIf
 			
 	If RunFinished Then
