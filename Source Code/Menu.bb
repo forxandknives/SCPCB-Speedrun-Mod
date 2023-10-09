@@ -20,6 +20,8 @@ Next
 Global RandomSeed$
 Global SelectedSeed$ = "" ; For speedrun mod seed selecting.
 Global CurrentPage% = 0
+Global SeedToAdd$ = ""
+Global SelectedSeedIndex% = 0
 
 Global NumberOfSeeds%
 
@@ -97,6 +99,31 @@ Function AddSavedSeed(seedToAdd$)
 	
 End Function
 
+
+Function DeleteSavedSeed(seedIndex%)
+	CatchErrors("Uncaught DeleteSavedSeed()")
+	
+	Local file = WriteFile("Data\seeds.txt")
+	
+	Local i%
+	
+	For i = 0 To NumberOfSeeds - 1
+		If i <> seedIndex Then
+			WriteLine(file, SavedSeeds(i))
+		EndIf
+	Next
+	
+	NumberOfSeeds = NumberOfSeeds - 1
+	
+	CloseFile(file)
+	
+	LoadSavedSeeds()
+	
+	SelectedSeed = ""
+	RandomSeed = ""
+	
+	CatchErrors("DeleteSavedSeed()")
+End Function
 
 Dim MenuBlinkTimer%(2), MenuBlinkDuration%(2)
 MenuBlinkTimer%(0) = 1
@@ -342,8 +369,6 @@ Function UpdateMainMenu()
 				Local ButtonHeight% = height / 4 ; 4 because leave some space at the bottom for Page number 
 				Local StartingX% = x + width + 20
 				
-				Local FullPages% = NumberOfSeeds / 9
-				Local SeedsOnLastPage% = NumberOfSeeds Mod 9 ; 1-8
 				Local TotalPages% = Ceil(NumberOfSeeds / 9)
 				
 				Local SeedsPerPage% = 9				
@@ -373,6 +398,7 @@ Function UpdateMainMenu()
 					Else 
 						If DrawButton(StartingX + ((index Mod 3) * ButtonWidth) , y + ((index / 3) * ButtonHeight), ButtonWidth, ButtonHeight, SavedSeeds((CurrentPage * SeedsPerPage) + index-1), False) Then
 							SelectedSeed = SavedSeeds((CurrentPage * SeedsPerPage) + index-1) ; index - 1 because of the above comment
+							SelectedSeedIndex = (CurrentPage * SeedsPerPage) + index-1
 							RandomSeed = SelectedSeed
 						EndIf
 
@@ -497,10 +523,23 @@ Function UpdateMainMenu()
 				EndIf
 				
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-				;Add Seed
+				;Add Seed and Delete Seed
 				
-				If DrawButton(StartingX, y + height + 20 * MenuScale, 160 * MenuScale, 70* MenuScale, "Add Seed", False) Then
-					AddSavedSeed(Str MilliSecs())
+				Local InputWidth = SelectorWidth - 2 * (160 * MenuScale) - 40
+				
+				SeedToAdd = Left(InputBox(StartingX, y + height + 20 * MenuScale, InputWidth, 70 * MenuScale, SeedToAdd), 15)								 
+				
+				If DrawButton(StartingX + SelectorWidth - 2 * (160 * MenuScale) - 20, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Add Seed", False) Then
+					If SeedToAdd <> "" Then
+						AddSavedSeed(SeedToAdd)
+					EndIf
+					SeedToAdd = ""
+				EndIf
+				
+				If DrawButton(StartingX + SelectorWidth - 160 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70* MenuScale, "Delete " + SelectedSeed, False) Then
+					If SelectedSeed <> "" Then
+						DeleteSavedSeed(SelectedSeedIndex)
+					EndIf	
 				EndIf
 				
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
