@@ -1,4 +1,16 @@
-﻿Speedrun Mod v0.0.2
+﻿Speedrun Mod v0.0.3
+- Changed timer font to monospaced font.
+- Fixed timer not being centered on y-axis.
+- Fixed timer being jittery.
+- Added Seed Selector to Main Menu
+  - Seeds are found in Data\seeds.txt
+  - You can add/delete seeds from in game
+  - Seed box is now always empty when selecting New Game from main menu when a specific seed is not selected.
+  - Seed box will be autofilled with whatever seed you selected.
+- ShowFPS is permanently on.
+- Framelimit is permanently on.
+
+Speedrun Mod v0.0.2
 - Added speedrun settings page under the advanced tab of main menu.
 - Added ability to display timer in game or not.
 - Added ability to change color of timer.
