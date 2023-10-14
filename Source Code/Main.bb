@@ -44,7 +44,7 @@ Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
-Global SpeedrunVersion$ = "0.0.3"
+Global SpeedrunVersion$ = "0.0.4"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -776,11 +776,25 @@ Function UpdateConsole()
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
 							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
 							CreateConsoleMsg("******************************")
+						Case "e"
+							CreateConsoleMsg("HELP - e")
+							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("Godmode, Noclip, Camerafog 1000, InfStam, Notarget")
+							CreateConsoleMsg("******************************")
 							
 						Default
 							CreateConsoleMsg("There is no help available for that command.",255,150,0)
 					End Select
 					
+					;[End Block]
+				Case "e"
+					;[Block]
+					GodMode = 1
+					Noclip = 1
+					CameraFogNear = 1000
+					CameraFogFar  = 1000
+					InfiniteStamina = 1
+					Notarget = 1
 					;[End Block]
 				Case "asd"
 					;[Block]
