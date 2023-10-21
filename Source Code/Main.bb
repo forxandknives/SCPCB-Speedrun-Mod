@@ -370,6 +370,9 @@ Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
 
+Global SeedHas008% = False
+Global SeedHasElectricalCenter% = False
+
 Global TimerR% = GetINIInt(OptionFile, "options", "timer r")
 Global TimerRText$ = Str(TimerR)
 Global TimerG% = GetINIInt(OptionFile, "options", "timer g")
@@ -3913,6 +3916,8 @@ Function DrawEnding()
 						GameTime = 0
 						RunFinished = False
 						SpeedrunEnding = ""
+						SeedHas008 = False
+						SeedHasElectricalCenter = False
 						InitCredits()
 					EndIf
 				Else
@@ -4718,6 +4723,12 @@ Function DrawGUI()
 		Color TimerR, TimerG, TimerB
 		AASetFont FontMono
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
+		
+		If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+			AASetFont Font2
+			AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
+		EndIf
+		
 	EndIf
 			
 	If RunFinished Then
@@ -7767,6 +7778,8 @@ Function DrawMenu()
 						GameTime = 0
 						RunFinished = False
 						SpeedrunEnding = ""
+						SeedHas008 = False
+						SeedHasElectricalCenter = False
 						FlushKeys()
 					EndIf
 				EndIf
@@ -7787,6 +7800,8 @@ Function DrawMenu()
 				GameTime = 0
 				RunFinished = False
 				SpeedrunEnding = ""
+				SeedHas008 = False
+				SeedHasElectricalCenter = False	
 				FlushKeys()
 			EndIf
 			
@@ -7979,6 +7994,8 @@ Function DrawMenu()
 					GameTime = 0
 					RunFinished = False
 					SpeedrunEnding = ""
+					SeedHas008 = False
+					SeedHasElectricalCenter = False
 					FlushKeys()
 				EndIf
 				y= y + 80*MenuScale

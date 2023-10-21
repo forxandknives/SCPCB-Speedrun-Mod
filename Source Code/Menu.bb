@@ -568,6 +568,17 @@ Function UpdateMainMenu()
 					InitNewGame()
 					RunStartTime = MilliSecs()
 					MainMenuOpen = False
+					
+					For plink.Rooms = Each Rooms
+						If plink\RoomTemplate\Name = "008" Then
+							SeedHas008 = True
+						EndIf
+						
+						If plink\RoomTemplate\Name = "room2ccont" Then
+							SeedHasElectricalCenter = True
+						EndIf
+					Next
+					
 					FlushKeys()
 					FlushMouse()
 					
