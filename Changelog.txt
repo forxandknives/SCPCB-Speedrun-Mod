@@ -1,4 +1,9 @@
-﻿Speedrun Mod v0.0.3
+﻿Speedrun Mod v0.0.4
+- NPCs.ini is now hardcoded into the game.
+- Seed is now shown on screen once a run is completed.
+- The game will tell you if a run is not beatable if the map is missing 008 or room079.
+
+Speedrun Mod v0.0.3
 - Changed timer font to monospaced font.
 - Fixed timer not being centered on y-axis.
 - Fixed timer being jittery.
