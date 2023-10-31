@@ -579,6 +579,10 @@ Function UpdateMainMenu()
 						EndIf
 					Next
 					
+					If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+						IsSeedBeatable = False
+					EndIf
+					
 					FlushKeys()
 					FlushMouse()
 					

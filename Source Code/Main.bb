@@ -370,6 +370,7 @@ Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
 
+Global IsSeedBeatable = True
 Global SeedHas008% = False
 Global SeedHasElectricalCenter% = False
 
@@ -3916,6 +3917,7 @@ Function DrawEnding()
 						GameTime = 0
 						RunFinished = False
 						SpeedrunEnding = ""
+						IsSeedBeatable = True
 						SeedHas008 = False
 						SeedHasElectricalCenter = False
 						InitCredits()
@@ -4724,7 +4726,7 @@ Function DrawGUI()
 		AASetFont FontMono
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
 		
-		If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+		If Not(IsSeedBeatable) Then
 			AASetFont Font2
 			AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
 		EndIf
@@ -7310,6 +7312,19 @@ Function DrawMenu()
 			AAText x, y, "Difficulty: "+SelectedDifficulty\name
 			AAText x, y+20*MenuScale, "Save: "+CurrSave
 			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
+			
+			If Not(IsSeedBeatable) Then
+				Local missingRooms$ = ""
+				If SeedHas008 = False Then
+					missingRooms = missingRooms + "008 "
+				EndIf
+				If SeedHasElectricalCenter = False Then
+					missingRooms = missingRooms + "room2ccont"
+				EndIf
+				
+				AAText x + 125, y, "Seed is missing: " + missingRooms
+			EndIf
+			
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, "Back") Then
 				AchievementsMenu = 0
@@ -7778,6 +7793,7 @@ Function DrawMenu()
 						GameTime = 0
 						RunFinished = False
 						SpeedrunEnding = ""
+						IsSeedBeatable = True
 						SeedHas008 = False
 						SeedHasElectricalCenter = False
 						FlushKeys()
@@ -7800,6 +7816,7 @@ Function DrawMenu()
 				GameTime = 0
 				RunFinished = False
 				SpeedrunEnding = ""
+				IsSeedBeatable = True
 				SeedHas008 = False
 				SeedHasElectricalCenter = False	
 				FlushKeys()
@@ -7994,6 +8011,7 @@ Function DrawMenu()
 					GameTime = 0
 					RunFinished = False
 					SpeedrunEnding = ""
+					IsSeedBeatable = True
 					SeedHas008 = False
 					SeedHasElectricalCenter = False
 					FlushKeys()
