@@ -4877,6 +4877,10 @@ Function DrawGUI()
 		y% = GraphicHeight - 95
 		
 		Color 255, 255, 255	
+		
+		If Notarget Then
+			Color 255, 0, 0
+		EndIf
 		Rect (x, y, width, height, False)
 		For i = 1 To Int(((width - 2) * (BlinkTimer / (BLINKFREQ))) / 10)
 			DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
@@ -4890,12 +4894,20 @@ Function DrawGUI()
 		End If
 		
 		Color 255, 255, 255
+		If Godmode Then
+			Color 255, 0, 0
+		EndIf
 		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
 		
 		DrawImage BlinkIcon, x - 50, y
 		
 		y = GraphicHeight - 55
+			
 		Color 255, 255, 255
+		
+		If InfiniteStamina Then
+			Color 255, 0, 0
+		EndIf
 		Rect (x, y, width, height, False)
 		For i = 1 To Int(((width - 2) * (Stamina / 100.0)) / 10)
 			DrawImage(StaminaMeterIMG, x + 3 + 10 * (i - 1), y + 3)
@@ -4905,6 +4917,10 @@ Function DrawGUI()
 		Rect(x - 50, y, 30, 30)
 		
 		Color 255, 255, 255
+		
+		If Noclip Then
+			Color 255, 0, 0
+		EndIf 
 		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
 		If Crouch Then
 			DrawImage CrouchIcon, x - 50, y
