@@ -2,6 +2,9 @@
 - NPCs.ini is now hardcoded into the game.
 - Seed is now shown on screen once a run is completed.
 - The game will tell you if a run is not beatable if the map is missing 008 or room079.
+	- Will show which rooms are missing in the pause menu.
+- The borders of the sprint/blink icons and meters will now turn red once a specific cheat has been turned on.
+- Speedrun timer and beatable seed check now works when loading a game from the main menu.
 
 Speedrun Mod v0.0.3
 - Changed timer font to monospaced font.
