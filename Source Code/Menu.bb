@@ -683,6 +683,22 @@ Function UpdateMainMenu()
 										CurrSave = SaveGames(i - 1)
 										InitLoadGame()
 										MainMenuOpen = False
+										RunStartTime = MilliSecs()
+										
+										For plink.Rooms = Each Rooms
+											If plink\RoomTemplate\Name = "008" Then
+												SeedHas008 = True
+											EndIf
+											
+											If plink\RoomTemplate\Name = "room2ccont" Then
+												SeedHasElectricalCenter = True
+											EndIf
+										Next
+										
+										If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+											IsSeedBeatable = False
+										EndIf
+										
 									EndIf
 								EndIf
 								

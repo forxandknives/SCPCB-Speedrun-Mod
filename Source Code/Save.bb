@@ -467,6 +467,475 @@ Function SaveGame(file$)
 	CatchErrors("SaveGame")
 End Function
 
+Function SaveAndQuitGame(file$)
+	CatchErrors("Uncaught (SaveAndQuitGame)")
+	
+	If Not Playable Then Return ;don't save if the player can't move at all
+	
+	If DropSpeed#>0.02*FPSfactor Or DropSpeed#<-0.02*FPSfactor Then Return
+	
+	If KillTimer < 0 Then Return
+	
+	GameSaved = True
+	
+	Local x%, y%, i%, temp%
+	Local n.NPCs, r.Rooms, do.Doors
+	
+	CreateDir(file)
+	
+	Local f% = WriteFile(file + "save.txt")
+	
+	WriteString f, CurrentTime()
+	WriteString f, CurrentDate()
+	
+	WriteInt f, GameTime
+	WriteFloat f, EntityX(Collider)
+	WriteFloat f, EntityY(Collider)
+	WriteFloat f, EntityZ(Collider)
+	
+	WriteFloat f, EntityX(Head)
+	WriteFloat f, EntityY(Head)
+	WriteFloat f, EntityZ(Head)
+	
+	WriteString f, Str(AccessCode)
+	
+	WriteFloat f, EntityPitch(Collider)
+	WriteFloat f, EntityYaw(Collider)
+	
+	;WriteString f, VersionNumber
+	WriteString f, CompatibleNumber
+	
+	WriteFloat f, BlinkTimer
+	WriteFloat f, BlinkEffect
+	WriteFloat f, BlinkEffectTimer
+	
+	WriteInt f, DeathTimer
+	WriteInt f, BlurTimer
+	WriteFloat f, HealTimer
+	
+	WriteByte f, Crouch
+	
+	WriteFloat f, Stamina
+	WriteFloat f, StaminaEffect
+	WriteFloat f, StaminaEffectTimer
+	
+	WriteFloat f, EyeStuck	
+	WriteFloat f, EyeIrritation
+	
+	WriteFloat f, Injuries
+	WriteFloat f, Bloodloss
+	
+	WriteFloat f,PrevInjuries
+	WriteFloat f,PrevBloodloss
+	
+	WriteString f, DeathMSG
+	
+	For i = 0 To 5
+		WriteFloat f, SCP1025state[i]
+	Next
+	
+	WriteFloat f, VomitTimer
+	WriteByte f, Vomit
+	WriteFloat f, CameraShakeTimer
+	WriteFloat f, Infect
+	
+	For i = 0 To CUSTOM
+		If (SelectedDifficulty = difficulties(i)) Then
+			WriteByte f, i
+			
+			If (i = CUSTOM) Then
+				WriteByte f,SelectedDifficulty\aggressiveNPCs
+				WriteByte f,SelectedDifficulty\permaDeath
+				WriteByte f,SelectedDifficulty\saveType
+				WriteByte f,SelectedDifficulty\otherFactors
+			EndIf
+		EndIf
+	Next
+	
+	WriteFloat f, MonitorTimer
+	
+	WriteFloat f, Sanity
+	
+	WriteByte f, WearingGasMask
+	WriteByte f, WearingVest
+	WriteByte f, WearingHazmat
+	
+	WriteByte f, WearingNightVision
+	WriteByte f, Wearing1499
+	WriteFloat f,NTF_1499PrevX#
+	WriteFloat f,NTF_1499PrevY#
+	WriteFloat f,NTF_1499PrevZ#
+	WriteFloat f,NTF_1499X#
+	WriteFloat f,NTF_1499Y#
+	WriteFloat f,NTF_1499Z#
+	If NTF_1499PrevRoom <> Null
+		WriteFloat f,NTF_1499PrevRoom\x
+		WriteFloat f,NTF_1499PrevRoom\z
+	Else
+		WriteFloat f,0.0
+		WriteFloat f,0.0
+	EndIf
+	
+	WriteByte f, SuperMan
+	WriteFloat f, SuperManTimer
+	WriteByte f, LightsOn
+	
+	WriteString f, RandomSeed
+	
+	WriteFloat f, SecondaryLightOn
+	WriteFloat f, PrevSecondaryLightOn
+	WriteByte f, RemoteDoorOn
+	WriteByte f, SoundTransmission
+	WriteByte f, Contained106
+	
+	For i = 0 To MAXACHIEVEMENTS-1
+		WriteByte f, Achievements(i)
+	Next
+	WriteInt f, RefinedItems
+	
+	WriteInt f, MapWidth
+	WriteInt f, MapHeight
+	For lvl = 0 To 0
+		For x = 0 To MapWidth
+			For y = 0 To MapHeight
+				WriteInt f, MapTemp(x, y)
+				WriteByte f, MapFound(x, y)
+			Next
+		Next
+	Next
+	
+	WriteInt f, 113
+	
+	temp = 0
+	For  n.NPCs = Each NPCs
+		temp = temp +1
+	Next	
+	
+	WriteInt f, temp
+	For n.NPCs = Each NPCs
+		DebugLog("Saving NPC " +n\NVName+ " (ID "+n\ID+")")
+		
+		WriteByte f, n\NPCtype
+		WriteFloat f, EntityX(n\Collider,True)
+		WriteFloat f, EntityY(n\Collider,True)
+		WriteFloat f, EntityZ(n\Collider,True)
+		
+		WriteFloat f, EntityPitch(n\Collider)
+		WriteFloat f, EntityYaw(n\Collider)
+		WriteFloat f, EntityRoll(n\Collider)
+		
+		WriteFloat f, n\State
+		WriteFloat f, n\State2
+		WriteFloat f, n\State3
+		WriteInt f, n\PrevState
+		
+		WriteByte f, n\Idle
+		WriteFloat f, n\LastDist
+		WriteInt f, n\LastSeen
+		
+		WriteInt f, n\CurrSpeed
+		
+		WriteFloat f, n\Angle
+		
+		WriteFloat f, n\Reload
+		
+		WriteInt f, n\ID
+		If n\Target <> Null Then
+			WriteInt f, n\Target\ID		
+		Else
+			WriteInt f, 0
+		EndIf
+		
+		WriteFloat f, n\EnemyX
+		WriteFloat f, n\EnemyY
+		WriteFloat f, n\EnemyZ
+		
+		WriteString f, n\texture
+		
+		WriteFloat f, AnimTime(n\obj)
+		
+		WriteInt f, n\IsDead
+		WriteFloat f, n\PathX
+		WriteFloat f, n\PathZ
+		WriteInt f, n\HP
+		WriteString f, n\Model
+		WriteFloat f, n\ModelScaleX#
+		WriteFloat f, n\ModelScaleY#
+		WriteFloat f, n\ModelScaleZ#
+		WriteInt f, n\TextureID
+	Next
+	
+	WriteFloat f, MTFtimer
+	For i = 0 To 6
+		If MTFrooms[0]<>Null Then 
+			WriteString f, MTFrooms[0]\RoomTemplate\Name 
+		Else 
+			WriteString f,	"a"
+		EndIf
+		WriteInt f, MTFroomState[i]
+	Next
+	
+	WriteInt f, 632
+	
+	WriteInt f, room2gw_brokendoor
+	WriteFloat f,room2gw_x
+	WriteFloat f,room2gw_z
+	
+	WriteByte f, I_Zone\Transition[0]
+	WriteByte f, I_Zone\Transition[1]
+	WriteByte f, I_Zone\HasCustomForest
+	WriteByte f, I_Zone\HasCustomMT
+	
+	temp = 0
+	For r.Rooms = Each Rooms
+		temp=temp+1
+	Next	
+	WriteInt f, temp	
+	For r.Rooms = Each Rooms
+		WriteInt f, r\RoomTemplate\id
+		WriteInt f, r\angle
+		WriteFloat f, r\x
+		WriteFloat f, r\y
+		WriteFloat f, r\z
+		
+		WriteByte f, r\found
+		
+		WriteInt f, r\zone
+		
+		If PlayerRoom = r Then 
+			WriteByte f, 1
+		Else 
+			WriteByte f, 0
+		EndIf
+		
+		For i = 0 To 11
+			If r\NPC[i]=Null Then
+				WriteInt f, 0
+			Else
+				WriteInt f, r\NPC[i]\ID
+			EndIf
+		Next
+		
+		For i=0 To 10
+			If r\Levers[i]<>0 Then
+				If EntityPitch(r\Levers[i],True) > 0 Then ;p??????ll???
+					WriteByte(f,1)
+				Else
+					WriteByte(f,0)
+				EndIf	
+			EndIf
+		Next
+		WriteByte(f,2)
+		
+		
+		If r\grid=Null Then ;this room doesn't have a grid
+			WriteByte(f,0)
+		Else ;this room has a grid
+			WriteByte(f,1)
+			For y=0 To gridsz-1
+				For x=0 To gridsz-1
+					WriteByte(f,r\grid\grid[x+(y*gridsz)])
+					WriteByte(f,r\grid\angles[x+(y*gridsz)])
+				Next
+			Next
+		EndIf
+		
+		If r\fr=Null Then ;this room doesn't have a forest
+			WriteByte(f,0)
+		Else ;this room has a forest
+			If (Not I_Zone\HasCustomForest) Then
+				WriteByte(f,1)
+			Else
+				WriteByte(f,2)
+			EndIf
+			For y=0 To gridsize-1
+				For x=0 To gridsize-1
+					WriteByte(f,r\fr\grid[x+(y*gridsize)])
+				Next
+			Next
+			WriteFloat f,EntityX(r\fr\Forest_Pivot,True)
+			WriteFloat f,EntityY(r\fr\Forest_Pivot,True)
+			WriteFloat f,EntityZ(r\fr\Forest_Pivot,True)
+		EndIf
+	Next
+	
+	WriteInt f, 954
+	
+	temp = 0
+	For do.Doors = Each Doors
+		temp = temp+1	
+	Next	
+	WriteInt f, temp	
+	For do.Doors = Each Doors
+		WriteFloat f, EntityX(do\frameobj,True)
+		WriteFloat f, EntityY(do\frameobj,True)
+		WriteFloat f, EntityZ(do\frameobj,True)
+		WriteByte f, do\open
+		WriteFloat f, do\openstate
+		WriteByte f, do\locked
+		WriteByte f, do\AutoClose
+		
+		WriteFloat f, EntityX(do\obj, True)
+		WriteFloat f, EntityZ(do\obj, True)
+		
+		If do\obj2 <> 0 Then
+			WriteFloat f, EntityX(do\obj2, True)
+			WriteFloat f, EntityZ(do\obj2, True)
+		Else
+			WriteFloat f, 0.0
+			WriteFloat f, 0.0
+		End If
+		
+		WriteFloat f, do\timer
+		WriteFloat f, do\timerstate
+		
+		WriteByte f, do\IsElevatorDoor
+		WriteByte f, do\MTFClose
+	Next
+	
+	WriteInt f, 1845
+	DebugLog 1845
+	
+	Local d.Decals
+	temp = 0
+	For d.Decals = Each Decals
+		temp = temp+1
+	Next	
+	WriteInt f, temp
+	For d.Decals = Each Decals
+		WriteInt f, d\ID
+		
+		WriteFloat f, EntityX(d\obj,True)
+		WriteFloat f, EntityY(d\obj,True)
+		WriteFloat f, EntityZ(d\obj,True)
+		
+		WriteFloat f, EntityPitch(d\obj,True)
+		WriteFloat f, EntityYaw(d\obj,True)
+		WriteFloat f, EntityRoll(d\obj,True)
+		
+		WriteByte f, d\blendmode
+		WriteInt f, d\fx
+		
+		WriteFloat f, d\Size
+		WriteFloat f, d\Alpha
+		WriteFloat f, d\AlphaChange
+		WriteFloat f, d\Timer
+		WriteFloat f, d\lifetime
+	Next
+	
+	Local e.Events
+	temp = 0
+	For e.Events = Each Events
+		temp=temp+1
+	Next	
+	WriteInt f, temp
+	For e.Events = Each Events
+		WriteString f, e\EventName
+		WriteFloat f, e\EventState
+		WriteFloat f, e\EventState2	
+		WriteFloat f, e\EventState3	
+		WriteFloat f, EntityX(e\room\obj)
+		WriteFloat f, EntityZ(e\room\obj)
+		WriteString f, e\EventStr
+	Next
+	
+	temp = 0
+	For it.items = Each Items	
+		temp=temp+1
+	Next
+	WriteInt f, temp
+	For it.items = Each Items
+		WriteString f, it\itemtemplate\name
+		WriteString f, it\itemtemplate\tempName
+		
+		WriteString f, it\name
+		
+		WriteFloat f, EntityX(it\collider, True)
+		WriteFloat f, EntityY(it\collider, True)
+		WriteFloat f, EntityZ(it\collider, True)
+		
+		WriteByte f, it\r
+		WriteByte f, it\g
+		WriteByte f, it\b
+		WriteFloat f, it\a
+		
+		WriteFloat f, EntityPitch(it\collider)
+		WriteFloat f, EntityYaw(it\collider)
+		
+		WriteFloat f, it\state
+		WriteByte f, it\Picked
+		
+		If SelectedItem = it Then WriteByte f, 1 Else WriteByte f, 0
+		Local ItemFound% = False
+		For i = 0 To MaxItemAmount - 1
+			If Inventory(i) = it Then ItemFound = True : Exit
+		Next
+		If ItemFound Then WriteByte f, i Else WriteByte f, 66
+		
+		If it\itemtemplate\isAnim<>0 Then
+			WriteFloat f, AnimTime(it\model)
+		EndIf
+		WriteByte f,it\invSlots
+		WriteInt f,it\ID
+		If it\itemtemplate\invimg=it\invimg Then WriteByte f,0 Else WriteByte f,1
+	Next
+	
+	temp=0
+	For it.items = Each Items
+		If it\invSlots>0 Then temp=temp+1
+	Next
+	
+	WriteInt f,temp
+	
+	For it.items = Each Items
+		;OtherInv
+		If it\invSlots>0 Then
+			WriteInt f,it\ID
+			For i=0 To it\invSlots-1
+				If it\SecondInv[i] <> Null Then
+					WriteInt f, it\SecondInv[i]\ID
+				Else
+					WriteInt f, -1
+				EndIf
+			Next
+		EndIf
+		;OtherInv End
+	Next
+	
+	For itt.itemtemplates = Each ItemTemplates
+		WriteByte f, itt\found
+	Next
+	
+	If UsedConsole
+		WriteInt f, 100
+		DebugLog "Used Console"
+	Else
+		WriteInt f, 994
+	EndIf
+	WriteFloat f, CameraFogFar
+	WriteFloat f, StoredCameraFogFar
+	WriteByte f, I_427\Using
+	WriteFloat f, I_427\Timer
+	
+	WriteByte f, Wearing714
+	CloseFile f
+	
+	If Not MenuOpen Then
+		If SelectedDifficulty\saveType = SAVEONSCREENS Then
+			PlaySound_Strict(LoadTempSound("SFX\General\Save2.ogg"))
+		Else
+			PlaySound_Strict(LoadTempSound("SFX\General\Save1.ogg"))
+		EndIf
+		
+		Msg = "Game progress saved."
+		MsgTimer = 70 * 4
+		;SetSaveMSG("Game progress saved.")
+	EndIf
+	
+	CatchErrors("SaveAndQuitGame")
+End Function
+
+
 Function LoadGame(file$)
 	Local version$ = ""
 	
@@ -485,7 +954,7 @@ Function LoadGame(file$)
 	strtemp = ReadString(f)
 	strtemp = ReadString(f)
 	
-	PlayTime = ReadInt(f)
+	LoadFromMenuGameTime = ReadInt(f)
 	
 	x = ReadFloat(f)
 	y = ReadFloat(f)

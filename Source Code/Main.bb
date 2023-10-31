@@ -365,6 +365,7 @@ Global LoadTime%
 Global ShouldIncreaseLoadTime% = False
 Global PlayTime%, ShouldIncreasePlayTime% = False
 Global GameTime%
+Global LoadFromMenuGameTime% = 0; We need a variable to load the game time of the run into when we load save from main menu. We add this to game time.
 Global RunFinished% = False
 Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
@@ -373,6 +374,24 @@ Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its no
 Global IsSeedBeatable = True
 Global SeedHas008% = False
 Global SeedHasElectricalCenter% = False
+
+Function ResetSpeedrunVariables()
+
+	RunStartTime = 0
+	LoadStartTime = 0
+	PlayTime = 0
+	ShouldIncreasePlayTime = False
+	LoadTime = 0
+	GameTime = 0
+	LoadFromMenuGameTime = 0
+	RunFinished = False
+	SpeedrunEnding = ""
+	IsSeedBeatable = True
+	SeedHas008 = False
+	SeedHasElectricalCenter = False
+	
+	
+End Function
 
 Global TimerR% = GetINIInt(OptionFile, "options", "timer r")
 Global TimerRText$ = Str(TimerR)
@@ -2870,7 +2889,7 @@ Repeat
 	EndIf
 	
 	If Not RunFinished Then
-		GameTime = PlayTime - LoadTime
+		GameTime = PlayTime - LoadTime + LoadFromMenuGameTime
 	EndIf
 	
 	CurTime = MilliSecs2()
@@ -3909,17 +3928,9 @@ Function DrawEnding()
 						SetStreamVolume_Strict(MusicCHN,1.0*MusicVolume)
 						FlushKeys()
 						EndingTimer=-2000
-						RunStartTime = 0
-						LoadStartTime = 0
-						PlayTime = 0
-						ShouldIncreasePlayTime = False
-						LoadTime = 0
-						GameTime = 0
-						RunFinished = False
-						SpeedrunEnding = ""
-						IsSeedBeatable = True
-						SeedHas008 = False
-						SeedHasElectricalCenter = False
+						
+						ResetSpeedrunVariables()
+						
 						InitCredits()
 					EndIf
 				Else
@@ -7778,25 +7789,17 @@ Function DrawMenu()
 					QuitButton = 140
 					If DrawButton(x, y + 60*MenuScale, 390*MenuScale, 60*MenuScale, "Save & Quit") Then
 						DropSpeed = 0
-						SaveGame(SavePath + CurrSave + "\")
+						SaveAndQuitGame(SavePath + CurrSave + "\")
 						NullGame()
 						MenuOpen = False
 						MainMenuOpen = True
 						MainMenuTab = 0
 						CurrSave = ""
-						RunStartTime = 0
-						LoadStartTime = 0
-						LoadTime = 0
-						;ShouldIncreaseLoadTime = False
-						PlayTime = 0
-						ShouldIncreasePlayTime = False
-						GameTime = 0
-						RunFinished = False
-						SpeedrunEnding = ""
-						IsSeedBeatable = True
-						SeedHas008 = False
-						SeedHasElectricalCenter = False
+						
+						ResetSpeedrunVariables()
+	
 						FlushKeys()
+						
 					EndIf
 				EndIf
 			EndIf
@@ -7807,18 +7810,9 @@ Function DrawMenu()
 				MainMenuOpen = True
 				MainMenuTab = 0
 				CurrSave = ""
-				RunStartTime = 0
-				LoadStartTime = 0
-				LoadTime = 0
-				;ShouldIncreaseLoadTime = False
-				PlayTime = 0
-				ShouldIncreasePlayTime = False
-				GameTime = 0
-				RunFinished = False
-				SpeedrunEnding = ""
-				IsSeedBeatable = True
-				SeedHas008 = False
-				SeedHasElectricalCenter = False	
+				
+				ResetSpeedrunVariables()
+				
 				FlushKeys()
 			EndIf
 			
@@ -8004,16 +7998,9 @@ Function DrawMenu()
 					MainMenuOpen = True
 					MainMenuTab = 0
 					CurrSave = ""
-					RunStartTime = 0
-					PlayTime = 0
-					ShouldIncreasePlayTime = False
-					LoadTime = 0
-					GameTime = 0
-					RunFinished = False
-					SpeedrunEnding = ""
-					IsSeedBeatable = True
-					SeedHas008 = False
-					SeedHasElectricalCenter = False
+					
+					ResetSpeedrunVariables()
+					
 					FlushKeys()
 				EndIf
 				y= y + 80*MenuScale
@@ -8861,9 +8848,13 @@ Function InitLoadGame()
 	CatchErrors("InitLoadGame")
 	DrawLoading(100)
 	
+	ShouldIncreasePlayTime = True
+	
 	PrevTime = MilliSecs()
 	FPSfactor = 0
 	ResetInput()
+	
+	
 	
 End Function
 
