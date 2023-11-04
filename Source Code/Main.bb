@@ -4747,7 +4747,7 @@ Function DrawGUI()
 	If RunFinished Then
 		Color 0, 255, 0
 		AASetFont Font2
-		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + secondsString + "." + Str(ms), True, True
+		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
 		AAText (GraphicWidth/2), (GraphicHeight * 0.55), "Seed: " + RandomSeed, True, True
 	EndIf
 	
