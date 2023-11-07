@@ -4894,6 +4894,7 @@ Function DrawGUI()
 		End If
 		
 		Color 255, 255, 255
+		
 		If Godmode Then
 			Color 255, 0, 0
 		EndIf
@@ -4927,6 +4928,8 @@ Function DrawGUI()
 		Else
 			DrawImage SprintIcon, x - 50, y
 		EndIf
+		
+		Color 255, 255, 255
 		
 		If DebugHUD Then
 			Color 255, 255, 255
