@@ -1889,7 +1889,7 @@ Function rInput$(aString$)
 	
 	If value = 13 Or value = 0 Then
 		Return aString$
-	ElseIf value > 0 And value < 7 Or value > 26 And value < 32 Or value = 9
+	ElseIf value > 0 And value < 7 Or value > 26 And value < 32 Or value = 9 Or value = 22 ;22 is Ctrl + V
 		Return aString$
 	Else
 		aString$ = aString$ + Chr(value)
@@ -1919,10 +1919,59 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	If SelectedInputBox = ID Then
 		Txt = rInput(Txt)
 		
+		;Clipboard Stuff
+	
+		If KeyDown(29) And KeyHit(47) Then
+			Local window = api_GetActiveWindow()
+			
+			api_OpenClipboard(window)
+									
+			If api_IsClipboardFormatAvailable(1) Then
+				Local cbData = api_GetClipboardData(1)		
+				
+				If cbData Then
+					Local lock = api_GlobalLock(cbData)
+					If lock Then
+						
+						;16 size because of null terminator at end of string.
+						Local bank = CreateBank(16)
+						
+						apiRtlMoveMemory(bank, lock, 16)
+						
+						Local s$
+						For i% = 0 To 15
+							Local c$ = Chr(PeekByte(bank, i))
+							If Asc(c) = 0 Then
+								Exit
+							Else 
+								s = s + c
+							EndIf							
+						Next
+						
+						FreeBank(bank)
+						
+						api_GlobalUnlock(cbData)
+						
+						Txt = Txt + s
+					Else 
+						RuntimeError "Lock is null"
+					EndIf
+				Else
+					RuntimeError "cbData is null"			
+				EndIf												
+				
+			Else
+				RuntimeError "Format CF_TEXT (1) is not available."
+			EndIf
+									
+			api_CloseClipboard()
+			
+		EndIf	
+		
 		;This is the blinking cursor in text boxes.
 		If (MilliSecs2() Mod 800) < 400 Then Rect (x + width / 2 + AAStringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
-	EndIf	
-	
+	EndIf				
+		
 	AAText(x + width / 2, y + height / 2, Txt, True, True)
 	
 	Return Txt
