@@ -259,6 +259,7 @@ Function UpdateMainMenu()
 						; automatically put the seed into the box so you can start runs faster.				
 						LoadSavedSeeds()						
 						MainMenuTab = 1
+						SelectedInputBox = 3 ; 3 because that is the ID of the Map Seed text box. We want the cursor to start in that box.
 					EndIf
 				Case 1
 					txt = "LOAD GAME"
@@ -527,7 +528,7 @@ Function UpdateMainMenu()
 				
 				Local InputWidth = SelectorWidth - 2 * (160 * MenuScale) - 40
 				
-				SeedToAdd = Left(InputBox(StartingX, y + height + 20 * MenuScale, InputWidth, 70 * MenuScale, SeedToAdd), 15)								 
+				SeedToAdd = Left(InputBox(StartingX, y + height + 20 * MenuScale, InputWidth, 70 * MenuScale, SeedToAdd, 4), 15)								 
 				
 				If DrawButton(StartingX + SelectorWidth - 2 * (160 * MenuScale) - 20, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Add Seed", False) Then
 					If SeedToAdd <> "" Then
@@ -1917,6 +1918,8 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	
 	If SelectedInputBox = ID Then
 		Txt = rInput(Txt)
+		
+		;This is the blinking cursor in text boxes.
 		If (MilliSecs2() Mod 800) < 400 Then Rect (x + width / 2 + AAStringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
 	EndIf	
 	
