@@ -259,7 +259,7 @@ Function UpdateMainMenu()
 						; automatically put the seed into the box so you can start runs faster.				
 						LoadSavedSeeds()						
 						MainMenuTab = 1
-						SelectedInputBox = 3 ; 3 because that is the ID of the Map Seed text box. We want the cursor to start in that box.
+						SelectedInputBox = 3 ; 3 because that is the ID of the seed input box.
 					EndIf
 				Case 1
 					txt = "LOAD GAME"
@@ -307,6 +307,7 @@ Function UpdateMainMenu()
 		;DrawFrame(SelectorX, y, 580 * MenuScale * 1.5 * MenuScale, height)
 		
 		If DrawButton(x + width + 20 * MenuScale, y, 580 * MenuScale - width - 20 * MenuScale, height, "BACK", False) Then 
+			SelectedInputBox = 0
 			Select MainMenuTab
 				Case 1
 					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
@@ -443,7 +444,7 @@ Function UpdateMainMenu()
 				Color 255,255,255
 				If SelectedMap = "" Then
 					AAText (x + 20 * MenuScale, y + 60 * MenuScale, "Map seed:")
-					RandomSeed = Left(InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, RandomSeed, 3),15)	
+					RandomSeed = Left(InputBox(x+150*MenuScale, y+55*MenuScale, 200*MenuScale, 30*MenuScale, RandomSeed, 3),15)
 				Else
 					AAText (x + 20 * MenuScale, y + 60 * MenuScale, "Selected map:")
 					Color (255, 255, 255)
@@ -1954,14 +1955,14 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 						
 						Txt = Txt + s
 					Else 
-						RuntimeError "Lock is null"
+						DebugLog "Lock is null"
 					EndIf
 				Else
-					RuntimeError "cbData is null"			
+					DebugLog  "cbData is null"			
 				EndIf												
 				
 			Else
-				RuntimeError "Format CF_TEXT (1) is not available."
+				DebugLog  "Format CF_TEXT (1) is not available."
 			EndIf
 									
 			api_CloseClipboard()
