@@ -13,13 +13,13 @@ Requirements:
 
 # Features
 
-• In-game timer for speedrunning.
-	- Customizable timer color and position.
-• Automatic load time removal.
-• In-game seed selector where you can save your seeds.
-	- Seeds are located in Data\seeds.txt.
-• In-game detection for if a seed is beatable or not.
-• Increased cheat protection.
-• Quality of life changes.
-• Pasting from your clipboard into text boxes now works.
-• Console command "e" which enables god/fly/infstam/notarget.
+1. In-game timer for speedrunning.<br>
+	- Customizable timer color and position.<br>
+2. Automatic load time removal.<br>
+3. In-game seed selector where you can save your seeds.<br>
+	- Seeds are located in Data\seeds.txt.<br>
+4. In-game detection for if a seed is beatable or not.<br>
+5. Increased cheat protection.<br>
+6. Quality of life changes.<br>
+7.  Pasting from your clipboard into text boxes now works.<br>
+8.  Console command "e" which enables god/fly/infstam/notarget.<br>
