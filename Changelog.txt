@@ -5,6 +5,8 @@
 	- Will show which rooms are missing in the pause menu.
 - The borders of the sprint/blink icons and meters will now turn red once a specific cheat has been turned on.
 - Speedrun timer and beatable seed check now works when loading a game from the main menu.
+- You can now paste from your clipboard into text boxes. 
+	- Only up to 15 characters.
 
 Speedrun Mod v0.0.3
 - Changed timer font to monospaced font.
