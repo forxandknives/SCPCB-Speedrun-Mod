@@ -375,6 +375,9 @@ Global IsSeedBeatable = True
 Global SeedHas008% = False
 Global SeedHasElectricalCenter% = False
 
+Global Can100Seed% = False
+Global RoomCounter% = 0
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -389,6 +392,8 @@ Function ResetSpeedrunVariables()
 	IsSeedBeatable = True
 	SeedHas008 = False
 	SeedHasElectricalCenter = False
+	Can100Seed = False
+	RoomCounter = 0
 	
 	
 End Function
@@ -4740,6 +4745,11 @@ Function DrawGUI()
 		If Not(IsSeedBeatable) Then
 			AASetFont Font2
 			AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
+		EndIf
+		
+		If SelectedDifficulty\Name = "Keter" And (Not Can100Seed) Then
+			AASetFont Font2
+			AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
 		EndIf
 		
 	EndIf
