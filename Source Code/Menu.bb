@@ -1989,7 +1989,24 @@ Function rInput$(aString$)
 	
 	If value = 8 Then
 		value = 0
-		If length > 0 Then aString$ = Left(aString, length - 1)
+		If length > 0 Then 
+			If CursorIndex = length Then 
+				aString$ = Left(aString, length - 1)
+				CursorIndex = CursorIndex - 1
+			Else If CursorIndex = 0 Then
+				; Nothing
+			Else ; Cursor position is not at the start or end of the string				
+				
+				Local rightSide$ = Right(aString, length - CursorIndex)
+				CursorIndex = CursorIndex - 1
+				Local leftSide$  = Left(aString, CursorIndex)
+				
+				aString$ = leftSide + rightSide
+				
+			EndIf
+		Else
+			CursorIndex = 0
+		EndIf
 	EndIf
 	
 	If value = 13 Or value = 0 Then
@@ -1998,6 +2015,7 @@ Function rInput$(aString$)
 		Return aString$
 	Else
 		aString$ = aString$ + Chr(value)
+		CursorIndex = CursorIndex + 1
 		Return aString$
 	End If
 End Function
@@ -2009,11 +2027,17 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	;Rect(x, y, width, height)
 	Color (0, 0, 0)
 	
+	Local index%
+	
 	Local MouseOnBox% = False
 	If MouseOn(x, y, width, height) Then
 		Color(50, 50, 50)
 		MouseOnBox = True
-		If MouseHit1 Then SelectedInputBox = ID : FlushKeys
+		If MouseHit1 Then 
+			SelectedInputBox = ID
+			CursorIndex = Len(Txt)
+			FlushKeys
+		EndIf
 	EndIf
 	
 	Rect(x + 2, y + 2, width - 4, height - 4)
@@ -2021,60 +2045,53 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	
 	If (Not MouseOnBox) And MouseHit1 And SelectedInputBox = ID Then SelectedInputBox = 0
 	
-	If SelectedInputBox = ID Then
-		Txt = rInput(Txt)
-		
-		;Clipboard Stuff
+	If SelectedInputBox = ID Then		
 	
-		If KeyDown(29) And KeyHit(47) Then
-			Local window = api_GetActiveWindow()
-			
-			api_OpenClipboard(window)
-									
-			If api_IsClipboardFormatAvailable(1) Then
-				Local cbData = api_GetClipboardData(1)		
-				
-				If cbData Then
-					Local lock = api_GlobalLock(cbData)
-					If lock Then
-						
-						;16 size because of null terminator at end of string.
-						Local bank = CreateBank(16)
-						
-						apiRtlMoveMemory(bank, lock, 16)
-						
-						Local s$
-						For i% = 0 To 15
-							Local c$ = Chr(PeekByte(bank, i))
-							If Asc(c) = 0 Then
-								Exit
-							Else 
-								s = s + c
-							EndIf							
-						Next
-						
-						FreeBank(bank)
-						
-						api_GlobalUnlock(cbData)
-						
-						Txt = Txt + s
-					Else 
-						DebugLog "Lock is null"
-					EndIf
-				Else
-					DebugLog  "cbData is null"			
-				EndIf												
-				
-			Else
-				DebugLog  "Format CF_TEXT (1) is not available."
+		Txt = rInput(Txt)	
+		
+		If KeyDown(29) And KeyHit(47) Then			
+			Txt = PasteFromClipboard()		
+			; TODO make text get pasted at cursor.
+			CursorIndex = Len(Txt)
+		EndIf
+		
+		If KeyHit(203) Then
+			If CursorIndex - 1 >= 0 Then
+				CursorIndex = CursorIndex - 1
 			EndIf
-									
-			api_CloseClipboard()
-			
-		EndIf	
+		EndIf
+		
+		If KeyHit(205) Then
+			If CursorIndex + 1 <= Len(Txt) Then			
+				CursorIndex = CursorIndex + 1
+			EndIf
+		EndIf		
+		
+		DebugLog "CursorIndex: " + CursorIndex		
 		
 		;This is the blinking cursor in text boxes.
-		If (MilliSecs2() Mod 800) < 400 Then Rect (x + width / 2 + AAStringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
+		If (MilliSecs2() Mod 800) < 400 Then 
+		
+			;Original
+			;Rect (x + width / 2 + AAStringWidth(Txt) / 2 + 2, y + height / 2 - 5, 2, 12)
+			
+			;Modded
+			
+			Local charSize% = AAStringWidth("a") ; Temp
+			Local indexPosition% = (CursorIndex * charSize) ;((Len(Txt) - CursorIndex) * charSize)
+			Rect (x + width / 2 + indexPosition - (AAStringWidth(Txt) / 2), y + height / 2 - 5, 2, 12)
+					
+			;If Txt <> "" Then
+			;	Local charSize% = AAStringWidth("a") ; Temp
+			;	Local indexPosition% = (CursorIndex * charSize) ;((Len(Txt) - CursorIndex) * charSize)
+			;			
+			;	Rect (x + width / 2 + indexPosition - (AAStringWidth(Txt) / 2), y + height / 2 - 5, 2, 12)
+			;Else 
+			;	; For no text, so that cursor is directly in the center of the text box.
+			;	Rect ((x + width / 2) + (AAStringWidth(Txt) / 2) - 1, y + height / 2 - 5, 2, 12)
+			;EndIf						
+									
+		EndIf		
 	EndIf				
 		
 	AAText(x + width / 2, y + height / 2, Txt, True, True)

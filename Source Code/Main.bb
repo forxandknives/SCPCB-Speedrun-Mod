@@ -378,6 +378,8 @@ Global SeedHasElectricalCenter% = False
 Global Can100Seed% = False
 Global RoomCounter% = 0
 
+Global CursorIndex% = 0 ; Temporary until I figure out a better solution for cursor position in text boxes.
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -442,6 +444,58 @@ Function CopySeedToClipBoard%()
 	FreeBank(bank)
 	
 	Return False
+
+End Function
+
+Function PasteFromClipboard$()
+
+	Local pasted$ = ""
+
+	Local window = api_GetActiveWindow()
+	
+	api_OpenClipboard(window)
+								
+	If api_IsClipboardFormatAvailable(1) Then
+		Local cbData = api_GetClipboardData(1)		
+		
+		If cbData Then
+			Local lock = api_GlobalLock(cbData)
+			If lock Then
+				
+				;16 size because of null terminator at end of string.
+				Local bank = CreateBank(16)
+				
+				apiRtlMoveMemory(bank, lock, 16)
+				
+				Local s$
+				For i% = 0 To 15
+					Local c$ = Chr(PeekByte(bank, i))
+					If Asc(c) = 0 Then
+						Exit
+					Else 
+						s = s + c
+					EndIf							
+				Next
+				
+				FreeBank(bank)
+				
+				api_GlobalUnlock(cbData)
+				
+				pasted = Left(s, 15)
+			Else 
+				DebugLog "Lock is null"
+			EndIf
+		Else
+			DebugLog  "cbData is null"			
+		EndIf												
+		
+	Else
+		DebugLog  "Format CF_TEXT (1) is not available."
+	EndIf
+								
+	api_CloseClipboard()
+		
+	Return pasted			
 
 End Function
 
@@ -684,6 +738,8 @@ Function UpdateConsole()
 			Else
 				StrTemp$ = Lower(ConsoleInput)
 			End If
+			
+			CursorIndex = 0 ; :)
 			
 			Select Lower(StrTemp)
 				Case "help"
