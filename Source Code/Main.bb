@@ -398,6 +398,53 @@ Function ResetSpeedrunVariables()
 	
 End Function
 
+Function CopySeedToClipBoard%()
+
+	Local seedLength% = Len(RandomSeed)
+	
+	Local bank = CreateBank(seedLength)
+	
+	For i% = 1 To seedLength
+		
+		Local char% = Asc(Mid(RandomSeed,i,1))
+		
+		PokeByte(bank, i-1, char)
+				
+	Next
+	
+	Local globalAlloc = api_GlobalAlloc(66, BankSize(bank)+1) ; + 1 because it is not reading the last byte in the bank.
+	
+	If globalAlloc Then
+		Local lock = api_GlobalLock(globalAlloc)
+		
+		If lock Then
+	
+			apiRtlMoveMemory2(lock, bank, BankSize(bank))
+	
+			api_GlobalUnlock(globalAlloc)
+			
+		EndIf 
+		
+		Local window = api_GetActiveWindow()
+			
+		If api_OpenClipboard(window) Then
+			api_EmptyClipboard()
+			api_SetClipboardData(1, globalAlloc)
+			api_CloseClipboard()
+		EndIf
+		
+		FreeBank(bank)
+		
+		Return True
+		
+	EndIf
+	
+	FreeBank(bank)
+	
+	Return False
+
+End Function
+
 Global TimerR% = GetINIInt(OptionFile, "options", "timer r")
 Global TimerRText$ = Str(TimerR)
 Global TimerG% = GetINIInt(OptionFile, "options", "timer g")
@@ -7352,6 +7399,21 @@ Function DrawMenu()
 			AAText x, y, "Difficulty: "+SelectedDifficulty\name
 			AAText x, y+20*MenuScale, "Save: "+CurrSave
 			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
+			
+			Local length% = StringWidth("Map seed: " + RandomSeed)
+			
+			If Drawbutton(x + length + 10, y + 25, GraphicsWidth() * 0.05, GraphicsHeight() * 0.025, "Copy Seed", False) Then
+				Local success$ = CopySeedToClipboard()		
+				
+				If success Then
+ 					Msg = "Seed copied to clipboard."
+				Else
+					Msg = "Failed to copy seed to clipboard."
+				EndIf
+				
+				MsgTimer = 3 * 70
+						
+			EndIf
 			
 			If Not(IsSeedBeatable) Then
 				Local missingRooms$ = ""
