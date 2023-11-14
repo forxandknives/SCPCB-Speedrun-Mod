@@ -4801,12 +4801,15 @@ Function DrawGUI()
 		
 	EndIf
 			
+	AASetFont Font1
+			
 	If RunFinished Then
 		Color 0, 255, 0
 		AASetFont Font2
 		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
 		AAText (GraphicWidth/2), (GraphicHeight * 0.55), "Seed: " + RandomSeed, True, True
 	EndIf
+		
 	
 	If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
 		For e.Events = Each Events
