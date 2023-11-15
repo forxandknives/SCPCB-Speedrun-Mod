@@ -108,6 +108,8 @@ Global Bit16Mode = GetINIInt(OptionFile, "options", "16bit")
 
 Include "Source Code/AAText.bb"
 
+ButtonSFX% = LoadSound_Strict("SFX\Interact\Button.ogg")
+
 If LauncherEnabled Then 
 	AspectRatioRatio = 1.0
 	UpdateLauncher()
