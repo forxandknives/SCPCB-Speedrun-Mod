@@ -2043,7 +2043,29 @@ Function rInput$(aString$)
 	ElseIf value > 0 And value < 7 Or value > 26 And value < 32 Or value = 9 Or value = 22 ;22 is Ctrl + V
 		Return aString$
 	Else
-		aString$ = aString$ + Chr(value)
+		
+		; Make sure we add text at the cursor
+	
+		If CursorIndex = length Then ; Cursor at end of string
+			aString$ = aString$ + Chr(value)
+			
+		Else If CursorIndex = 0 ; Cursor at beginning of string
+			aString = Chr(value) + aString$
+			
+		Else ; Cursor not at the beginning or end of the string		
+			
+			leftSide$ = Left(aString, CursorIndex)
+			
+			If CursorIndex > length Then
+				rightSide = Right(aString, length)
+			Else 
+				rightSide = Right(aString, length - CursorIndex)
+			EndIf
+			
+			aString = leftSide + Chr(value) + rightSide
+		
+		EndIf 
+		
 		CursorIndex = CursorIndex + 1				
 		
 		Return aString$
