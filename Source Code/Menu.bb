@@ -2009,13 +2009,43 @@ Function rInput$(aString$)
 		EndIf
 	EndIf
 	
+	If value = 4 Then ; Delete
+	
+		value = 0
+		If length > 0 Then
+		
+			If CursorIndex = length Then ; Cursor at end of string
+			
+				; Nothing
+				
+			Else If CursorIndex = 0 Then ; Cursor at start of string
+			
+				aString$ = Right(aString, length - 1)
+				;CursorIndex = CursorIndex + 1
+				
+			Else ; Cursor is not at the beginning or end of the string
+						
+				leftSide$  = Left(aString, CursorIndex)
+				;CursorIndex = CursorIndex + 1
+				rightSide$ = Right(aString, length - (CursorIndex + 1))
+						
+				aString = leftSide + rightSide
+										
+			EndIf	
+		Else
+			CursorIndex = 0
+		EndIf
+	
+	EndIf
+	
 	If value = 13 Or value = 0 Then
 		Return aString$
 	ElseIf value > 0 And value < 7 Or value > 26 And value < 32 Or value = 9 Or value = 22 ;22 is Ctrl + V
 		Return aString$
 	Else
 		aString$ = aString$ + Chr(value)
-		CursorIndex = CursorIndex + 1
+		CursorIndex = CursorIndex + 1				
+		
 		Return aString$
 	End If
 End Function
@@ -2068,6 +2098,11 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 		EndIf		
 		
 		DebugLog "CursorIndex: " + CursorIndex		
+		
+		;Fix for when doing Left() on the inputboxes.
+		If CursorIndex > Len(Txt) Then 
+			CursorIndex = Len(Txt)
+		EndIf
 		
 		;This is the blinking cursor in text boxes.
 		If (MilliSecs2() Mod 800) < 400 Then 
