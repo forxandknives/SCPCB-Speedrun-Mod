@@ -2102,9 +2102,15 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 		Txt = rInput(Txt)	
 		
 		If KeyDown(29) And KeyHit(47) Then ; Ctrl + V
-			Txt = PasteFromClipboard()		
-			; TODO make text get pasted at cursor.
-			CursorIndex = Len(Txt)
+			Local clipText$ = PasteFromClipboard()
+			Local leftSide$ =  Left(Txt, CursorIndex)
+			Local rightSide$ = Right(Txt, CursorIndex)
+			
+			Txt = leftSide + clipText + rightSide
+			CursorIndex = CursorIndex + Len(clipText)
+			
+			If CursorIndex > Len(Txt) Then CursorIndex = Len(Txt)
+			
 		EndIf
 		
 		If KeyHit(203) Then ; Left Arrow
