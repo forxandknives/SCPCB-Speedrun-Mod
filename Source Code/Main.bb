@@ -400,15 +400,15 @@ Function ResetSpeedrunVariables()
 	
 End Function
 
-Function CopySeedToClipBoard%()
+Function CopyTextToClipBoard%(inputText$)
 
-	Local seedLength% = Len(RandomSeed)
+	Local seedLength% = Len(inputText)
 	
 	Local bank = CreateBank(seedLength)
 	
 	For i% = 1 To seedLength
 		
-		Local char% = Asc(Mid(RandomSeed,i,1))
+		Local char% = Asc(Mid(inputText,i,1))
 		
 		PokeByte(bank, i-1, char)
 				
@@ -7462,7 +7462,7 @@ Function DrawMenu()
 			Local length% = StringWidth("Map seed: " + RandomSeed)
 			
 			If Drawbutton(x + length + 10, y + 25, GraphicsWidth() * 0.05, GraphicsHeight() * 0.025, "Copy Seed", False) Then
-				Local success$ = CopySeedToClipboard()		
+				Local success$ = CopyTextToClipboard(RandomSeed)		
 				
 				If success Then
  					Msg = "Seed copied to clipboard."
