@@ -2113,15 +2113,67 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 			
 		EndIf
 		
-		If KeyHit(203) Then ; Left Arrow
-			If CursorIndex - 1 >= 0 Then
-				CursorIndex = CursorIndex - 1
+		If KeyHit(203) And CursorIndex <> 0 Then ; Left Arrow
+		
+			If KeyDown(29) Then ; Ctrl + Left Arrow
+			
+				If Len(Txt) > 0 Then
+					Local space% = -1
+					Local spaceAtCursor% = False
+					
+					
+					;This block makes it so that Ctrl+Left will skip over a space if the cursor is currently on one.
+					If Mid(Txt, CursorIndex, 1) = " " Then						
+						For i% = 1 To CursorIndex-1
+							If Mid(Txt, i, 1) = " " Then
+								space = i
+							EndIf
+						Next
+					Else
+						For i% = 1 To CursorIndex
+							If Mid(Txt, i, 1) = " " Then
+								space = i
+							EndIf
+						Next
+					EndIf
+					
+					If space <> -1 Then
+						CursorIndex = space
+					Else
+						CursorIndex = 0 ; No space from 0 to Cursor so go to start of string.
+					EndIf					
+					
+				EndIf									
+			Else ; Left Arrow
+				If CursorIndex - 1 >= 0 Then
+					CursorIndex = CursorIndex - 1
+				EndIf
 			EndIf
 		EndIf
 		
-		If KeyHit(205) Then ; Right Arrow
-			If CursorIndex + 1 <= Len(Txt) Then			
-				CursorIndex = CursorIndex + 1
+		If KeyHit(205) And CursorIndex <> Len(Txt) Then ; Right Arrow
+		
+			If KeyDown(29) Then ; Ctrl + Right Arrow
+				If Len(Txt) > 0 Then
+					space% = -1
+					For i% = CursorIndex+1 To Len(Txt) ; +1 on CursorIndex since erorr if it is 0
+						If Mid(Txt, i, 1) = " " Then
+							space = i 
+							Exit
+						EndIf
+					Next	
+				
+					If space <> -1 Then
+						CursorIndex = space
+					Else 
+						CursorIndex = Len(Txt) ; No spaces from start to Cursor so go to end of string.
+					EndIf
+				EndIf
+				
+			Else ; Right Arrow
+				If CursorIndex + 1 <= Len(Txt) Then			
+					CursorIndex = CursorIndex + 1
+				EndIf
 			EndIf
 		EndIf		
 		
