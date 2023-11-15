@@ -2079,26 +2079,32 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 	
 		Txt = rInput(Txt)	
 		
-		If KeyDown(29) And KeyHit(47) Then			
+		If KeyDown(29) And KeyHit(47) Then ; Ctrl + V
 			Txt = PasteFromClipboard()		
 			; TODO make text get pasted at cursor.
 			CursorIndex = Len(Txt)
 		EndIf
 		
-		If KeyHit(203) Then
+		If KeyHit(203) Then ; Left Arrow
 			If CursorIndex - 1 >= 0 Then
 				CursorIndex = CursorIndex - 1
 			EndIf
 		EndIf
 		
-		If KeyHit(205) Then
+		If KeyHit(205) Then ; Right Arrow
 			If CursorIndex + 1 <= Len(Txt) Then			
 				CursorIndex = CursorIndex + 1
 			EndIf
 		EndIf		
 		
-		DebugLog "CursorIndex: " + CursorIndex		
+		If KeyHit(199) Then ; Home
+			CursorIndex = 0
+		EndIf
 		
+		If KeyHit(207) Then ; End
+			CursorIndex = Len(Txt)
+		EndIf
+				
 		;Fix for when doing Left() on the inputboxes.
 		If CursorIndex > Len(Txt) Then 
 			CursorIndex = Len(Txt)
