@@ -1981,15 +1981,13 @@ Function DrawLoading(percent%, shortloading=False)
 	Until (GetKey()<>0 Or MouseHit(1))
 End Function
 
-
-
 Function rInput$(aString$)
 	Local value% = GetKey()
 	Local length% = Len(aString$)
 	
-	If value = 8 Then
+	If value = 8 Then ; Backspace
 		value = 0
-		If length > 0 Then 
+		If length > 0 And CursorIndex <> 0 Then 
 			If CursorIndex = length Then 
 				aString$ = Left(aString, length - 1)
 				CursorIndex = CursorIndex - 1
@@ -2006,6 +2004,47 @@ Function rInput$(aString$)
 			EndIf
 		Else
 			CursorIndex = 0
+		EndIf
+	EndIf
+	
+	If value = 127 Then ; Ctrl+Backspace
+		value = 0
+		If length > 0  And CursorIndex <> 0 Then
+			space% = -1
+			If Mid(aString, CursorIndex, 1)  = " " Then
+				For i% = 1 To CursorIndex-1
+					If Mid(aString, i, 1) = " " Then
+						space = i
+					EndIf
+				Next	
+			Else
+				For i% = 1 To CursorIndex
+					If Mid(aString, i, 1) = " " Then
+						space = i
+					EndIf
+				Next		
+			EndIf
+					
+			If space <> -1 Then ; If there is a space from beginning of string to CursorIndex
+				If CursorIndex = length Then ; If cursor is at end of string
+					aString = Left(aString, space)
+				Else ; Cursor not at beginning or end of string
+					leftSide  = Left(aString, space)
+					rightSide = Right(aString, CursorIndex - space)
+					
+					aString = leftSide + rightSide
+					
+				EndIf
+			Else
+				If CursorIndex = length Then
+					aString = ""
+				Else 					
+					aString = Right(aString, length - CursorIndex)
+					CursorIndex = 0
+				EndIf
+			EndIf
+		Else
+			CursorIndex = 0		
 		EndIf
 	EndIf
 	
