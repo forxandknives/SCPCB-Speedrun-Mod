@@ -1991,8 +1991,7 @@ Function rInput$(aString$)
 			If CursorIndex = length Then 
 				aString$ = Left(aString, length - 1)
 				CursorIndex = CursorIndex - 1
-			Else If CursorIndex = 0 Then
-				; Nothing
+				
 			Else ; Cursor position is not at the start or end of the string				
 				
 				Local rightSide$ = Right(aString, length - CursorIndex)
@@ -2014,13 +2013,13 @@ Function rInput$(aString$)
 			If Mid(aString, CursorIndex, 1)  = " " Then
 				For i% = 1 To CursorIndex-1
 					If Mid(aString, i, 1) = " " Then
-						space = i
+						space = i						
 					EndIf
 				Next	
 			Else
 				For i% = 1 To CursorIndex
 					If Mid(aString, i, 1) = " " Then
-						space = i
+						space = i	
 					EndIf
 				Next		
 			EndIf
@@ -2034,7 +2033,7 @@ Function rInput$(aString$)
 					
 					aString = leftSide + rightSide
 					
-				EndIf
+				EndIf								
 			Else
 				If CursorIndex = length Then
 					aString = ""
@@ -2043,36 +2042,70 @@ Function rInput$(aString$)
 					CursorIndex = 0
 				EndIf
 			EndIf
-		Else
-			CursorIndex = 0		
 		EndIf
 	EndIf
 	
-	If value = 4 Then ; Delete
-	
-		value = 0
-		If length > 0 Then
+	If value = 4 Then ; Delete	
 		
-			If CursorIndex = length Then ; Cursor at end of string
-			
-				; Nothing
+		value = 0
+		If length > 0 And CursorIndex <> length Then
+		
+			If KeyDown(29) Then ; Ctrl + Delete
 				
-			Else If CursorIndex = 0 Then ; Cursor at start of string
-			
-				aString$ = Right(aString, length - 1)
-				;CursorIndex = CursorIndex + 1
+				space% = -1
 				
-			Else ; Cursor is not at the beginning or end of the string
+				If CursorIndex = 0 Then
+					For i% = 1 To length
+						If Mid(aString, i, 1) = " " Then
+							space = i	
+							Exit					
+						EndIf
+					Next
+				Else
+					For i% = CursorIndex To length
+						If Mid(aString, i, 1) = " " Then
+							space = i
+							Exit
+						EndIf
+					Next
+				EndIf
+				
+				If space <> -1 Then ; We have a space from the cursor to the end of the string
+					If CursorIndex = 0 Then
+						aString = Right(aString, length - space)
+					Else
+						leftSide = Left(aString, CursorIndex)
+						rightSide = Right(aString, length - space)
 						
-				leftSide$  = Left(aString, CursorIndex)
-				;CursorIndex = CursorIndex + 1
-				rightSide$ = Right(aString, length - (CursorIndex + 1))
+						aString = leftSide + rightSide
+					EndIf
+				Else ; No space from cursor to end of string.
+					If CursorIndex = 0 Then	
+						aString = ""
+					Else
+						aString = Left(aString, CursorIndex)
+						CursorIndex = Len(aString)
+					EndIf
+					
+				EndIf
+					
+			Else
 						
-				aString = leftSide + rightSide
-										
-			EndIf	
-		Else
-			CursorIndex = 0
+				If CursorIndex = 0 Then ; Cursor at start of string
+				
+					aString$ = Right(aString, length - 1)
+					;CursorIndex = CursorIndex + 1
+					
+				Else ; Cursor is not at the beginning or end of the string
+							
+					leftSide$  = Left(aString, CursorIndex)
+					;CursorIndex = CursorIndex + 1
+					rightSide$ = Right(aString, length - (CursorIndex + 1))
+							
+					aString = leftSide + rightSide
+				EndIf
+											
+			EndIf
 		EndIf
 	
 	EndIf
