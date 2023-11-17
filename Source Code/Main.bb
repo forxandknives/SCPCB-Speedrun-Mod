@@ -371,6 +371,7 @@ Global LoadFromMenuGameTime% = 0; We need a variable to load the game time of th
 Global RunFinished% = False
 Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
+Global DisplaySeedWarnings% = GetINIInt(OptionFile, "options", "seed warnings")
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
 
 Global IsSeedBeatable = True
@@ -4847,14 +4848,16 @@ Function DrawGUI()
 		AASetFont FontMono
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
 		
-		If Not(IsSeedBeatable) Then
-			AASetFont Font2
-			AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
-		EndIf
-		
-		If SelectedDifficulty\Name = "Keter" And (Not Can100Seed) Then
-			AASetFont Font2
-			AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
+		If DisplaySeedWarnings Then
+			If Not(IsSeedBeatable) Then
+				AASetFont Font2
+				AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
+			EndIf
+			
+			If SelectedDifficulty\Name = "Keter" And (Not Can100Seed) Then
+				AASetFont Font2
+				AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
+			EndIf
 		EndIf
 		
 	EndIf
@@ -7885,7 +7888,11 @@ Function DrawMenu()
 					AAText(x, y, "Display Timer in Game:")
 					SpeedrunTimer% = DrawTick(x + 270 * MenuScale, y + MenuScale, SpeedrunTimer%)
 					
-					y = y + 50 * MenuScale
+					y = y + 30 * MenuScale
+					AAText(x, y, "Display Seed Warnings:")
+					DisplaySeedWarnings% = DrawTick(x + 270 * MenuScale, y + MenuScale, DisplaySeedWarnings%)
+					
+					y = y + 35 * MenuScale
 					
 					AAText(x, y, "Enter values from 0 To 255.")
 					
@@ -11527,6 +11534,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "enable vram", EnableVRam)
 	PutINIValue(OptionFile, "options", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "options", "speedrun timer", SpeedrunTimer)
+	PutINIValue(OptionFile, "options", "seed warnings", DisplaySeedWarnings)
 	PutINIValue(OptionFile, "options", "timer r", TimerR)
 	PutINIValue(OptionFile, "options", "timer g", TimerG)
 	PutINIValue(OptionFile, "options", "timer b", TimerB)

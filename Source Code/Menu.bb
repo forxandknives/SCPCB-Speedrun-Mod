@@ -1427,13 +1427,18 @@ Function UpdateMainMenu()
 					
 				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
 					;[Block]
-					height = 300 * MenuScale ; Height of white box around settings
+					height = 320 * MenuScale ; Height of white box around settings
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
 					
 					AAText(x + 20 * MenuScale, y, "Display Timer in Game:")
 					SpeedrunTimer% = DrawTick(x + 310 * MenuScale, y, SpeedrunTimer%)
+					
+					y = y + 30 * MenuScale
+					
+					AAText(X + 20 * MenuScale, y, "Display Seed Warnings:")
+					DisplaySeedWarnings% = DrawTick(x + 310 * MenuScale, y, DisplaySeedWarnings%)
 					
 					y = y + 35 * MenuScale
 					
