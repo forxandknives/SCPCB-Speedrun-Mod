@@ -2273,13 +2273,26 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 		Txt = rInput(Txt)	
 		
 		If KeyDown(29) And KeyHit(47) Then ; Ctrl + V
+		
 			Local clipText$ = PasteFromClipboard()
-			Local leftSide$ =  Left(Txt, CursorIndex)
-			Local rightSide$ = Right(Txt, CursorIndex)
-			
-			Txt = leftSide + clipText + rightSide
-			CursorIndex = CursorIndex + Len(clipText)
-			
+		
+			If CursorIndex = Len(Txt) Then
+				Txt = Txt + clipText
+				CursorIndex = Len(Txt)
+				
+			Else If CursorIndex = 0 Then
+				Txt = clipText + Txt
+				CursorIndex = Len(clipText)
+				
+			Else
+				Local leftSide$ =  Left(Txt, CursorIndex)
+				Local rightSide$ = Right(Txt, Len(Txt) - CursorIndex)
+				
+				Txt = leftSide + clipText + rightSide
+				CursorIndex =  CursorIndex + Len(clipText)
+				
+			EndIf
+		
 			If CursorIndex > Len(Txt) Then CursorIndex = Len(Txt)
 			
 		EndIf
