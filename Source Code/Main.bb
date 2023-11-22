@@ -916,6 +916,12 @@ Function UpdateConsole()
 							CreateConsoleMsg("Godmode, Noclip, Camerafog 1000, InfStam, Notarget")
 							CreateConsoleMsg("******************************")
 							
+						Case "quit", "exit"
+							CreateConsoleMsg("HELP - quit / exit")
+							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("Quits the game.")
+							CreateConsoleMsg("******************************")
+							
 						Default
 							CreateConsoleMsg("There is no help available for that command.",255,150,0)
 					End Select
@@ -930,6 +936,11 @@ Function UpdateConsole()
 					InfiniteStamina = 1
 					Notarget = 1
 					;[End Block]
+				Case "quit", "exit"
+					;[Block]
+					FSOUND_Stream_Stop(CurrMusicStream)
+					End
+					;[End Block]										
 				Case "asd"
 					;[Block]
 					WireFrame 1
@@ -7464,9 +7475,10 @@ Function DrawMenu()
 			AAText x, y+20*MenuScale, "Save: "+CurrSave
 			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
 			
-			Local length% = StringWidth("Map seed: " + RandomSeed)
+			Local length% = AAStringWidth("Map seed: " + RandomSeed)
+			Local seedStringHeight = AAStringHeight("Map seed: ")
 			
-			If Drawbutton(x + length + 10, y + 25, GraphicsWidth() * 0.05, GraphicsHeight() * 0.025, "Copy Seed", False) Then
+			If Drawbutton(x + length + 10, y + 40, GraphicsWidth() * 0.05, seedStringHeight, "Copy Seed", False) Then
 				Local success$ = CopyTextToClipboard(RandomSeed)		
 				
 				If success Then
@@ -7488,7 +7500,9 @@ Function DrawMenu()
 					missingRooms = missingRooms + "room2ccont"
 				EndIf
 				
-				AAText x + 125, y, "Seed is missing: " + missingRooms
+				Local difficultyStringWidth = AAStringWidth("Difficulty: " + SelectedDifficulty\name)
+				
+				AAText x + difficultyStringWidth + 20, y, "Seed is missing: " + missingRooms
 			EndIf
 			
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
