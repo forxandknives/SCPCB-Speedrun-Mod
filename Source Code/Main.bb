@@ -7471,7 +7471,24 @@ Function DrawMenu()
 		
 		If AchievementsMenu <= 0 And OptionsMenu <= 0 And QuitMSG <= 0
 			AASetFont Font1
-			AAText x, y, "Difficulty: "+SelectedDifficulty\name
+			
+			Local seedBeatableText$ = ""
+			
+			If Not(IsSeedBeatable) Then
+				Local missingRooms$ = ""
+				If SeedHas008 = False Then
+					missingRooms = missingRooms + "008 "
+				EndIf
+				If SeedHasElectricalCenter = False Then
+					missingRooms = missingRooms + "room2ccont"
+				EndIf
+				
+				Local difficultyStringWidth = AAStringWidth("Difficulty: " + SelectedDifficulty\name)
+				
+				seedBeatableText = "Seed is missing: " + missingRooms
+			EndIf
+			
+			AAText x, y, "Difficulty: "+SelectedDifficulty\name + " " + seedBeatableText 
 			AAText x, y+20*MenuScale, "Save: "+CurrSave
 			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
 			
@@ -7489,21 +7506,7 @@ Function DrawMenu()
 				
 				MsgTimer = 3 * 70
 						
-			EndIf
-			
-			If Not(IsSeedBeatable) Then
-				Local missingRooms$ = ""
-				If SeedHas008 = False Then
-					missingRooms = missingRooms + "008 "
-				EndIf
-				If SeedHasElectricalCenter = False Then
-					missingRooms = missingRooms + "room2ccont"
-				EndIf
-				
-				Local difficultyStringWidth = AAStringWidth("Difficulty: " + SelectedDifficulty\name)
-				
-				AAText x + difficultyStringWidth + 20, y, "Seed is missing: " + missingRooms
-			EndIf
+			EndIf						
 			
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, "Back") Then
