@@ -1585,8 +1585,7 @@ Function UpdateMainMenu()
 	
 	Color 255,255,255
 	AASetFont ConsoleFont
-	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion
-		
+	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " " + VersionDate		 
 	;DrawTiledImageRect(MenuBack, 985 * MenuScale, 860 * MenuScale, 200 * MenuScale, 20 * MenuScale, 1200 * MenuScale, 866 * MenuScale, 300, 20 * MenuScale)
 	
 	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
@@ -2156,42 +2155,53 @@ Function rInput$(aString$)
 		
 			If KeyDown(29) Then ; Ctrl + Delete
 				
-				space% = -1
+				Local foundSpaceChar% = False
+				Local firstCharAfterSpaceIndex% = -1
 				
+				; Mid() will not work if CursorIndex is 0			
+				Local temp%
 				If CursorIndex = 0 Then
-					For i% = 1 To length
-						If Mid(aString, i, 1) = " " Then
-							space = i	
-							Exit					
-						EndIf
-					Next
+					temp = 1
 				Else
-					For i% = CursorIndex To length
-						If Mid(aString, i, 1) = " " Then
-							space = i
-							Exit
-						EndIf
-					Next
+					temp = CursorIndex
 				EndIf
 				
-				If space <> -1 Then ; We have a space from the cursor to the end of the string
-					If CursorIndex = 0 Then
-						aString = Right(aString, length - space)
-					Else
-						leftSide = Left(aString, CursorIndex)
-						rightSide = Right(aString, length - space)
-						
-						aString = leftSide + rightSide
-					EndIf
-				Else ; No space from cursor to end of string.
-					If CursorIndex = 0 Then	
-						aString = ""
-					Else
-						aString = Left(aString, CursorIndex)
-						CursorIndex = Len(aString)
+				For i% = temp To length ; Check if there are any space characters in the string
+					If Mid(aString, i, 1) = " " Then
+						If temp = i Then
+							If Mid(aString, temp, 1) <> " " Then ; We have to check that the char at our CursorIndex is not a space, or else it will not do anything							
+								foundSpaceChar = True            ; when we ctrl+delete.
+							EndIf
+						Else
+							foundSpaceChar = True
+						EndIf
 					EndIf
 					
-				EndIf
+					If Mid(aString, i, 1) <> " " And foundSpaceChar = True Then ; Check for first char that isnt a space after we find a space.
+						firstCharAfterSpaceIndex = i
+						Exit
+					EndIf
+				Next				
+					
+				
+				If foundSpaceChar = True And firstCharAfterSpaceIndex <> -1 Then
+				
+					If CursorIndex = 0 Then ; Cursor at start of string and there is a space somewhere in the string.
+					
+						aString = Right(aString, length - (firstCharAfterSpaceIndex - 1)) ; Minus 1 or else we chop off first char after space.
+						
+					Else ; Cursor not at start and there is a space somewhere after CursorIndex in the string.
+						leftSide  = Left(aString, CursorIndex)
+						rightSide = Right(aString, length - (firstCharAfterSpaceIndex - 1))
+						aString = leftSide + rightSide
+					EndIf
+				Else
+					If CursorIndex = 0 Then ; Cursor at start of string and no spaces in string.	
+						aString = ""
+					Else 
+						aString = Left(aString, CursorIndex) ; Cursor not at start, and no spaces from CursorIndex to end of string.
+					EndIf
+				EndIf	
 					
 			Else
 						
