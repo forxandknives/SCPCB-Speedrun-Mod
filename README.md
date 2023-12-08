@@ -21,5 +21,7 @@ Requirements:
 4. In-game detection for if a seed is beatable or not.<br>
 5. Increased cheat protection.<br>
 6. Quality of life changes.<br>
-7.  Pasting from your clipboard into text boxes now works.<br>
-8.  Console command "e" which enables god/fly/infstam/notarget.<br>
+7. Pasting from your clipboard into text boxes now works.<br>
+8. Console command "e" which enables god/fly/infstam/notarget.<br>
+9. Console command "quit" which quits the game.<br>
+10. Updated functionality for text boxes.<br>
