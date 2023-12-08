@@ -2112,39 +2112,43 @@ Function rInput$(aString$)
 	If value = 127 Then ; Ctrl+Backspace
 		value = 0
 		If length > 0  And CursorIndex <> 0 Then
-			space% = -1
-			If Mid(aString, CursorIndex, 1)  = " " Then
-				For i% = 1 To CursorIndex-1
-					If Mid(aString, i, 1) = " " Then
-						space = i						
-					EndIf
-				Next	
-			Else
-				For i% = 1 To CursorIndex
-					If Mid(aString, i, 1) = " " Then
-						space = i	
-					EndIf
-				Next		
-			EndIf
-					
-			If space <> -1 Then ; If there is a space from beginning of string to CursorIndex
-				If CursorIndex = length Then ; If cursor is at end of string
-					aString = Left(aString, space)
-				Else ; Cursor not at beginning or end of string
-					leftSide  = Left(aString, space)
-					rightSide = Right(aString, CursorIndex - space)
-					
+		
+			Local foundNonSpaceChar% = False
+			Local firstSpaceAfterCharIndex% = -1
+			
+			For i% = CursorIndex To 1 Step -1 ; Check if there are any space characters in the string				
+				
+				If Mid(aString, i, 1) <> " " Then 
+					foundNonSpaceChar = True
+				EndIf							
+				
+				If Mid(aString, i, 1) = " " And foundNonSpaceChar = True Then ; Check for first char that isnt a space after we find a space.
+					firstSpaceAfterCharIndex = i
+					Exit
+				EndIf
+			Next	
+			
+			If foundNonSpaceChar = True And firstSpaceAfterCharIndex <> -1 Then
+			
+				If CursorIndex = length Then ; Cursor is at end of string and there is a space somewhere after a non-space char in the string.
+					aString = Left(aString, firstSpaceAfterCharIndex)
+					CursorIndex = firstSpaceAfterCharIndex
+				Else
+					leftSide = Left(aString, firstSpaceAfterCharIndex) ; Cursor not at end of string and there is a space from start to CursorIndex.
+					rightSide = Right(aString, length - CursorIndex)
 					aString = leftSide + rightSide
-					
-				EndIf								
+					CursorIndex = firstSpaceAfterCharIndex
+				EndIf
 			Else
+			
 				If CursorIndex = length Then
-					aString = ""
-				Else 					
-					aString = Right(aString, length - CursorIndex)
+					aString = "" ; There is no space in the string when CursorIndex is at end of string.
+					CursorIndex = 0
+				Else
+					aString = Right(aString, length - CursorIndex) ; Cursor is not at end of string and there is no space from start to CursorIndex.
 					CursorIndex = 0
 				EndIf
-			EndIf
+			EndIf			
 		EndIf
 	EndIf
 	
@@ -2171,7 +2175,7 @@ Function rInput$(aString$)
 						If temp = i Then
 							If Mid(aString, temp, 1) <> " " Then ; We have to check that the char at our CursorIndex is not a space, or else it will not do anything							
 								foundSpaceChar = True            ; when we ctrl+delete.
-							EndIf
+							EndIf ; This might not be correct but it still works.
 						Else
 							foundSpaceChar = True
 						EndIf
