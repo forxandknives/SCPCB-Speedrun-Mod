@@ -45,7 +45,7 @@ Global ConsoleFont%
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
 Global SpeedrunVersion$ = "0.0.4"
-Global VersionDate$ = "December 7 2023"
+Global VersionDate$ = "December 8 2023"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
