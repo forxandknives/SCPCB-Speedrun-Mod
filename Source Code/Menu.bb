@@ -2088,6 +2088,8 @@ Function rInput$(aString$)
 	Local value% = GetKey()
 	Local length% = Len(aString$)
 	
+	DebugLog("Value is: " + Str(value))
+	
 	If value = 8 Then ; Backspace
 		value = 0
 		If length > 0 And CursorIndex <> 0 Then 
@@ -2109,7 +2111,7 @@ Function rInput$(aString$)
 		EndIf
 	EndIf
 	
-	If value = 127 Then ; Ctrl+Backspace
+	If KeyDown(29) And KeyHit(14) Then ; value = 127 Then ; Sometime value = 127 isnt working so im just gonna use Keydown and Keyhit ; Ctrl+Backspace
 		value = 0
 		If length > 0  And CursorIndex <> 0 Then
 		
@@ -2416,8 +2418,8 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 			
 			;Modded
 			
-			Local charSize% = AAStringWidth("a") ; Temp
-			Local indexPosition% = (CursorIndex * charSize) ;((Len(Txt) - CursorIndex) * charSize)
+			Local charSize% = AAStringWidth(Left(Txt, CursorIndex)) ; Temp
+			Local indexPosition% = charSize ;((Len(Txt) - CursorIndex) * charSize)
 			Rect (x + width / 2 + indexPosition - (AAStringWidth(Txt) / 2), y + height / 2 - 5, 2, 12)
 					
 			;If Txt <> "" Then
