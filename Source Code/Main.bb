@@ -738,6 +738,10 @@ Function UpdateConsole()
 		ConsoleInput = Left(ConsoleInput, 100)
 		
 		CursorIndex = Len(ConsoleInput)
+
+		If KeyDown(29) And KeyHit(46) Then
+			ConsoleInput = ""
+		EndIf
 		
 		If KeyHit(28) And ConsoleInput <> "" Then
 			ConsoleReissue = Null
