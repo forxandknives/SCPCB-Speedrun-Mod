@@ -382,6 +382,10 @@ Global SeedHasElectricalCenter% = False
 Global Can100Seed% = False
 Global RoomCounter% = 0
 
+Global ShowMap = False
+Global CellHeight = GraphicsHeight() * 0.015
+Global TenPercentOfScreen = GraphicsHeight() * 0.10
+
 Global CursorIndex% = 0 ; Temporary until I figure out a better solution for cursor position in text boxes.
 
 Function ResetSpeedrunVariables()
@@ -915,8 +919,12 @@ Function UpdateConsole()
 							CreateConsoleMsg("HELP - e")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Godmode, Noclip, Camerafog 1000, InfStam, Notarget")
+							CreateConsoleMsg("******************************")														
+						Case "showmap"
+							CreateConsoleMsg("HELP - showmap")
 							CreateConsoleMsg("******************************")
-							
+							CreateConsoleMsg("Draws a 2D version of the map on screen.")
+							CreateConsoleMsg("******************************")
 						Case "quit", "exit"
 							CreateConsoleMsg("HELP - quit / exit")
 							CreateConsoleMsg("******************************")
@@ -936,6 +944,15 @@ Function UpdateConsole()
 					CameraFogFar  = 1000
 					InfiniteStamina = 1
 					Notarget = 1
+					;[End Block]
+				Case "showmap"
+					;[Block]
+					If ShowMap Then
+						CreateConsoleMsg("Showmap disabled.")
+					Else 
+						CreateConsoleMsg("Showmap enabled.")
+					EndIf
+					ShowMap = Not(ShowMap)
 					;[End Block]
 				Case "quit", "exit"
 					;[Block]
@@ -4883,6 +4900,18 @@ Function DrawGUI()
 		AAText (GraphicWidth/2), (GraphicHeight * 0.55), "Seed: " + RandomSeed, True, True
 	EndIf
 		
+	If ShowMap Then		
+		For r.Rooms = Each Rooms
+		
+			If PlayerRoom\x = r\x And PlayerRoom\z = r\z Then
+				Color 255, 0, 0
+			Else
+				Color 255, 255, 255
+			EndIf
+			
+			Rect((18 - (r\x / 8)) * cellHeight, TenPercentOfScreen + ((r\z / 8) * cellHeight), cellHeight, cellHeight, 1)
+		Next
+	EndIf
 	
 	If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
 		For e.Events = Each Events
