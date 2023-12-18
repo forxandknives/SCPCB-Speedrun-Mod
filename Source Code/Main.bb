@@ -737,6 +737,8 @@ Function UpdateConsole()
 		EndIf
 		ConsoleInput = Left(ConsoleInput, 100)
 		
+		CursorIndex = Len(ConsoleInput)
+		
 		If KeyHit(28) And ConsoleInput <> "" Then
 			ConsoleReissue = Null
 			ConsoleScroll = 0
