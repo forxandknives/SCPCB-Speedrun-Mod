@@ -681,6 +681,7 @@ Function UpdateConsole()
 			
 			If ConsoleReissue<>Null Then
 				ConsoleInput = ConsoleReissue\txt
+				CursorIndex = Len(ConsoleInput)
 				ConsoleScroll = reissuePos+(height/2)
 			EndIf
 		EndIf
@@ -724,6 +725,7 @@ Function UpdateConsole()
 			
 			If ConsoleReissue<>Null Then
 				ConsoleInput = ConsoleReissue\txt
+				CursorIndex = Len(ConsoleInput)
 				ConsoleScroll = reissuePos+(height/2)
 			EndIf
 		EndIf
