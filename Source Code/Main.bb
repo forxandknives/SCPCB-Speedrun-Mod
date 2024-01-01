@@ -386,7 +386,10 @@ Global ShowMap = False
 Global CellHeight = GraphicsHeight() * 0.015
 Global TenPercentOfScreen = GraphicsHeight() * 0.10
 
-Global CursorIndex% = 0 ; Temporary until I figure out a better solution for cursor position in text boxes.
+Global CursorIndex% = 0
+
+Global SeedRNGDirectly = False
+Global DirectSeed% = -1
 
 Function ResetSpeedrunVariables()
 
@@ -404,7 +407,8 @@ Function ResetSpeedrunVariables()
 	SeedHasElectricalCenter = False
 	Can100Seed = False
 	RoomCounter = 0
-	
+	ShowMap = False
+	DirectSeed = -1
 	
 End Function
 
@@ -737,7 +741,7 @@ Function UpdateConsole()
 		EndIf
 		ConsoleInput = Left(ConsoleInput, 100)
 		
-		CursorIndex = Len(ConsoleInput)
+		;CursorIndex = Len(ConsoleInput)
 
 		If KeyDown(29) And KeyHit(46) Then
 			ConsoleInput = ""
@@ -3462,7 +3466,15 @@ Repeat
 				Else
 					PauseSounds()
 				EndIf
-				ConsoleOpen = (Not ConsoleOpen)
+				
+				;ConsoleOpen = (Not ConsoleOpen)
+				If Not(ConsoleOpen) Then
+					ConsoleOpen = True
+					CursorIndex = Len(ConsoleInput)
+				Else
+					ConsoleOpen = False
+				EndIf
+				
 				FlushKeys()
 			EndIf
 		EndIf
@@ -4881,20 +4893,19 @@ Function DrawGUI()
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then
 		Color TimerR, TimerG, TimerB
 		AASetFont FontMono
-		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
-		
-		If DisplaySeedWarnings Then
-			If Not(IsSeedBeatable) Then
-				AASetFont Font2
-				AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
-			EndIf
-			
-			If SelectedDifficulty\Name = "Keter" And (Not Can100Seed) Then
-				AASetFont Font2
-				AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
-			EndIf
+		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
+	EndIf
+	
+	If DisplaySeedWarnings Then
+		If Not(IsSeedBeatable) Then
+			AASetFont Font2
+			AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
 		EndIf
 		
+		If SelectedDifficulty\Name = "Keter" And (Not Can100Seed) Then
+			AASetFont Font2
+			AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
+		EndIf
 	EndIf
 			
 	AASetFont Font1
@@ -4904,6 +4915,9 @@ Function DrawGUI()
 		AASetFont Font2
 		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
 		AAText (GraphicWidth/2), (GraphicHeight * 0.55), "Seed: " + RandomSeed, True, True
+		If SeedRNGDirectly Then
+			AAText (GraphicWidth/2), (GraphicHeight * 0.60), "RNG Seeded Directly", True, True
+		EndIf
 	EndIf
 		
 	If ShowMap Then		
@@ -7500,6 +7514,22 @@ Function DrawMenu()
 			AASetFont Font1
 		End If		
 		
+		Local length% = AAStringWidth("Map seed: " + RandomSeed)
+		Local seedStringHeight = AAStringHeight("Map seed: ")
+
+		If Drawbutton(x+250*MenuScale, y-(122-45)*MenuScale-(GraphicsWidth()*0.03)/2, GraphicsWidth() * 0.10, GraphicsWidth() * 0.03, "Copy Seed", False) Then
+			Local success$ = CopyTextToClipboard(RandomSeed)		
+			
+			If success Then
+ 					Msg = "Seed copied to clipboard."
+			Else
+				Msg = "Failed to copy seed to clipboard."
+			EndIf
+			
+			MsgTimer = 3 * 70
+					
+		EndIf	
+		
 		Local AchvXIMG% = (x + (22*MenuScale))
 		Local scale# = GraphicHeight/768.0
 		Local SeparationConst% = 76*scale
@@ -7526,23 +7556,12 @@ Function DrawMenu()
 			
 			AAText x, y, "Difficulty: "+SelectedDifficulty\name + " " + seedBeatableText 
 			AAText x, y+20*MenuScale, "Save: "+CurrSave
-			AAText x, y+40*MenuScale, "Map seed: "+RandomSeed
 			
-			Local length% = AAStringWidth("Map seed: " + RandomSeed)
-			Local seedStringHeight = AAStringHeight("Map seed: ")
-			
-			If Drawbutton(x + length + 10, y + 40, GraphicsWidth() * 0.05, seedStringHeight, "Copy Seed", False) Then
-				Local success$ = CopyTextToClipboard(RandomSeed)		
-				
-				If success Then
- 					Msg = "Seed copied to clipboard."
-				Else
-					Msg = "Failed to copy seed to clipboard."
-				EndIf
-				
-				MsgTimer = 3 * 70
-						
-			EndIf						
+			If SeedRNGDirectly Then	
+				AAText x, y+40*MenuScale, "Map seed: " + RandomSeed + " (RNG SEEDED DIRECTLY)"
+			Else
+				AAText x, y+40*MenuScale, "Map seed: " + RandomSeed
+			EndIf																	
 			
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, "Back") Then

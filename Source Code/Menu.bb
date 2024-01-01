@@ -311,6 +311,7 @@ Function UpdateMainMenu()
 			Select MainMenuTab
 				Case 1
 					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
+					PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%)
 					MainMenuTab = 0
 				Case 2
 					CurrLoadGamePage = 0
@@ -464,8 +465,9 @@ Function UpdateMainMenu()
 					EndIf
 				EndIf	
 				
-				AAText(x + 20 * MenuScale, y + 110 * MenuScale, "Enable intro sequence:")
-				IntroEnabled = DrawTick(x + 280 * MenuScale, y + 110 * MenuScale, IntroEnabled)	
+				; Decide if we want to seed the rng directly with the CPU time instead of running it through GenerateSeedNumber().
+				AAText(x + 20 * MenuScale, y + 110 * MenuScale, "Seed RNG directly (NUMBERS ONLY): ")
+				SeedRNGDirectly = DrawTick(x + AAStringWidth("Seed RNG directly (NUMBERS ONLY): ") + 20 * MenuScale, y + 110 * MenuScale, SeedRNGDirectly)	
 				
 				;Local modeName$, modeDescription$, selectedDescription$
 				AAText (x + 20 * MenuScale, y + 150 * MenuScale, "Difficulty:")				
@@ -548,149 +550,188 @@ Function UpdateMainMenu()
 				
 				AASetFont Font2
 				
-				If DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", False) Then
-					If CurrSave = "" Then CurrSave = "untitled"
+				If DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", False) Then					
+					
+					Local shouldStartGame% = True
 					
 					If RandomSeed = "" Then
+					
 						RandomSeed = Abs(MilliSecs())
-					EndIf
-					
-					SeedRnd GenerateSeedNumber(RandomSeed)
-					
-					Local SameFound% = False
-					
-					For  i% = 1 To SaveGameAmount
-						If SaveGames(i - 1) = CurrSave Then SameFound = SameFound + 1
-					Next
 						
-					If SameFound > 0 Then CurrSave = CurrSave + " (" + (SameFound + 1) + ")"
-					
-					LoadEntities()
-					LoadAllSounds()
-					InitNewGame()
-					MainMenuOpen = False
-					
-					For plink.Rooms = Each Rooms
-						If plink\RoomTemplate\Name = "008" Then
-							SeedHas008 = True
+						If SeedRNGDirectly Then
+							SeedRnd Int(RandomSeed)
+						Else	
+							SeedRnd GenerateSeedNumber(RandomSeed)
 						EndIf
 						
-						If plink\RoomTemplate\Name = "room2ccont" Then
-							SeedHasElectricalCenter = True
+					Else
+					
+						If SeedRNGDirectly Then
+							
+							Local onlyNumbers% = True
+							
+							For i% = 1 To Len(RandomSeed)
+								; Check if randomseed only has numbers in it
+								Local char% = Asc(Mid(RandomSeed, i, 1))
+								If char < 48 Or char > 57 Then									
+									onlyNumbers = False
+									shouldStartGame = False
+									Exit
+								EndIf					 								
+							Next
+							
+							If onlyNumbers Then	
+								SeedRnd Int(RandomSeed)								
+								DirectSeed = Int(RandomSeed)
+							EndIf
+							
+						Else
+							SeedRnd GenerateSeedNumber(RandomSeed)
+								
 						EndIf
-					Next
 					
-					If SeedHas008 = False Or SeedHasElectricalCenter = False Then
-						IsSeedBeatable = False
-					EndIf
+					EndIf	
 					
-					If SelectedDifficulty\Name = "Keter" Then 
-						For amongus.Events = Each Events
-							If amongus\EventName = "buttghost" Then
-								RoomCounter = RoomCounter + 1
-								DebugLog "butt ghost"
+					If shouldStartGame Then
+												
+						If CurrSave = "" Then CurrSave = "untitled"
+															
+						Local SameFound% = False
+						
+						For  i% = 1 To SaveGameAmount
+							If SaveGames(i - 1) = CurrSave Then SameFound = SameFound + 1
+						Next
+							
+						If SameFound > 0 Then CurrSave = CurrSave + " (" + (SameFound + 1) + ")"
+						
+						LoadEntities()
+						LoadAllSounds()
+						InitNewGame()
+						MainMenuOpen = False
+						
+						For plink.Rooms = Each Rooms
+							If plink\RoomTemplate\Name = "008" Then
+								SeedHas008 = True
+							EndIf
+							
+							If plink\RoomTemplate\Name = "room2ccont" Then
+								SeedHasElectricalCenter = True
 							EndIf
 						Next
 						
-						For p.Rooms = Each Rooms
-							Select p\Roomtemplate\name$
-								Case "008" ; Biohazard;;;;;;;;;;;;;;;;;;;;;;;;;;
+						If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+							IsSeedBeatable = False
+						EndIf
+						
+						If SelectedDifficulty\Name = "Keter" Then 
+							For amongus.Events = Each Events
+								If amongus\EventName = "buttghost" Then
 									RoomCounter = RoomCounter + 1
-									DebugLog "biohazard"
-									
-								Case "room012" ; Scribe;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "scribe"
-									
-								Case "room035" ; Curtains Down;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "curtains down"	
+									DebugLog "butt ghost"
+								EndIf
+							Next
+							
+							For p.Rooms = Each Rooms
+								Select p\Roomtemplate\name$
+									Case "008" ; Biohazard;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "biohazard"
+										
+									Case "room012" ; Scribe;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "scribe"
+										
+									Case "room035" ; Curtains Down;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "curtains down"	
+																		
+									Case "room2sl" ; Doctor, Doctor;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "doctor doctor"
+										
+									Case "room079" ; Deductive Reasoning;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "deductive reasoning"
+										
+									Case "room205" ; Femme Fatal;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "femme fatal"		
 																	
-								Case "room2sl" ; Doctor, Doctor;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "doctor doctor"
-									
-								Case "room079" ; Deductive Reasoning;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "deductive reasoning"
-									
-								Case "room205" ; Femme Fatal;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "femme fatal"		
-																
-								Case "room2cafeteria" ; OUT OF RANGE;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "out of range"
-									
-								Case "roompj" ; The Corner of Your Eye;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "corner of your eye"
-									
-								Case "room2sroom" ; Reggae, Man;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "weed"
-									
-								Case "room513" ; If You Ring it, He Will Come;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "ring it he will come"
-									
-								Case "room2scps" ; Mental Exhaustion : Blue Hue : Potential Bioweapon;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1
-									DebugLog "mental exhaustion"							
-									
-								Case "coffin" ; Interference
-									RoomCounter = RoomCounter + 1
-									DebugLog "interference"
-									
-								Case "914" ; Refinery;;;;;;;;;;;;;;;;;;;;;;;;;;							
-									RoomCounter = RoomCounter + 1
-									DebugLog "refinery"							
+									Case "room2cafeteria" ; OUT OF RANGE;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "out of range"
 										
-								Case "room3storage" ; Show Yourself;;;;;;;;;;;;;;;;;;;;;;;;;;								
-									RoomCounter = RoomCounter + 1
-									DebugLog "show yourself"
-									
-								Case "room966" ; Rapid Eye Movement;;;;;;;;;;;;;;;;;;;;;;;;;;								
-									RoomCounter = RoomCounter + 1
-									DebugLog "rapid eye movement"
-									
-								Case "room2storage" ; Recursive Spacial Phenomenom;;;;;;;;;;;;;;;;;;;;;;;;;;								
-									RoomCounter = RoomCounter + 1
-									DebugLog "recursive spacial phenomenom"
-									
-								Case "room1123" ; The Final Solution;;;;;;;;;;;;;;;;;;;;;;;;;;								
-									RoomCounter = RoomCounter + 1
-									DebugLog "final solution"
-									
-								Case "room2poffices" ; The Containment Breach : World-Ending Scenario;;;;;;;;;;;;;;;;;;;;;;;;;;								
-									RoomCounter = RoomCounter + 1
-									DebugLog "the containment breach"
-									
-								Case "room1162" ; Pieces of the Past;;;;;;;;;;;;;;;;;;;;;;;;;;								
-									RoomCounter = RoomCounter + 1
-									DebugLog "pieces of t he past"
-									
-								Case "room2scps2" ; Screams of the Present;;;;;;;;;;;;;;;;;;;;;;;;;;
-									RoomCounter = RoomCounter + 1									
-									DebugLog "screams of the present"
-									
-								Default
+									Case "roompj" ; The Corner of Your Eye;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "corner of your eye"
 										
-							End Select								 
-						Next
-					EndIf
-					
-					If RoomCounter = 21 Then
-						Can100Seed = True
-					EndIf
-					
-					FlushKeys()
-					FlushMouse()
-					
-					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
-
-					RunStartTime = MilliSecs()
-					
+									Case "room2sroom" ; Reggae, Man;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "weed"
+										
+									Case "room513" ; If You Ring it, He Will Come;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "ring it he will come"
+										
+									Case "room2scps" ; Mental Exhaustion : Blue Hue : Potential Bioweapon;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1
+										DebugLog "mental exhaustion"							
+										
+									Case "coffin" ; Interference
+										RoomCounter = RoomCounter + 1
+										DebugLog "interference"
+										
+									Case "914" ; Refinery;;;;;;;;;;;;;;;;;;;;;;;;;;							
+										RoomCounter = RoomCounter + 1
+										DebugLog "refinery"							
+											
+									Case "room3storage" ; Show Yourself;;;;;;;;;;;;;;;;;;;;;;;;;;								
+										RoomCounter = RoomCounter + 1
+										DebugLog "show yourself"
+										
+									Case "room966" ; Rapid Eye Movement;;;;;;;;;;;;;;;;;;;;;;;;;;								
+										RoomCounter = RoomCounter + 1
+										DebugLog "rapid eye movement"
+										
+									Case "room2storage" ; Recursive Spacial Phenomenom;;;;;;;;;;;;;;;;;;;;;;;;;;								
+										RoomCounter = RoomCounter + 1
+										DebugLog "recursive spacial phenomenom"
+										
+									Case "room1123" ; The Final Solution;;;;;;;;;;;;;;;;;;;;;;;;;;								
+										RoomCounter = RoomCounter + 1
+										DebugLog "final solution"
+										
+									Case "room2poffices" ; The Containment Breach : World-Ending Scenario;;;;;;;;;;;;;;;;;;;;;;;;;;								
+										RoomCounter = RoomCounter + 1
+										DebugLog "the containment breach"
+										
+									Case "room1162" ; Pieces of the Past;;;;;;;;;;;;;;;;;;;;;;;;;;								
+										RoomCounter = RoomCounter + 1
+										DebugLog "pieces of t he past"
+										
+									Case "room2scps2" ; Screams of the Present;;;;;;;;;;;;;;;;;;;;;;;;;;
+										RoomCounter = RoomCounter + 1									
+										DebugLog "screams of the present"
+										
+									Default
+											
+								End Select								 
+							Next
+						EndIf
+						
+						If RoomCounter = 21 Then
+							Can100Seed = True
+						EndIf
+						
+						FlushKeys()
+						FlushMouse()
+						
+						PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
+						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);
+	
+						RunStartTime = MilliSecs()
+						
+					EndIf					
 				EndIf
 				
 				;[End Block]
@@ -2086,9 +2127,7 @@ End Function
 
 Function rInput$(aString$)
 	Local value% = GetKey()
-	Local length% = Len(aString$)
-	
-	DebugLog("Value is: " + Str(value))
+	Local length% = Len(aString$)	
 	
 	If value = 8 Then ; Backspace
 		value = 0

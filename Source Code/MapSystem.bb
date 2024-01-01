@@ -7034,8 +7034,16 @@ Function CreateMap()
 	
 	Local zone%
 	
-	SeedRnd GenerateSeedNumber(RandomSeed)
-	
+	If SeedRNGDirectly Then
+		If DirectSeed <> -1 Then
+			SeedRnd DirectSeed
+		Else
+			SeedRnd Int(RandomSeed)
+		EndIf
+	Else
+		SeedRnd GenerateSeedNumber(RandomSeed)
+	EndIf
+			
 	Dim MapName$(MapWidth, MapHeight)
 	
 	Dim MapRoomID%(ROOM4 + 1)
