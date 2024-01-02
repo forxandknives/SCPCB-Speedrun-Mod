@@ -383,8 +383,8 @@ Global Can100Seed% = False
 Global RoomCounter% = 0
 
 Global ShowMap = False
-Global CellHeight = GraphicsHeight() * 0.015
-Global TenPercentOfScreen = GraphicsHeight() * 0.10
+Global CellHeight = GraphicsHeight() * 0.02 ;GraphicsHeight() * 0.015
+Global TenPercentOfScreen = GraphicsHeight() * 0.50 ;GraphicsHeight() * 0.10
 
 Global CursorIndex% = 0
 
@@ -936,7 +936,64 @@ Function UpdateConsole()
 							CreateConsoleMsg("HELP - showmap")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Draws a 2D version of the map on screen.")
+							
+							CreateConsoleMsg("")
+							
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
+							CreateConsoleMsg("Entrance Zone")
+							ConsoleR = 100 : ConsoleG = 100 : ConsoleB = 100
+							CreateConsoleMsg("room2ccont")
+							ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 0
+							CreateConsoleMsg("room860")
+							ConsoleR = 0 : ConsoleG = 0 : ConsoleB = 255
+							CreateConsoleMsg("gateaentrance")
+							ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
+							CreateConsoleMsg("exit1")
+							ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 255
+							CreateConsoleMsg("room2cafeteria")
+							
+							CreateConsoleMsg("")
+							
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
+							CreateConsoleMsg("Heavy Containment")
+							ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 0
+							CreateConsoleMsg("room079")
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 0
+							CreateConsoleMsg("008")
+							ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 255
+							CreateConsoleMsg("room035")
+							ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
+							CreateConsoleMsg("room106")
+							ConsoleR = 0 : ConsoleG = 0 : ConsoleB = 255
+							CreateConsoleMsg("coffin")
+							ConsoleR = 100 : ConsoleG = 100 : ConsoleB = 100
+							CreateConsoleMsg("room049")
+							ConsoleR = 10 : ConsoleG = 100 : ConsoleB = 10
+							CreateConsoleMsg("room2tunel")
+							ConsoleR = 30 : ConsoleG = 10 : ConsoleB = 10
+							CreateConsoleMsg("room2servers")
+							
+							CreateConsoleMsg("")
+							
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
+							CreateConsoleMsg("Light Containment")
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
+							ConsoleR = 0 : ConsoleG = 0 : ConsoleB = 255
+							CreateConsoleMsg("914")
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 0
+							CreateConsoleMsg("roompj")
+							ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 0
+							CreateConsoleMsg("room2closets")
+							ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 255
+							CreateConsoleMsg("room2testroom2")
+							ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
+							CreateConsoleMsg("room2sl")
+							ConsoleR = 100 : ConsoleG = 100 : ConsoleB = 100
+							CreateConsoleMsg("room3storage")
+							
+							ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
 							CreateConsoleMsg("******************************")
+							
 						Case "quit", "exit"
 							CreateConsoleMsg("HELP - quit / exit")
 							CreateConsoleMsg("******************************")
@@ -962,7 +1019,7 @@ Function UpdateConsole()
 					If ShowMap Then
 						CreateConsoleMsg("Showmap disabled.")
 					Else 
-						CreateConsoleMsg("Showmap enabled.")
+						CreateConsoleMsg("Showmap enabled. Type help showmap for the colors.")
 					EndIf
 					ShowMap = Not(ShowMap)
 					;[End Block]
@@ -4923,12 +4980,64 @@ Function DrawGUI()
 	EndIf
 		
 	If ShowMap Then		
-		For r.Rooms = Each Rooms
+		For r.Rooms = Each Rooms					
 		
 			If PlayerRoom\x = r\x And PlayerRoom\z = r\z Then
-				Color 255, 0, 0
+				Color 0, 255, 0
 			Else
-				Color 255, 255, 255
+				Select r\RoomTemplate\name$
+					
+					; Entrance Zone									
+					Case "room2ccont"
+						Color 100, 100, 100
+					Case "room860"
+						Color 255, 0, 0
+					Case "gateaentrance"
+						Color 0, 0, 255
+					Case "exit1"
+						Color 0, 255, 255
+					Case "room2cafeteria" 
+						Color 255, 0, 255
+
+					;Heavy Containment
+					Case "room079"
+						Color 255, 0, 0
+					Case "008" 
+						Color 255, 255, 0
+					Case "room035"
+						Color 255, 0, 255
+					Case "room106"
+						Color 0, 255, 255
+					Case "coffin"
+						Color 0, 0, 255
+					Case "room049"
+						Color 100, 100, 100
+					Case "room2tunnel"
+						Color 10, 100, 10			
+					Case "room2servers"
+						Color 30, 10, 10	
+					
+					; Light Containment	
+					Case "914"
+						Color 0, 0, 255
+					Case "roompj"
+						Color 255, 255, 0
+					Case "room2closets" 
+						Color 255, 0, 0
+					Case "room2testroom2"
+						Color 255, 0, 255
+					Case "room2sl"
+						Color 0, 255, 255
+					Case "room3storage"
+						Color 100, 100, 100
+					
+					;Other
+					Case "checkpoint1", "checkpoint2" 
+						Color 255, 105, 180
+						
+					Default 
+						Color 255, 255, 255
+				End Select
 			EndIf
 			
 			Rect((18 - (r\x / 8)) * cellHeight, TenPercentOfScreen + ((r\z / 8) * cellHeight), cellHeight, cellHeight, 1)
