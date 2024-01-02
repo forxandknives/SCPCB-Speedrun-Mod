@@ -45,7 +45,7 @@ Global ConsoleFont%
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
 Global SpeedrunVersion$ = "0.0.5"
-Global VersionDate$ = "December 13 2023 10:25 PM EST"
+Global VersionDate$ = "January 1 2024 8:29 PM EST"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -384,7 +384,8 @@ Global RoomCounter% = 0
 
 Global ShowMap = False
 Global CellHeight = GraphicsHeight() * 0.02 ;GraphicsHeight() * 0.015
-Global TenPercentOfScreen = GraphicsHeight() * 0.50 ;GraphicsHeight() * 0.10
+Global TenPercentOfScreen = GraphicsHeight() * 0.10
+Global EightyPercentOfScreen = GraphicsWidth() * 0.75
 
 Global CursorIndex% = 0
 
@@ -969,7 +970,7 @@ Function UpdateConsole()
 							ConsoleR = 100 : ConsoleG = 100 : ConsoleB = 100
 							CreateConsoleMsg("room049")
 							ConsoleR = 10 : ConsoleG = 100 : ConsoleB = 10
-							CreateConsoleMsg("room2tunel")
+							CreateConsoleMsg("room2tunnel")
 							ConsoleR = 30 : ConsoleG = 10 : ConsoleB = 10
 							CreateConsoleMsg("room2servers")
 							
@@ -5040,7 +5041,7 @@ Function DrawGUI()
 				End Select
 			EndIf
 			
-			Rect((18 - (r\x / 8)) * cellHeight, TenPercentOfScreen + ((r\z / 8) * cellHeight), cellHeight, cellHeight, 1)
+			Rect(((18 - (r\x / 8)) * cellHeight) + EightyPercentOfScreen, TenPercentOfScreen + ((r\z / 8) * cellHeight), cellHeight, cellHeight, 1)
 		Next
 	EndIf
 	
