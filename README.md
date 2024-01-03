@@ -26,5 +26,6 @@ Requirements:
 9. Console command "quit" which quits the game.<br>
 10. Console command "showmap" which draws a 2D version of the map on screen.<br>
 11. Updated functionality for text boxes.<br>
+12. Added ability to generate more possible random seeds.<br>
 
 Read the changelog for a full list of changes for each version.<br>
