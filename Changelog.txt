@@ -1,4 +1,17 @@
-﻿Speedrun Mod v0.0.4
+﻿Speedrun Mod v0.0.5
+- Added autosplitter for use with livesplit.
+	- Will split on start, reaching heavy containment, reaching entrance zone, reaching surface, and finishing the run
+	- Optional splits on 008, 079, first and second electrical centers.
+- Added option to directly seed the game's rng with the inputted seed.
+	- The seed must be numbers only.
+	- Leave this enabled and the seed blank for 2 billion possible random seeds.
+	- In-game pause menu and end of the run will tell you if the rng was directly seeded.
+- Added console command "showmap" to draw a 2D version of the map on screen.
+	- Type "help showmap" to see what room each color represents.
+- Minor bug fixes to text boxes and console text box.
+- Ctrl+c will now clear the console text when the console is open.
+
+Speedrun Mod v0.0.4
 - NPCs.ini is now hardcoded into the game.
 - Seed is now shown on screen once a run is completed.
 - The game will tell you if a run is not beatable if the map is missing 008 or room079.
