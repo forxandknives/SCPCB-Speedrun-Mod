@@ -24,4 +24,7 @@ Requirements:
 7. Pasting from your clipboard into text boxes now works.<br>
 8. Console command "e" which enables god/fly/infstam/notarget.<br>
 9. Console command "quit" which quits the game.<br>
-10. Updated functionality for text boxes.<br>
+10. Console command "showmap" which draws a 2D version of the map on screen.<br>
+11. Updated functionality for text boxes.<br>
+
+Read the changelog for a full list of changes for each version.<br>
