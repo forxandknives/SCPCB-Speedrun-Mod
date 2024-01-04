@@ -379,7 +379,7 @@ Function UpdateMainMenu()
 				Local index%
 				Local seed%
 								
-				Local SeedsThisPage 
+				Local SeedsThisPage% 
 				
 				If Abs((CurrentPage * 9) - NumberOfSeeds) > 9 Then
 					If CurrentPage = 0 Then
@@ -536,13 +536,18 @@ Function UpdateMainMenu()
 				If DrawButton(StartingX + SelectorWidth - 2 * (160 * MenuScale) - 20, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Add Seed", False) Then
 					If SeedToAdd <> "" Then
 						AddSavedSeed(SeedToAdd)
+						;Add page changing when seed exceeds max page limit on current page.						
 					EndIf
 					SeedToAdd = ""
 				EndIf
 				
 				If DrawButton(StartingX + SelectorWidth - 160 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70* MenuScale, "Delete " + SelectedSeed, False) Then
-					If SelectedSeed <> "" Then
+					If SelectedSeed <> "" Then						
 						DeleteSavedSeed(SelectedSeedIndex)
+						SeedsThisPage = SeedsThisPage - 1						
+						If SeedsThisPage = 0 Then
+							CurrentPage = CurrentPage - 1
+						EndIf						
 					EndIf	
 				EndIf
 				
