@@ -392,6 +392,9 @@ Global CursorIndex% = 0
 Global SeedRNGDirectly = False
 Global DirectSeed% = -1
 
+Global MonitorHeight = GraphicsHeight()
+Global MonitorWidth  = GraphicsWidth()
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -7629,7 +7632,7 @@ Function DrawMenu()
 		Local length% = AAStringWidth("Map seed: " + RandomSeed)
 		Local seedStringHeight = AAStringHeight("Map seed: ")
 
-		If Drawbutton(x+250*MenuScale, y-(122-45)*MenuScale-(GraphicsWidth()*0.03)/2, GraphicsWidth() * 0.10, GraphicsWidth() * 0.03, "Copy Seed", False) Then
+		If Drawbutton(x+210*MenuScale, y-(122-45)*MenuScale-(MonitorWidth*0.03)/2, MonitorWidth * 0.060, MonitorWidth * 0.03, "Copy Seed", False) Then
 			Local success$ = CopyTextToClipboard(RandomSeed)		
 			
 			If success Then
@@ -7641,6 +7644,15 @@ Function DrawMenu()
 			MsgTimer = 3 * 70
 					
 		EndIf	
+		
+		If Drawbutton(x+220*MenuScale + MonitorWidth * 0.060, y-(122-45)*MenuScale-(MonitorWidth*0.03)/2, MonitorWidth * 0.060, MonitorWidth * 0.03, "Save Seed", False) Then
+		
+			AddSavedSeed(RandomSeed)
+			
+			Msg = "Seed saved."
+			MsgTimer = 3 * 70			
+		
+		EndIf 
 		
 		Local AchvXIMG% = (x + (22*MenuScale))
 		Local scale# = GraphicHeight/768.0
