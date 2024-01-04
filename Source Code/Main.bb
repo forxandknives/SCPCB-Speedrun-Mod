@@ -411,7 +411,9 @@ Function ResetSpeedrunVariables()
 	SeedHasElectricalCenter = False
 	Can100Seed = False
 	RoomCounter = 0
-	ShowMap = False
+	If Showmap <> 2 Then	
+		Showmap = False
+	EndIf
 	DirectSeed = -1
 	
 End Function
@@ -995,7 +997,14 @@ Function UpdateConsole()
 							ConsoleR = 100 : ConsoleG = 100 : ConsoleB = 100
 							CreateConsoleMsg("room3storage")
 							
+							ConsoleR = 0 : ConsoleG = 0 : ConsoleB = 0
+							
+							CreateConsoleMsg("")
+							
+							CreateConsoleMsg("Type showmap 2 to keep showmap on between saves.")
+							
 							ConsoleR = 0 : ConsoleG = 255 : ConsoleB = 255
+							
 							CreateConsoleMsg("******************************")
 							
 						Case "quit", "exit"
@@ -1020,12 +1029,22 @@ Function UpdateConsole()
 					;[End Block]
 				Case "showmap"
 					;[Block]
-					If ShowMap Then
-						CreateConsoleMsg("Showmap disabled.")
-					Else 
-						CreateConsoleMsg("Showmap enabled. Type help showmap for the colors.")
-					EndIf
-					ShowMap = Not(ShowMap)
+					
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					
+					Select StrTemp
+						Case "2"
+							Showmap = 2
+							CreateConsoleMsg("Showmap will now stay on between saves.")
+						Default
+							If ShowMap Then
+								CreateConsoleMsg("Showmap disabled.")
+							Else 
+								CreateConsoleMsg("Showmap enabled. Type help showmap for the colors.")
+							EndIf
+							ShowMap = Not(ShowMap)				
+					End Select
+					
 					;[End Block]
 				Case "quit", "exit"
 					;[Block]
