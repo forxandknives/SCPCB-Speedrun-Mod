@@ -997,7 +997,7 @@ Function UpdateConsole()
 							ConsoleR = 100 : ConsoleG = 100 : ConsoleB = 100
 							CreateConsoleMsg("room3storage")
 							
-							ConsoleR = 0 : ConsoleG = 0 : ConsoleB = 0
+							ConsoleR = 255 : ConsoleG = 255 : ConsoleB = 255
 							
 							CreateConsoleMsg("")
 							
