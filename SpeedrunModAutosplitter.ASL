@@ -53,7 +53,7 @@ startup {
     
 }
 
-shutdown {
+/*shutdown {
     if (game != null && vars.injected) {
 	game.Suspend();
 
@@ -63,7 +63,7 @@ shutdown {
 	game.Resume();
 	vars.injected = false;
     }
-}
+    }*/
 
 init {
 
@@ -88,11 +88,12 @@ init {
 	    break;
 	}
 
-	if (eventState008 == IntPtr.Zero) {
+	/*if (eventState008 == IntPtr.Zero) {
 	    eventState008 = vars.eventState008 = scanner.Scan(new SigScanTarget(0, "BB ?? ?? ?? ?? 89 18 81 EC ?? ?? ?? ?? 8B 05 ?? ?? ?? ?? 89 04 24 E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 81 EC ?? ?? ?? ??"));
 	} else {
 	    break;
-	}
+	    }
+	*/
 
 	if (pointer079Start == IntPtr.Zero) {
 	    pointer079Start = vars.pointer079Start = scanner.Scan(new SigScanTarget(2, "03 35 ?? ?? ?? ?? 89 1E 8B 1D ?? ?? ?? ?? 8B 75 18 21 F3 21 DB"));
@@ -112,12 +113,12 @@ init {
 	    break; 
 	}
 
-	if (sl == IntPtr.Zero) {
+	/*if (sl == IntPtr.Zero) {
 	    sl = vars.sl = scanner.Scan(new SigScanTarget(2, "C7 05 ?? ?? ?? ?? 01 00 00 00 E9 ?? ?? ?? ?? 8B 1D ?? ?? ?? ?? 89 5D EC"));
 	} else {
 	    break;
 	}
-	
+	*/
     }
 
     if (runStartTime != IntPtr.Zero) {
@@ -127,11 +128,12 @@ init {
 	throw new Exception("Cant find RunStartTime");
     }
 
-    if (eventState008 != IntPtr.Zero) {
+    /*if (eventState008 != IntPtr.Zero) {
 	print("008EventState found at: " + eventState008.ToString("X"));
     } else {
 	throw new Exception("Cant find 008");
     }
+    */
 
     if (pointer079Start != IntPtr.Zero) {
 	print("079 Achievement found at: " + pointer079Start.ToString("X"));
@@ -151,18 +153,22 @@ init {
 	throw new Exception("Can't find remote door control.");
     }
 
+    /*
     if (sl != IntPtr.Zero) {
 	print("Lockdown found at: " + sl.ToString("X"));
     } else {
 	throw new Exception("Can't find lockdown");
     }
-
-    game.Suspend();
+    */
     
+    game.Suspend();
+
+    /*
     var aslMem = vars.aslMem = game.AllocateMemory(32);
     var addrMem = BitConverter.GetBytes((int) aslMem).Reverse().ToArray();
     print("aslMem Address: " + BitConverter.ToString(addrMem).Replace("-", ""));
 
+   
     //Store original bytes to copy back into the game once livesplit shuts down.
     vars.original008Bytes = game.ReadBytes(eventState008, 7);
 
@@ -192,12 +198,12 @@ init {
     game.WriteBytes((IntPtr)aslMem+7, newBytes.ToArray());      
 
     game.WriteBytes((IntPtr)aslMem+18, new byte[] {0x81, 0x0, 0x00, 0x0, 0x0, 0x0});
-    
+    */
     
     vars.bytes = game.ReadBytes(runStartTime, 4);
     int bytes32 = BitConverter.ToInt32(vars.bytes, 0);
     IntPtr bytesPtr = new IntPtr(bytes32);
-    //print("Bytes Ptr: " + bytesPtr.ToString("X"));  
+    //print("Bytes Ptr: " + bytesPtr.ToString("X"));      
 
     /*
       This is what our allocated memory looks like
@@ -206,7 +212,8 @@ init {
       jmp ????????      // jmp back to the games memory
       add [eax],4000000 // we store the event state after the [eax].
     */
-
+    
+    
     vars.achievement079Bytes = game.ReadBytes(pointer079Start, 4);
     int bytes079 = BitConverter.ToInt32(vars.achievement079Bytes, 0);
     IntPtr pointer079 = new IntPtr(bytes079);
@@ -218,7 +225,6 @@ init {
     IntPtr achievementOmni = achievementsStart + 0x78;
     IntPtr achievement079 = achievementsStart + 0x14;
 
-
     vars.playerZoneBytes = game.ReadBytes(playerZone, 4);
     int bytesPlayerZone = BitConverter.ToInt32(vars.playerZoneBytes, 0);
     IntPtr zone = new IntPtr(bytesPlayerZone);
@@ -227,19 +233,19 @@ init {
     int bytesRDC = BitConverter.ToInt32(vars.rdcBytes, 0);
     IntPtr doorControl = new IntPtr(bytesRDC);
 
+    /*
     vars.slBytes = game.ReadBytes(sl, 4);
     int bytesSl = BitConverter.ToInt32(vars.slBytes, 0);
     IntPtr surveillance = new IntPtr(bytesSl);
-
-    print(bytesPtr.ToString("X"));
+    */
     
     vars.runStartTime = new MemoryWatcher<int>(bytesPtr);
     //vars.realTime     = new MemoryWatcher<int>(bytesPtr + 0x10);
     vars.gameTime     = new MemoryWatcher<int>(bytesPtr + 0x18);
     vars.runFinished  = new MemoryWatcher<int>(bytesPtr + 0x20);
     vars.gotOmni      = new MemoryWatcher<int>(achievementOmni);
-    vars.room2sl      = new MemoryWatcher<int>(surveillance);
-    vars.contained008 = new MemoryWatcher<float>(aslMem  +0x14);
+    vars.room2sl      = new MemoryWatcher<int>(bytesPtr + 0x98);
+    vars.contained008 = new MemoryWatcher<int>(bytesPtr + 0x9C);
     vars.activated079 = new MemoryWatcher<int>(achievement079);
     vars.currentZone  = new MemoryWatcher<int>(zone);
     vars.remoteDoorControl = new MemoryWatcher<int>(doorControl);
@@ -284,21 +290,22 @@ split {
     }
 
     //Split on getting an omni card.
-    if (vars.gotOmni.Current == 1 && !vars.Splits.Contains("omni")) {
-	return vars.Splits.Add("omni");
+    if (settings["splitOnOmni"]) {
+	if (vars.gotOmni.Current == 1 && !vars.Splits.Contains("omni")) {
+	    return vars.Splits.Add("omni");
+	}		
     }
 
-    //THIS DOES NOT WORK WE WILL LIKELY HAVE TO OVERWRITE THE ASSEMBLY AND READ THE VALUE FROM
-    //OUR ALLOCATED MEMORY LIKE WE DO FOR THE 008 SPLIT.
-    
     //Split on disablind the light containment lockdown.
-    if (vars.room2sl.Current == 1 && vars.room2sl.Old == 0 && !vars.Splits.Contains("sl")) {
-	return vars.Splits.Add("sl");
+    if (settings["splitOnSl"]) {
+	if (vars.room2sl.Current == 1 && vars.room2sl.Old == 0 && !vars.Splits.Contains("sl")) {
+	    return vars.Splits.Add("sl");
+	}
     }
     
     //Split on 008 containment.
     if (settings["splitOn008"]) {
-	if (vars.contained008.Current == 2 && vars.contained008.Old == 0 && !vars.Splits.Contains("008")) {
+	if (vars.contained008.Current == 1 && vars.contained008.Old == 0 && !vars.Splits.Contains("008")) {
 	    return vars.Splits.Add("008");
 	}
     }
@@ -348,7 +355,7 @@ update {
 
 reset {
     if (vars.runStartTime.Current == 0) {
-	game.WriteBytes((IntPtr)vars.aslMem+20, new byte[] {0x0, 0x0, 0x0, 0x0});
+	//game.WriteBytes((IntPtr)vars.aslMem+20, new byte[] {0x0, 0x0, 0x0, 0x0});
 	return true;
     }
 }
