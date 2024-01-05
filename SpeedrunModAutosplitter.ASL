@@ -3,7 +3,7 @@
 //December 10 2023
 
 state("SCP - Containment Breach Speedrun Mod", "Speedrun Mod") {
-    float playerY : "SCP - Containment Breach.exe", 0x000f5400, 0x160, 0x140, 0x44; // player y pos
+    float playerY : "SCP - Containment Breach Speedrun Mod.exe", 0x000f5400, 0x160, 0x140, 0x44; // player y pos
 }
 
 startup {
@@ -27,6 +27,12 @@ startup {
 			"\n - Complete the run." +
 			"\n\nDisable this if you just want auto start and stop."
 			);
+    settings.Add("splitOnOmni", false, "Split on getting an omni card.", "Standard");
+    settings.SetToolTip("splitOnOmni", "Automatically splits when you get an omni key card.");
+
+    settings.Add("splitOnSl", false, "Split upon disabling lockdown", "Standard");
+    settings.SetToolTip("splitOnSl", "Automatically splits when you disable the light containment lockdown.");
+    
     settings.Add("splitOn079", false, "Split on SCP-079", "Standard");
     settings.SetToolTip("splitOn079", "Automatically splits when SCP-079 is activated");
 
@@ -72,6 +78,7 @@ init {
     IntPtr pointer079Start = IntPtr.Zero;
     IntPtr playerZone      = IntPtr.Zero;
     IntPtr rdc             = IntPtr.Zero;
+    IntPtr sl              = IntPtr.Zero;
     
     foreach (var page in game.MemoryPages(true)) {
 	var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
@@ -103,6 +110,12 @@ init {
 	    rdc = vars.rdc = scanner.Scan(new SigScanTarget(15, "C7 44 24 04 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 05 ?? ?? ?? ?? 81 EC ?? ?? ?? ?? 8B 45 D4 89 04 24 E8 ?? ?? ?? ??"));
 	} else {
 	    break; 
+	}
+
+	if (sl == IntPtr.Zero) {
+	    sl = vars.sl = scanner.Scan(new SigScanTarget(2, "C7 05 ?? ?? ?? ?? 01 00 00 00 E9 ?? ?? ?? ?? 8B 1D ?? ?? ?? ?? 89 5D EC"));
+	} else {
+	    break;
 	}
 	
     }
@@ -136,7 +149,13 @@ init {
 	print("Remote Door Control found at: " + rdc.ToString("X"));
     } else {
 	throw new Exception("Can't find remote door control.");
-    }	
+    }
+
+    if (sl != IntPtr.Zero) {
+	print("Lockdown found at: " + sl.ToString("X"));
+    } else {
+	throw new Exception("Can't find lockdown");
+    }
 
     game.Suspend();
     
@@ -194,8 +213,11 @@ init {
     
     vars.pointer079Bytes = game.ReadBytes(pointer079, 4);
     int bytes079Achievement = BitConverter.ToInt32(vars.pointer079Bytes, 0);
-    IntPtr achievement079 = new IntPtr(bytes079Achievement);
-    achievement079 += 0x14;
+    IntPtr achievementsStart = new IntPtr(bytes079Achievement);
+
+    IntPtr achievementOmni = achievementsStart + 0x78;
+    IntPtr achievement079 = achievementsStart + 0x14;
+
 
     vars.playerZoneBytes = game.ReadBytes(playerZone, 4);
     int bytesPlayerZone = BitConverter.ToInt32(vars.playerZoneBytes, 0);
@@ -204,17 +226,25 @@ init {
     vars.rdcBytes = game.ReadBytes(rdc, 4);
     int bytesRDC = BitConverter.ToInt32(vars.rdcBytes, 0);
     IntPtr doorControl = new IntPtr(bytesRDC);
+
+    vars.slBytes = game.ReadBytes(sl, 4);
+    int bytesSl = BitConverter.ToInt32(vars.slBytes, 0);
+    IntPtr surveillance = new IntPtr(bytesSl);
+
+    print(bytesPtr.ToString("X"));
     
     vars.runStartTime = new MemoryWatcher<int>(bytesPtr);
     //vars.realTime     = new MemoryWatcher<int>(bytesPtr + 0x10);
     vars.gameTime     = new MemoryWatcher<int>(bytesPtr + 0x18);
     vars.runFinished  = new MemoryWatcher<int>(bytesPtr + 0x20);
+    vars.gotOmni      = new MemoryWatcher<int>(achievementOmni);
+    vars.room2sl      = new MemoryWatcher<int>(surveillance);
     vars.contained008 = new MemoryWatcher<float>(aslMem  +0x14);
     vars.activated079 = new MemoryWatcher<int>(achievement079);
     vars.currentZone  = new MemoryWatcher<int>(zone);
     vars.remoteDoorControl = new MemoryWatcher<int>(doorControl);
   
-    vars.watchers = new MemoryWatcherList() { vars.runStartTime, /*vars.realTime,*/ vars.gameTime, vars.runFinished, vars.contained008, vars.activated079, vars.currentZone, vars.remoteDoorControl };
+    vars.watchers = new MemoryWatcherList() { vars.runStartTime, /*vars.realTime,*/ vars.gameTime, vars.runFinished, vars.contained008, vars.activated079, vars.currentZone, vars.remoteDoorControl, vars.gotOmni, vars.room2sl };
 
     game.Resume();
     
@@ -244,8 +274,26 @@ split {
     }
 
     //Split on player reaching the surface.
-    if (vars.playerOnSurface && !vars.Splits.Containes("surface")) {
+    if (vars.playerOnSurface && !vars.Splits.Contains("surface")) {
 	return vars.Splits.Add("surface");
+    }
+
+    //Split when the run is finished.
+    if (vars.runFinished.Current == 1 && !vars.Splits.Contains("finished")) {
+	return vars.Splits.Add("finished");
+    }
+
+    //Split on getting an omni card.
+    if (vars.gotOmni.Current == 1 && !vars.Splits.Contains("omni")) {
+	return vars.Splits.Add("omni");
+    }
+
+    //THIS DOES NOT WORK WE WILL LIKELY HAVE TO OVERWRITE THE ASSEMBLY AND READ THE VALUE FROM
+    //OUR ALLOCATED MEMORY LIKE WE DO FOR THE 008 SPLIT.
+    
+    //Split on disablind the light containment lockdown.
+    if (vars.room2sl.Current == 1 && vars.room2sl.Old == 0 && !vars.Splits.Contains("sl")) {
+	return vars.Splits.Add("sl");
     }
     
     //Split on 008 containment.
@@ -257,7 +305,7 @@ split {
 
     //Split when you disable remote door control.
     if (settings["splitOnFirstElectrical"]) {
-	if (vars.remoteDoorControl.Current == 0 && vars.remoteDoorControl.Old == 1 && !vars.Splits.contains("electrical1")) {
+	if (vars.remoteDoorControl.Current == 0 && vars.remoteDoorControl.Old == 1 && !vars.Splits.Contains("electrical1")) {
 	    return vars.Splits.Add("electrical1");
 	}
     }
@@ -274,7 +322,7 @@ split {
 	if (vars.remoteDoorControl.Current == 1 && vars.remoteDoorControl.Old == 0 && vars.Splits.Contains("079")  && !vars.Splits.Contains("electrical2")) {
 	    return vars.Splits.Add("electrical2");
 	}
-    }	
+    }
 }
 
 gameTime {
