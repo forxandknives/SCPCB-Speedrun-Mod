@@ -44,32 +44,11 @@ startup {
 
     settings.Add("splitOnSecondElectrical", false, "Split when you enable remote door control", "Standard");
     settings.SetToolTip("splitOnSecondElectrical", "Split when you enable remote door control.");
-
-    vars.CopyMemory = (Func<Process, IntPtr, int, IntPtr, bool>)((proc, src, len, dest) =>
-	{
-	    var bytes = proc.ReadBytes(src, len);
-	    return proc.WriteBytes(dest, bytes);
-	});
-    
 }
-
-/*shutdown {
-    if (game != null && vars.injected) {
-	game.Suspend();
-
-	vars.CopyMemory(game, (IntPtr)vars.aslMem, 7, (IntPtr)vars.eventState008);
-	
-	game.FreeMemory((IntPtr)vars.aslMem);
-	game.Resume();
-	vars.injected = false;
-    }
-    }*/
 
 init {
 
     vars.Splits = new HashSet<string>();
-    
-    vars.injected = false;
 
     vars.playerOnSurface = false;
     
@@ -88,13 +67,6 @@ init {
 	    break;
 	}
 
-	/*if (eventState008 == IntPtr.Zero) {
-	    eventState008 = vars.eventState008 = scanner.Scan(new SigScanTarget(0, "BB ?? ?? ?? ?? 89 18 81 EC ?? ?? ?? ?? 8B 05 ?? ?? ?? ?? 89 04 24 E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 81 EC ?? ?? ?? ??"));
-	} else {
-	    break;
-	    }
-	*/
-
 	if (pointer079Start == IntPtr.Zero) {
 	    pointer079Start = vars.pointer079Start = scanner.Scan(new SigScanTarget(2, "03 35 ?? ?? ?? ?? 89 1E 8B 1D ?? ?? ?? ?? 8B 75 18 21 F3 21 DB"));
 	} else {
@@ -112,13 +84,6 @@ init {
 	} else {
 	    break; 
 	}
-
-	/*if (sl == IntPtr.Zero) {
-	    sl = vars.sl = scanner.Scan(new SigScanTarget(2, "C7 05 ?? ?? ?? ?? 01 00 00 00 E9 ?? ?? ?? ?? 8B 1D ?? ?? ?? ?? 89 5D EC"));
-	} else {
-	    break;
-	}
-	*/
     }
 
     if (runStartTime != IntPtr.Zero) {
@@ -127,13 +92,6 @@ init {
 	print("Failed to find RunStartTime.");
 	throw new Exception("Cant find RunStartTime");
     }
-
-    /*if (eventState008 != IntPtr.Zero) {
-	print("008EventState found at: " + eventState008.ToString("X"));
-    } else {
-	throw new Exception("Cant find 008");
-    }
-    */
 
     if (pointer079Start != IntPtr.Zero) {
 	print("079 Achievement found at: " + pointer079Start.ToString("X"));
@@ -152,67 +110,12 @@ init {
     } else {
 	throw new Exception("Can't find remote door control.");
     }
-
-    /*
-    if (sl != IntPtr.Zero) {
-	print("Lockdown found at: " + sl.ToString("X"));
-    } else {
-	throw new Exception("Can't find lockdown");
-    }
-    */
     
     game.Suspend();
-
-    /*
-    var aslMem = vars.aslMem = game.AllocateMemory(32);
-    var addrMem = BitConverter.GetBytes((int) aslMem).Reverse().ToArray();
-    print("aslMem Address: " + BitConverter.ToString(addrMem).Replace("-", ""));
-
-   
-    //Store original bytes to copy back into the game once livesplit shuts down.
-    vars.original008Bytes = game.ReadBytes(eventState008, 7);
-
-    //Copy our 7 bytes from game to our allocated memory.
-    vars.CopyMemory(game, eventState008, 7, aslMem);
-
-    //Overwrite those 7 bytes with a jump to our memory and 2 nops.
-    game.WriteJumpInstruction(eventState008, (IntPtr)aslMem);
-    game.WriteBytes(eventState008+5, new byte[] {0x90, 0x90});
-
-    //int writeLocationInt32 = BitConverter.ToInt32(vars.aslMem+10, 0);
-
-    //vars.newWriteLocation = new IntPtr(writeLocationInt32);
-    
-    //game.WriteBytes((IntPtr)aslMem+7, new byte[] {0x89, 0x1D, vars.newWriteLocation[0], vars.newWriteLocation[1], vars.newWriteLocation[2], vars.newWriteLocation[3]});
-
-    //Write a jump from our memory back into the games memory.
-    game.WriteJumpInstruction((IntPtr)aslMem+13, eventState008 + 7);
-
-    //Arbitrarily choose a destination to store out data.
-    //In this case it is address of aslMem + 0x10.
-    //Whenever we want the data we have to ReadByte.
-    var destination = BitConverter.GetBytes((int)aslMem+0x14);
-    var newBytes = new List<byte>(new byte[] {0x89, 0x1D});
-    newBytes.AddRange(destination);    
-    
-    game.WriteBytes((IntPtr)aslMem+7, newBytes.ToArray());      
-
-    game.WriteBytes((IntPtr)aslMem+18, new byte[] {0x81, 0x0, 0x00, 0x0, 0x0, 0x0});
-    */
     
     vars.bytes = game.ReadBytes(runStartTime, 4);
     int bytes32 = BitConverter.ToInt32(vars.bytes, 0);
-    IntPtr bytesPtr = new IntPtr(bytes32);
-    //print("Bytes Ptr: " + bytesPtr.ToString("X"));      
-
-    /*
-      This is what our allocated memory looks like
-      mov ebx, 40000000 // 2 in float
-      mov [eax], ebx    // putting the number into the event state for 008.
-      jmp ????????      // jmp back to the games memory
-      add [eax],4000000 // we store the event state after the [eax].
-    */
-    
+    IntPtr bytesPtr = new IntPtr(bytes32);   
     
     vars.achievement079Bytes = game.ReadBytes(pointer079Start, 4);
     int bytes079 = BitConverter.ToInt32(vars.achievement079Bytes, 0);
@@ -232,15 +135,8 @@ init {
     vars.rdcBytes = game.ReadBytes(rdc, 4);
     int bytesRDC = BitConverter.ToInt32(vars.rdcBytes, 0);
     IntPtr doorControl = new IntPtr(bytesRDC);
-
-    /*
-    vars.slBytes = game.ReadBytes(sl, 4);
-    int bytesSl = BitConverter.ToInt32(vars.slBytes, 0);
-    IntPtr surveillance = new IntPtr(bytesSl);
-    */
     
     vars.runStartTime = new MemoryWatcher<int>(bytesPtr);
-    //vars.realTime     = new MemoryWatcher<int>(bytesPtr + 0x10);
     vars.gameTime     = new MemoryWatcher<int>(bytesPtr + 0x18);
     vars.runFinished  = new MemoryWatcher<int>(bytesPtr + 0x20);
     vars.gotOmni      = new MemoryWatcher<int>(achievementOmni);
@@ -250,12 +146,9 @@ init {
     vars.currentZone  = new MemoryWatcher<int>(zone);
     vars.remoteDoorControl = new MemoryWatcher<int>(doorControl);
   
-    vars.watchers = new MemoryWatcherList() { vars.runStartTime, /*vars.realTime,*/ vars.gameTime, vars.runFinished, vars.contained008, vars.activated079, vars.currentZone, vars.remoteDoorControl, vars.gotOmni, vars.room2sl };
+    vars.watchers = new MemoryWatcherList() { vars.runStartTime, vars.gameTime, vars.runFinished, vars.contained008, vars.activated079, vars.currentZone, vars.remoteDoorControl, vars.gotOmni, vars.room2sl };
 
-    game.Resume();
-    
-    vars.injected = true;
-    
+    game.Resume();       
 }
 
 start {    
@@ -354,10 +247,7 @@ update {
 }
 
 reset {
-    if (vars.runStartTime.Current == 0) {
-	//game.WriteBytes((IntPtr)vars.aslMem+20, new byte[] {0x0, 0x0, 0x0, 0x0});
-	return true;
-    }
+    return vars.runStartTime.Current == 0;
 }
 
 onStart {
