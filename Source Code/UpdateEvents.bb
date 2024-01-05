@@ -7196,6 +7196,7 @@ Function UpdateEvents()
 						If EntityPitch(e\room\Levers[0],True)<40 Then 
 							e\EventState = 2
 							PlaySound_Strict LeverSFX
+							Contained008 = True
 						Else
 							p.Particles = CreateParticle(EntityX(e\room\Objects[0],True),EntityY(e\room\Objects[0],True),EntityZ(e\room\Objects[0],True), 6, 0.02, -0.12)
 							RotateEntity (p\pvt,-90,0,0,True)
@@ -8377,6 +8378,7 @@ Function UpdateEvents()
 							EntityTexture e\room\Objects[20],e\room\Textures[0],2
 						EndIf
 					Else
+						DeactivatedLockdown = True
 						TurnCheckpointMonitorsOff(0)
 						EntityTexture e\room\Objects[20],e\room\Textures[0],0
 					EndIf

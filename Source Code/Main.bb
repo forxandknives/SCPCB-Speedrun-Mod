@@ -389,11 +389,14 @@ Global EightyPercentOfScreen = GraphicsWidth() * 0.75
 
 Global CursorIndex% = 0
 
-Global SeedRNGDirectly = False
+Global SeedRNGDirectly% = False
 Global DirectSeed% = -1
 
-Global MonitorHeight = GraphicsHeight()
-Global MonitorWidth  = GraphicsWidth()
+Global DeactivatedLockdown% = False
+Global Contained008% = False
+
+Global MonitorHeight% = GraphicsHeight()
+Global MonitorWidth%  = GraphicsWidth()
 
 Function ResetSpeedrunVariables()
 
@@ -415,6 +418,9 @@ Function ResetSpeedrunVariables()
 		Showmap = False
 	EndIf
 	DirectSeed = -1
+	DeactivatedLockdown = False
+	Contained008 = False
+	
 	
 End Function
 
