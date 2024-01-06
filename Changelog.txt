@@ -1,13 +1,19 @@
 ﻿Speedrun Mod v0.0.5
+- Added option to see how long you lived for.
+	- Can disable showing this in settings.
 - Added autosplitter for use with livesplit.
 	- Will split on start, reaching heavy containment, reaching entrance zone, reaching surface, and finishing the run
-	- Optional splits on 008, 079, first and second electrical centers.
+	- Disable the "Standard autosplitter" option if you just want auto start and stop.
+	- Optional splits on omni, surverillance room, scp008, scp079, first and second electrical centers.
+	- An included layout and splits file to use.
+		- The splits file assumes you are doing all optional splits.
 - Added option to directly seed the game's rng with the inputted seed.
 	- The seed must be numbers only.
 	- Leave this enabled and the seed blank for 2 billion possible random seeds.
 	- In-game pause menu and end of the run will tell you if the rng was directly seeded.
 - Added console command "showmap" to draw a 2D version of the map on screen.
 	- Type "help showmap" to see what room each color represents.
+	- Type "showmap 2" to have showmap stay on between seeds.
 - Minor bug fixes to text boxes and console text box.
 - Ctrl+c will now clear the console text when the console is open.
 
