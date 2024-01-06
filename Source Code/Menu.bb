@@ -734,6 +734,7 @@ Function UpdateMainMenu()
 						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);
 	
 						RunStartTime = MilliSecs()
+						DeathStartTime = MilliSecs()
 						
 					EndIf					
 				EndIf
@@ -946,6 +947,7 @@ Function UpdateMainMenu()
 											Can100Seed = True
 										EndIf
 
+										DeathStartTime = MilliSecs()
 										
 										RunStartTime = MilliSecs()
 										
@@ -1482,8 +1484,13 @@ Function UpdateMainMenu()
 					
 					y = y + 30 * MenuScale
 					
-					AAText(X + 20 * MenuScale, y, "Display Seed Warnings:")
+					AAText(x + 20 * MenuScale, y, "Display Seed Warnings:")
 					DisplaySeedWarnings% = DrawTick(x + 310 * MenuScale, y, DisplaySeedWarnings%)
+					
+					y = y + 30 * MenuScale
+					
+					AAText(x + 20 * MenuScale, y, "Display Death Time:")
+					ShowDeathTime% = DrawTick(x + 310 * MenuScale, y, ShowDeathTime)
 					
 					y = y + 35 * MenuScale
 					
@@ -1512,7 +1519,7 @@ Function UpdateMainMenu()
 					Color TimerR, TimerG, TimerB
 					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "This is the color of your timer.")
 					
-					y = y + 50 * MenuScale
+					y = y + 30 * MenuScale
 					
 					Color 255, 255, 255
 					AASetFont Font1

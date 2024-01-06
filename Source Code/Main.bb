@@ -398,6 +398,10 @@ Global Contained008% = False
 Global MonitorHeight% = GraphicsHeight()
 Global MonitorWidth%  = GraphicsWidth()
 
+Global DeathStartTime% = 0
+Global DeathEndTime%   = 0
+Global ShowDeathTime% = GetINIInt(OptionFile, "options", "show death time")
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -420,7 +424,8 @@ Function ResetSpeedrunVariables()
 	DirectSeed = -1
 	DeactivatedLockdown = False
 	Contained008 = False
-	
+	DeathStartTime = 0
+	DeathEndTime = 0
 	
 End Function
 
@@ -3410,7 +3415,21 @@ Repeat
 			
 			If (Not WearingNightVision) Then darkA = Max((1.0-SecondaryLightOn)*0.9, darkA)
 			
-			If KillTimer < 0 Then
+			If KillTimer < 0 Then				
+			
+				If DeathEndTime = 0 Then
+					DeathEndTime = MilliSecs()
+				EndIf
+				
+				If ShowDeathTime Then
+					Local deathTime% = DeathEndTime - DeathStartTime
+					
+					Local sec% = deathTime / 1000
+					Local msec% = deathTime Mod 1000
+					
+					AAText(MonitorWidth / 2, MonitorHeight * 0.90, "Died in " + Str(sec) + "." + Str(msec) + " seconds.", True, True)
+				EndIf
+				
 				InvOpen = False
 				SelectedItem = Null
 				SelectedScreen = Null
@@ -8113,6 +8132,11 @@ Function DrawMenu()
 					AAText(x, y, "Display Seed Warnings:")
 					DisplaySeedWarnings% = DrawTick(x + 270 * MenuScale, y + MenuScale, DisplaySeedWarnings%)
 					
+					y = y + 30 * MenuScale
+					
+					AAText(x, y, "Display Death Time:")
+					ShowDeathTime% = DrawTick(x + 270 * MenuScale, y, ShowDeathTime)
+					
 					y = y + 35 * MenuScale
 					
 					AAText(x, y, "Enter values from 0 To 255.")
@@ -8140,7 +8164,7 @@ Function DrawMenu()
 					Color TimerR, TimerG, TimerB
 					AAText(x, y, "This is the color of your timer.")
 					
-					y = y + 50 * MenuScale
+					y = y + 30 * MenuScale
 					
 					Color 255, 255, 255
 					AASetFont Font1
@@ -8305,6 +8329,10 @@ Function DrawMenu()
 							FPSfactor = 0
 							
 							ResetInput()
+							
+							DeathEndTime = 0
+							DeathStartTime = MilliSecs()
+							
 						EndIf
 					Else
 						DrawFrame(x,y,390*MenuScale, 60*MenuScale)
@@ -8366,6 +8394,10 @@ Function DrawMenu()
 						FPSfactor = 0
 						
 						ResetInput()
+						
+						DeathEndTime = 0
+						DeathStartTime = MilliSecs()
+						
 					EndIf
 				Else
 					DrawButton(x, y, 390*MenuScale, 60*MenuScale, "")
@@ -11756,6 +11788,8 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "options", "speedrun timer", SpeedrunTimer)
 	PutINIValue(OptionFile, "options", "seed warnings", DisplaySeedWarnings)
+	PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirecly)
+	PutINIValue(OptionFile, "options", "show death time", ShowDeathTime)
 	PutINIValue(OptionFile, "options", "timer r", TimerR)
 	PutINIValue(OptionFile, "options", "timer g", TimerG)
 	PutINIValue(OptionFile, "options", "timer b", TimerB)
