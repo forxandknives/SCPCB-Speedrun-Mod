@@ -3,7 +3,7 @@
 //December 10 2023
 
 state("SCP - Containment Breach Speedrun Mod", "Speedrun Mod") {
-    float playerY : "SCP - Containment Breach Speedrun Mod.exe", 0x000f5400, 0x160, 0x140, 0x44; // player y pos
+    float playerY : "SCP - Containment Breach Speedrun Mod.exe", 0x000FA7EC, 0xC, 0x4, 0x44; // player y pos
 }
 
 startup {
@@ -53,16 +53,14 @@ init {
     vars.playerOnSurface = false;
     
     IntPtr runStartTime    = IntPtr.Zero;
-    IntPtr eventState008   = IntPtr.Zero;
     IntPtr pointer079Start = IntPtr.Zero;
     IntPtr playerZone      = IntPtr.Zero;
     IntPtr rdc             = IntPtr.Zero;
-    IntPtr sl              = IntPtr.Zero;
     
     foreach (var page in game.MemoryPages(true)) {
 	var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
 	if (runStartTime == IntPtr.Zero) {
-	    runStartTime = scanner.Scan(new SigScanTarget(2, "89 05 ?? ?? ?? ?? E9 ?? ?? ?? ?? BB ?? ?? ?? ??"));
+	    runStartTime = scanner.Scan(new SigScanTarget(2, "89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 05 ?? ?? ?? ?? E9 ?? ?? ?? ?? BB ?? ?? ?? ??"));
 	} else {
 	    break;
 	}
