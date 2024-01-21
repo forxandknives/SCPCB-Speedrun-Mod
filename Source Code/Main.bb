@@ -389,7 +389,7 @@ Global EightyPercentOfScreen = GraphicsWidth() * 0.75
 
 Global CursorIndex% = 0
 
-Global SeedRNGDirectly% = False
+Global SeedRNGDirectly% = GetINIInt(OptionFile, "options", "seed rng directly")
 Global DirectSeed% = -1
 
 Global DeactivatedLockdown% = False
