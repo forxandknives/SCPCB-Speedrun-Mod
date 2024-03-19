@@ -402,6 +402,14 @@ Global DeathStartTime% = 0
 Global DeathEndTime%   = 0
 Global ShowDeathTime% = GetINIInt(OptionFile, "options", "show death time")
 
+Global StartMainLoopTime% = 0
+Global EndMainLoopTime% = 0
+Global MainLoopCount% = 0
+Global TimeThisMainLoop = 0
+Global AverageMainLoopTime% = 0
+Global FinalLoopCount% = 0
+Global FinalLoopTime% = 0
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -1440,6 +1448,24 @@ Function UpdateConsole()
 						CreateConsoleMsg("Debug Mode Off")
 					EndIf
 					;[End Block]
+				Case "debughud2"
+					;[Block]
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					Select StrTemp
+						Case "on", "1", "true"
+							DebugHUD2 = True
+						Case "off", "0", "false"
+							DebugHUD2 = False
+						Default 
+							DebugHUD2 = Not DebugHUD2
+					End Select
+					If DebugHUD2 Then
+						CreateConsoleMsg("Debug Mode 2 On")
+					Else
+						CreateConsoleMsg("Debug Mode 2 Off")
+					EndIf
+
+					;[End Block]
 				Case "stopsound", "stfu"
 					;[Block]
 					For snd.Sound = Each Sound
@@ -1841,6 +1867,7 @@ CreateConsoleMsg("  - spawn [npc type]")
 ;---------------------------------------------------------------------------------------------------
 
 Global DebugHUD%
+Global DebugHUD2%
 
 Global BlurVolume#, BlurTimer#
 
@@ -3127,6 +3154,42 @@ End Function
 
 Repeat
 	
+	;This will track how many times the main loop runs in each second, and the average run time for each loop.
+	If DebugHUD2 Then		
+		If StartMainLoopTime = 0 Then
+			StartMainLoopTime = MilliSecs()
+			TimeThisMainLoop = MilliSecs()
+		Else
+			If EndMainLoopTime - StartMainLoopTime >= 1000
+				FinalLoopCount = MainLoopCount
+				FinalLoopTime = AverageMainLoopTime / FinalLoopCount
+				
+				DebugLog "-----------------------------------------"
+				DebugLog "StartMainLoopTime:" + StartMainLoopTime
+				DebugLog "EndMainLoopTime: " + EndMainLoopTime
+				DebugLog "MainLoopCount: " + MainLoopCount
+				DebugLog "TimeThisMainLoop: " + TimeThisMainLoop
+				DebugLog "AverageMainLoopTime: " + AverageMainLoopTime
+				DebugLog "FinalLoopCount: " + FinalLoopCount
+				DebugLog "FinalLoopTime: " + FinalLoopTime
+				DebugLog "-----------------------------------------"
+				
+				;Stop	
+				
+				MainLoopCount = 0
+				AverageMainLoopTime = 0
+				StartMainLoopTime = MilliSecs()
+				TimeThisMainLoop = MilliSecs()
+			Else 				
+			
+				MainLoopCount = MainLoopCount + 1				
+				AverageMainLoopTime = AverageMainLoopTime + (EndMainLoopTime - TimeThisMainLoop)							
+				TimeThisMainLoop = MilliSecs()	
+				
+			EndIf
+		EndIf
+	EndIf
+	
 	Cls
 	
 	If ShouldIncreasePlayTime Then
@@ -3136,6 +3199,8 @@ Repeat
 	If Not RunFinished Then
 		GameTime = PlayTime - LoadTime + LoadFromMenuGameTime
 	EndIf
+	
+	
 	
 	CurTime = MilliSecs2()
 	ElapsedTime = (CurTime - PrevTime) / 1000.0
@@ -3698,6 +3763,10 @@ Repeat
 	EntityFX fresize_image,1
 	EntityBlend fresize_image,1
 	EntityAlpha fresize_image,1.0
+	
+	If DebugHUD2 Then			
+		EndMainLoopTime = MilliSecs()
+	EndIf
 	
 	CatchErrors("Main loop / uncaught")
 	
@@ -5355,6 +5424,17 @@ Function DrawGUI()
 			EndIf
 			
 			AASetFont Font1
+		EndIf
+		
+		If DebugHUD2 Then
+			Color 255, 255, 255
+			AASetFont ConsoleFont
+			
+			AAText x - 50, 50, "Took " + Str(FinalLoopTime) + " milliseconds for " + Str(FinalLoopCount) + " main loops."
+			;AAText x - 50, 70, "Camera Position: (" + f2s(EntityX(Camera), 3)+ ", " + f2s(EntityY(Camera), 3) +", " + f2s(EntityZ(Camera), 3) + ")"
+			;AAText x - 50, 100, "Player Rotation: (" + f2s(EntityPitch(Collider), 3) + ", " + f2s(EntityYaw(Collider), 3) + ", " + f2s(EntityRoll(Collider), 3) + ")"
+			;AAText x - 50, 120, "Camera Rotation: (" + f2s(EntityPitch(Camera), 3)+ ", " + f2s(EntityYaw(Camera), 3) +", " + f2s(EntityRoll(Camera), 3) + ")"
+			;AAText x - 50, 150, "Room: " + PlayerRoom\RoomTemplate\Name
 		EndIf
 		
 	EndIf
