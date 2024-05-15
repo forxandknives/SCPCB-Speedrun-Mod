@@ -372,7 +372,9 @@ Global LoadFromMenuGameTime% = 0; We need a variable to load the game time of th
 Global RunFinished% = False
 Global SpeedrunEnding$ = ""
 Global SpeedrunTimer% = GetINIInt(OptionFile, "options", "speedrun timer")
-Global DisplaySeedWarnings% = GetINIInt(OptionFile, "options", "seed warnings")
+;Global DisplaySeedWarnings% = GetINIInt(OptionFile, "options", "seed warnings")
+Global ShowSeedIsBeatable% = GetINIInt(OptionFile, "options", "can beat seed warning")
+Global ShowSeedCanBe100% = GetINIInt(OptionFile, "options", "can 100 seed warning")
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
 
 Global IsSeedBeatable = True
@@ -409,6 +411,16 @@ Global TimeThisMainLoop = 0
 Global AverageMainLoopTime% = 0
 Global FinalLoopCount% = 0
 Global FinalLoopTime% = 0
+
+Global OldPlayerRoom.Rooms
+Global OnePointerCounter% = 0
+Global TwoPointerCounter% = 0
+Global startRoom% = 0
+Global endRoom% = 0
+Global startRoom2% = 0
+Global endRoom2% = 0
+
+Global ESP% = False
 
 Function ResetSpeedrunVariables()
 
@@ -1063,6 +1075,12 @@ Function UpdateConsole()
 							EndIf
 							ShowMap = Not(ShowMap)				
 					End Select
+					
+					;[End Block]
+				Case "esp"
+					;[Block]
+					
+					ESP = Not ESP
 					
 					;[End Block]
 				Case "quit", "exit"
@@ -3162,7 +3180,9 @@ Repeat
 		Else
 			If EndMainLoopTime - StartMainLoopTime >= 1000
 				FinalLoopCount = MainLoopCount
-				FinalLoopTime = AverageMainLoopTime / FinalLoopCount
+				If FinalLoopCount <> 0
+					FinalLoopTime = AverageMainLoopTime / FinalLoopCount
+				EndIf
 				
 				DebugLog "-----------------------------------------"
 				DebugLog "StartMainLoopTime:" + StartMainLoopTime
@@ -3198,10 +3218,8 @@ Repeat
 	
 	If Not RunFinished Then
 		GameTime = PlayTime - LoadTime + LoadFromMenuGameTime
-	EndIf
-	
-	
-	
+	EndIf		
+			
 	CurTime = MilliSecs2()
 	ElapsedTime = (CurTime - PrevTime) / 1000.0
 	PrevTime = CurTime
@@ -3763,6 +3781,8 @@ Repeat
 	EntityFX fresize_image,1
 	EntityBlend fresize_image,1
 	EntityAlpha fresize_image,1.0
+	
+	OldPlayerRoom = PlayerRoom
 	
 	If DebugHUD2 Then			
 		EndMainLoopTime = MilliSecs()
@@ -5077,17 +5097,97 @@ Function DrawGUI()
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
 	EndIf
 	
-	If DisplaySeedWarnings Then
+	If ShowSeedIsBeatable Then
 		If Not(IsSeedBeatable) Then
 			AASetFont Font2
 			AAText GraphicWidth/2, GraphicHeight * 0.05, "Seed is not beatable.", True, True
 		EndIf
+	EndIf
 		
-		If SelectedDifficulty\Name = "Keter" And (Not Can100Seed) Then
+	If ShowSeedCanBe100 Then
+		If (Not Can100Seed) Then
 			AASetFont Font2
 			AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
 		EndIf
 	EndIf
+	
+	If ESP Then
+		CameraProject(Camera, EntityX(Curr173\Collider), EntityY(Curr173\Collider), EntityZ(Curr173\Collider))				
+		
+		Local SquareSize% = MonitorHeight * 0.0125
+		Local MiddleX = MonitorWidth / 2
+		Local MiddleY = MonitorHeight
+		
+		Local SquareX = MiddleX
+		Local SquareY = MiddleY - SquareSize
+				
+		Color 255, 0, 0
+		Rect(SquareX, SquareY, SquareSize, SquareSize, 1)					
+		
+		Local NutX = ProjectedX()
+		Local NutY = ProjectedY()
+		
+		If NutX <> 0 And NutY <> 0		
+			Rect(NutX, NutY, SquareSize, SquareSize, 1)				
+			Line(SquareX, SquareY, NutX, NutY)
+		EndIf
+		
+	EndIf
+	
+	;DELETE THIS ONCE DONE
+	;
+	;This code will try to determine if it is worth it to search through Type object with a front and end pointer.
+	;Right now, basically all events and rooms are searched for with For r.Rooms or e.Events.
+	;This is done iteratively, and the hope is that having a pointer at the back will half the average time to get the desired room or event.
+	;
+	;We will start by just doing stuff with the PlayerRoom	
+	
+	;If PlayerRoom <> OldPlayerRoom Then
+	;		
+	;	Local roomCounter% = 0
+	;	
+	;	;One Pointer
+	;	startRoom = MilliSecs()		
+	;	For r.Rooms = Each Rooms 
+	;		If PlayerRoom\RoomTemplate\Name$ = r\RoomTemplate\Name
+	;			OnePointerCounter = roomCounter 
+	;			endRoom = MilliSecs()
+	;			Exit
+	;		Else
+	;			roomCounter = roomCounter + 1
+	;		EndIf
+	;	Next
+	;		
+	;	roomCounter = 0
+	;		
+	;	;Two Pointers
+	;	Local rStart.Rooms = First Rooms
+	;	Local rEnd.Rooms   = Last Rooms
+	;	startRoom2 = MilliSecs()
+	;	Repeat
+	;		If rStart\RoomTemplate\Name$ = PlayerRoom\RoomTemplate\Name$ Then
+	;			TwoPointerCounter = roomCounter
+	;			endRoom2 = MilliSecs()
+	;			Exit
+	;		Else
+	;			rStart = After rStart
+	;		EndIf
+	;		
+	;		If rEnd\RoomTemplate\Name$ = PlayerRoom\RoomTemplate\Name$ Then
+	;			TwoPointerCounter = roomCounter
+	;			endRoom2 = MilliSecs()
+	;			Exit
+	;		Else
+	;			rEnd = Before rEnd
+	;		EndIf
+	;		
+	;		roomCounter = roomCounter + 1			
+	;	Forever
+	;		
+	;EndIf 
+	
+	;AAText(MonitorWidth / 2, MonitorHeight * 0.10, Str(endRoom) + " " + Str(startRoom) + " " + Str(endRoom - startRoom) + " ms " + OnePointerCounter + " loops one pointer.", True, True)
+	;AAText(MonitorWidth / 2, MonitorHeight * 0.15, Str(endRoom2 - startRoom2) + " ms " + TwoPointerCounter + " loops two pointers.", True, True)	
 			
 	AASetFont Font1
 			
@@ -8209,11 +8309,14 @@ Function DrawMenu()
 
 					y = y + 50*MenuScale
 					
+					If DrawButton(x+325*MenuScale,y,100*MenuScale,30*MenuScale,"WARNINGS",False) Then OptionsMenu = 6
+					
 					Color 255,255,255
 					AAText(x, y, "Display Timer in Game:")
 					SpeedrunTimer% = DrawTick(x + 270 * MenuScale, y + MenuScale, SpeedrunTimer%)
 					
 					y = y + 30 * MenuScale
+					
 					AAText(x, y, "Display Seed Warnings:")
 					DisplaySeedWarnings% = DrawTick(x + 270 * MenuScale, y + MenuScale, DisplaySeedWarnings%)
 					
@@ -8265,7 +8368,27 @@ Function DrawMenu()
 					TimerYSlider = (SlideBar(x + 250*MenuScale, y, 100*MenuScale, TimerYSlider * 100.0)/100.0)
 					TimerY = TimerYSlider * GraphicHeight
 					
-					;[End Block]			
+					;[End Block]	
+				Case 6
+					;[Block]
+					
+					; Settings to enable/disable the seed warnings.
+					
+					y = y + 50*MenuScale
+					
+					Color 255,255,255
+					AAText(x, y, "Show seed is beatable:")
+					ShowSeedIsBeatable% = DrawTick(x + 270 * MenuScale, y + MenuScale, ShowSeedIsBeatable%)
+					
+					y = y + 30 * MenuScale
+					
+					AAText(x, y, "Show seed can be 100%:")
+					ShowSeedCanBe100% = DrawTick(x + 270 * MenuScale, y + MenuScale, ShowSeedCanBe100%)
+						
+					y = y + 30 * MenuScale
+
+					
+					;[End Block]		
 			End Select
 		ElseIf AchievementsMenu <= 0 And OptionsMenu <= 0 And QuitMSG > 0 And KillTimer >= 0
 			Local QuitButton% = 60 
@@ -11872,7 +11995,9 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "enable vram", EnableVRam)
 	PutINIValue(OptionFile, "options", "mouse smoothing", MouseSmooth)
 	PutINIValue(OptionFile, "options", "speedrun timer", SpeedrunTimer)
-	PutINIValue(OptionFile, "options", "seed warnings", DisplaySeedWarnings)
+	;PutINIValue(OptionFile, "options", "seed warnings", DisplaySeedWarnings)
+	PutINIValue(OptionFile, "options", "can beat seed warning", ShowSeedIsBeatable)
+	PutINIValue(OptionFile, "options", "can 100 seed warning", ShowSeedCanBe100)
 	PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirecly)
 	PutINIValue(OptionFile, "options", "show death time", ShowDeathTime)
 	PutINIValue(OptionFile, "options", "timer r", TimerR)

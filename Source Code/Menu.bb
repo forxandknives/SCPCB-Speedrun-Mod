@@ -626,105 +626,105 @@ Function UpdateMainMenu()
 						If SeedHas008 = False Or SeedHasElectricalCenter = False Then
 							IsSeedBeatable = False
 						EndIf
+						 
+						For amongus.Events = Each Events
+							If amongus\EventName = "buttghost" Then
+								RoomCounter = RoomCounter + 1
+								DebugLog "butt ghost"
+							EndIf
+						Next
 						
-						If SelectedDifficulty\Name = "Keter" Then 
-							For amongus.Events = Each Events
-								If amongus\EventName = "buttghost" Then
+						For p.Rooms = Each Rooms
+							Select p\Roomtemplate\name$
+								Case "008" ; Biohazard;;;;;;;;;;;;;;;;;;;;;;;;;;
 									RoomCounter = RoomCounter + 1
-									DebugLog "butt ghost"
-								EndIf
-							Next
-							
-							For p.Rooms = Each Rooms
-								Select p\Roomtemplate\name$
-									Case "008" ; Biohazard;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "biohazard"
-										
-									Case "room012" ; Scribe;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "scribe"
-										
-									Case "room035" ; Curtains Down;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "curtains down"	
-																		
-									Case "room2sl" ; Doctor, Doctor;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "doctor doctor"
-										
-									Case "room079" ; Deductive Reasoning;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "deductive reasoning"
-										
-									Case "room205" ; Femme Fatal;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "femme fatal"		
+									DebugLog "biohazard"
+									
+								Case "room012" ; Scribe;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "scribe"
+									
+								Case "room035" ; Curtains Down;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "curtains down"	
 																	
-									Case "room2cafeteria" ; OUT OF RANGE;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "out of range"
+								Case "room2sl" ; Doctor, Doctor;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "doctor doctor"
+									
+								Case "room079" ; Deductive Reasoning;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "deductive reasoning"
+									
+								Case "room205" ; Femme Fatal;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "femme fatal"		
+																
+								Case "room2cafeteria" ; OUT OF RANGE;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "out of range"
+									
+								Case "roompj" ; The Corner of Your Eye;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "corner of your eye"
+									
+								Case "room2sroom" ; Reggae, Man;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "weed"
+									
+								Case "room513" ; If You Ring it, He Will Come;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "ring it he will come"
+									
+								Case "room2scps" ; Mental Exhaustion : Blue Hue : Potential Bioweapon;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1
+									DebugLog "mental exhaustion"							
+									
+								Case "coffin" ; Interference
+									RoomCounter = RoomCounter + 1
+									DebugLog "interference"
+									
+								Case "914" ; Refinery;;;;;;;;;;;;;;;;;;;;;;;;;;							
+									RoomCounter = RoomCounter + 1
+									DebugLog "refinery"							
 										
-									Case "roompj" ; The Corner of Your Eye;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "corner of your eye"
+								Case "room3storage" ; Show Yourself;;;;;;;;;;;;;;;;;;;;;;;;;;								
+									RoomCounter = RoomCounter + 1
+									DebugLog "show yourself"
+									
+								Case "room966" ; Rapid Eye Movement;;;;;;;;;;;;;;;;;;;;;;;;;;								
+									RoomCounter = RoomCounter + 1
+									DebugLog "rapid eye movement"
+									
+								Case "room2storage" ; Recursive Spacial Phenomenom;;;;;;;;;;;;;;;;;;;;;;;;;;								
+									RoomCounter = RoomCounter + 1
+									DebugLog "recursive spacial phenomenom"
+									
+								Case "room1123" ; The Final Solution;;;;;;;;;;;;;;;;;;;;;;;;;;								
+									RoomCounter = RoomCounter + 1
+									DebugLog "final solution"
+									
+								Case "room2poffices" ; The Containment Breach : World-Ending Scenario;;;;;;;;;;;;;;;;;;;;;;;;;;								
+									RoomCounter = RoomCounter + 1
+									DebugLog "the containment breach"
+									
+								Case "room1162" ; Pieces of the Past;;;;;;;;;;;;;;;;;;;;;;;;;;								
+									RoomCounter = RoomCounter + 1
+									DebugLog "pieces of t he past"
+									
+								Case "room2scps2" ; Screams of the Present;;;;;;;;;;;;;;;;;;;;;;;;;;
+									RoomCounter = RoomCounter + 1									
+									DebugLog "screams of the present"
+									
+								Default
 										
-									Case "room2sroom" ; Reggae, Man;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "weed"
-										
-									Case "room513" ; If You Ring it, He Will Come;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "ring it he will come"
-										
-									Case "room2scps" ; Mental Exhaustion : Blue Hue : Potential Bioweapon;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1
-										DebugLog "mental exhaustion"							
-										
-									Case "coffin" ; Interference
-										RoomCounter = RoomCounter + 1
-										DebugLog "interference"
-										
-									Case "914" ; Refinery;;;;;;;;;;;;;;;;;;;;;;;;;;							
-										RoomCounter = RoomCounter + 1
-										DebugLog "refinery"							
-											
-									Case "room3storage" ; Show Yourself;;;;;;;;;;;;;;;;;;;;;;;;;;								
-										RoomCounter = RoomCounter + 1
-										DebugLog "show yourself"
-										
-									Case "room966" ; Rapid Eye Movement;;;;;;;;;;;;;;;;;;;;;;;;;;								
-										RoomCounter = RoomCounter + 1
-										DebugLog "rapid eye movement"
-										
-									Case "room2storage" ; Recursive Spacial Phenomenom;;;;;;;;;;;;;;;;;;;;;;;;;;								
-										RoomCounter = RoomCounter + 1
-										DebugLog "recursive spacial phenomenom"
-										
-									Case "room1123" ; The Final Solution;;;;;;;;;;;;;;;;;;;;;;;;;;								
-										RoomCounter = RoomCounter + 1
-										DebugLog "final solution"
-										
-									Case "room2poffices" ; The Containment Breach : World-Ending Scenario;;;;;;;;;;;;;;;;;;;;;;;;;;								
-										RoomCounter = RoomCounter + 1
-										DebugLog "the containment breach"
-										
-									Case "room1162" ; Pieces of the Past;;;;;;;;;;;;;;;;;;;;;;;;;;								
-										RoomCounter = RoomCounter + 1
-										DebugLog "pieces of t he past"
-										
-									Case "room2scps2" ; Screams of the Present;;;;;;;;;;;;;;;;;;;;;;;;;;
-										RoomCounter = RoomCounter + 1									
-										DebugLog "screams of the present"
-										
-									Default
-											
-								End Select								 
-							Next
-						EndIf
+							End Select								 
+						Next
 						
 						If RoomCounter = 21 Then
-							Can100Seed = True
+							If IsSeedBeatable Then
+								Can100Seed = True
+							EndIf
 						EndIf
 						
 						FlushKeys()
@@ -1473,8 +1473,8 @@ Function UpdateMainMenu()
 					EndIf
 					
 				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
-					;[Block]
-					height = 320 * MenuScale ; Height of white box around settings
+					;[Block] 320
+					height = 360 * MenuScale ; Height of white box around settings
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -1484,9 +1484,14 @@ Function UpdateMainMenu()
 					
 					y = y + 30 * MenuScale
 					
-					AAText(x + 20 * MenuScale, y, "Display Seed Warnings:")
-					DisplaySeedWarnings% = DrawTick(x + 310 * MenuScale, y, DisplaySeedWarnings%)
+					AAText(x + 20 * MenuScale, y, "Show if seed is beatable:")
+					ShowSeedIsBeatable% = DrawTick(x + 310 * MenuScale, y, ShowSeedIsBeatable%)
 					
+					y = y + 30 * MenuScale
+					
+					AAText(x + 20 * MenuScale, y, "Show if seed can be 100%:")
+					ShowSeedCanBe100% = DrawTick(x + 310 * MenuScale, y, ShowSeedCanBe100%)
+
 					y = y + 30 * MenuScale
 					
 					AAText(x + 20 * MenuScale, y, "Display Death Time:")

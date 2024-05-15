@@ -5642,8 +5642,37 @@ Function UpdateRooms()
 		
 		If hide Then
 			HideEntity r\obj
+			
+			;For i = 0 To MaxRoomLights-1
+			;	If r\Lights[i] <> 0 Then
+			;		HideEntity(r\Lights[i])
+			;	EndIf									
+			;Next
+			;
+			;For i = 0 To 7-1
+			;	If r\RoomDoors[i] <> Null Then
+			;		If r\RoomDoors[i]\obj <> 0 Then HideEntity(r\RoomDoors[i]\obj)
+			;		If r\RoomDoors[i]\obj2 <> 0 Then HideEntity(r\RoomDoors[i]\obj2)
+			;		If r\RoomDoors[i]\frameobj <> 0 Then HideEntity(r\RoomDoors[i]\frameobj)
+			;		If r\RoomDoors[i]\buttons[0] <> 0 Then HideEntity(r\RoomDoors[i]\buttons[0])
+			;		If r\RoomDoors[i]\buttons[1] <> 0 Then HideEntity(r\RoomDoors[i]\buttons[1])
+			;	EndIf
+			;Next
+			;
+			;For i = 0 To MaxRoomObjects-1
+			;	If r\Objects[i] <> 0 Then	
+			;		HideEntity(r\Objects[i])
+			;	EndIf
+			;Next
+			
+			;For i = 0 To 7-1
+			;	If r\RoomDoors[i] <> Null Then
+			;		If r\RoomDoors[i]\DoorHitOBJ <> 0 Then HideEntity(r\RoomDoors[i]\DoorHitOBJ)
+			;	EndIf
+			;Next
+						
 		Else
-			ShowEntity r\obj
+			ShowEntity r\obj 
 			For i = 0 To MaxRoomLights-1
 				If r\Lights[i] <> 0 Then
 					dist = EntityDistance(Collider,r\Lights[i])
