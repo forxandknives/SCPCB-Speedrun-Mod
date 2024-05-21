@@ -8315,10 +8315,10 @@ Function DrawMenu()
 					AAText(x, y, "Display Timer in Game:")
 					SpeedrunTimer% = DrawTick(x + 270 * MenuScale, y + MenuScale, SpeedrunTimer%)
 					
-					y = y + 30 * MenuScale
+					;y = y + 30 * MenuScale
 					
-					AAText(x, y, "Display Seed Warnings:")
-					DisplaySeedWarnings% = DrawTick(x + 270 * MenuScale, y + MenuScale, DisplaySeedWarnings%)
+					;AAText(x, y, "Display Seed Warnings:")
+					;DisplaySeedWarnings% = DrawTick(x + 270 * MenuScale, y + MenuScale, DisplaySeedWarnings%)
 					
 					y = y + 30 * MenuScale
 					
