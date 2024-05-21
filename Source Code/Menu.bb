@@ -179,6 +179,45 @@ Function UpdateMainMenu()
 		MenuBlinkDuration(0) = Rand(200, 500)
 	End If
 	
+	AASetFont FontMono
+	Color TimerR, TimerG, TimerB
+	If (RunStartTime = 0 Or RunFinished) Then
+		Local timerText$ = "Timer not running"
+		Local sw% = AAStringWidth(timerText)
+		;Local sh% = AAStringHeight(timerText)
+		
+		AAText(MonitorWidth - sw, 0, timerText, False, False) 		
+		
+	Else If (RunStartTime > 0) Then
+		
+		Local ms% = Int(Gametime Mod 1000)
+		Local seconds% = (GameTime / 1000) Mod 60
+		Local minutes% = Int((Gametime / 1000) / 60)
+			
+		Local secondsString$ = Str(seconds)
+			
+		If seconds < 10 Then
+			secondsString = "0" + secondsString
+		EndIf
+		
+		Local msString$ = Str(ms)
+		
+		If ms < 10 Then
+			msString = "00" + msString
+		EndIf 
+		
+		If ms < 100 Then
+			msString = "0" + msString
+			
+		EndIf
+			
+		Local finalTimeString$ = Str(minutes) + ":" + secondsString + "." + Left(msString, 3)
+			
+		;AAText TimerX, TimerY, finalTimeString, True, True						
+		AAText(MonitorWidth - AAStringWidth(finalTimeString), 0, finalTimeString, False, False)
+				
+	EndIf
+	
 	AASetFont Font1
 	
 	MenuBlinkTimer(1)=MenuBlinkTimer(1)-FPSfactor
@@ -608,6 +647,8 @@ Function UpdateMainMenu()
 							
 						If SameFound > 0 Then CurrSave = CurrSave + " (" + (SameFound + 1) + ")"
 						
+						ResetSpeedrunVariables()
+						
 						LoadEntities()
 						LoadAllSounds()
 						InitNewGame()
@@ -731,7 +772,7 @@ Function UpdateMainMenu()
 						FlushMouse()
 						
 						PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
-						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);
+						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);							
 	
 						RunStartTime = MilliSecs()
 						DeathStartTime = MilliSecs()
@@ -826,6 +867,9 @@ Function UpdateMainMenu()
 									AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
 								Else
 									If DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False) Then
+										
+										LoadStartTime = MilliSecs()
+										
 										LoadEntities()
 										LoadAllSounds()
 										LoadGame(SavePath + SaveGames(i - 1) + "\")
@@ -947,9 +991,11 @@ Function UpdateMainMenu()
 											Can100Seed = True
 										EndIf
 
-										DeathStartTime = MilliSecs()
+										LoadTime = LoadTime + MilliSecs() - LoadStartTime
+
+										;DeathStartTime = MilliSecs()
 										
-										RunStartTime = MilliSecs()
+										;RunStartTime = MilliSecs()
 										
 									EndIf
 								EndIf

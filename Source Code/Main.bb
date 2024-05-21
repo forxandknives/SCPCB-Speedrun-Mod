@@ -3217,7 +3217,7 @@ Repeat
 	EndIf
 	
 	If Not RunFinished Then
-		GameTime = PlayTime - LoadTime + LoadFromMenuGameTime
+		GameTime = PlayTime - LoadTime; + LoadFromMenuGameTime
 	EndIf		
 			
 	CurTime = MilliSecs2()
@@ -8408,7 +8408,9 @@ Function DrawMenu()
 						MainMenuTab = 0
 						CurrSave = ""
 						
-						ResetSpeedrunVariables()
+						If (RunFinished) Then
+							ResetSpeedrunVariables()
+						EndIf
 	
 						FlushKeys()
 						
@@ -8423,7 +8425,9 @@ Function DrawMenu()
 				MainMenuTab = 0
 				CurrSave = ""
 				
-				ResetSpeedrunVariables()
+				If (RunFinished) Then
+					ResetSpeedrunVariables()
+				EndIf
 				
 				FlushKeys()
 			EndIf
@@ -8619,7 +8623,9 @@ Function DrawMenu()
 					MainMenuTab = 0
 					CurrSave = ""
 					
-					ResetSpeedrunVariables()
+					If (RunFinished) Then						
+						ResetSpeedrunVariables()
+					EndIf
 					
 					FlushKeys()
 				EndIf
