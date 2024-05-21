@@ -422,6 +422,8 @@ Global endRoom2% = 0
 
 Global ESP% = False
 
+Global GuaranteedOmni% = False
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -1044,6 +1046,12 @@ Function UpdateConsole()
 							CreateConsoleMsg("Quits the game.")
 							CreateConsoleMsg("******************************")
 							
+						Case "omni"
+							CreateConsoleMsg("HELP - omni")
+							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("Enableds/Disables getting a guaranteed omni card from 914.")
+							CreateConsoleMsg("******************************")
+							
 						Default
 							CreateConsoleMsg("There is no help available for that command.",255,150,0)
 					End Select
@@ -1087,7 +1095,18 @@ Function UpdateConsole()
 					;[Block]
 					FSOUND_Stream_Stop(CurrMusicStream)
 					End
-					;[End Block]										
+					;[End Block]	
+				Case "omni"
+					;[Block]
+					GuaranteedOmni = Not GuaranteedOmni 
+					
+					If (GuaranteedOmni) Then
+						CreateConsoleMsg("Guarenteed omni enabled.")	
+					Else
+						CreateConsoleMsg("Guarenteed omni disabled.")
+					EndIf
+						
+					;[End Block]									
 				Case "asd"
 					;[Block]
 					WireFrame 1
@@ -5109,6 +5128,16 @@ Function DrawGUI()
 			AASetFont Font2
 			AAText GraphicWidth/2, GraphicHeight * 0.10, "Cannot 100% Seed.", True, True
 		EndIf
+	EndIf
+	
+	If (GuaranteedOmni) Then 
+		
+		AASetFont ConsoleFont
+		Color 255, 255, 255
+		
+		Local omniText$ = "Guaranteed omni enabled"
+		AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
+		
 	EndIf
 	
 	If ESP Then
@@ -10526,66 +10555,82 @@ Function Use914(item.Items, setting$, x#, y#, z#)
 									EndIf
 							End Select
 						Case "Level 5 Key Card"	
-							Local CurrAchvAmount%=0
-							For i = 0 To MAXACHIEVEMENTS-1
-								If Achievements(i)=True
-									CurrAchvAmount=CurrAchvAmount+1
-								EndIf
-							Next
+						
+							If (GuaranteedOmni) Then
+														
+								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
 							
-							DebugLog CurrAchvAmount
-							
-							Select SelectedDifficulty\otherFactors
-								Case EASY
-									If Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
-										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
-									Else
-										it2 = CreateItem("Mastercard", "misc", x, y, z)
+							Else
+						
+								Local CurrAchvAmount%=0
+								For i = 0 To MAXACHIEVEMENTS-1
+									If Achievements(i)=True
+										CurrAchvAmount=CurrAchvAmount+1
 									EndIf
-								Case NORMAL
-									If Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
-										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
-									Else
-										it2 = CreateItem("Mastercard", "misc", x, y, z)
-									EndIf
-								Case HARD
-									If Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
-										it2 = CreateItem("Key Card Omni", "key6", x, y, z)
-									Else
-										it2 = CreateItem("Mastercard", "misc", x, y, z)
-									EndIf
-							End Select		
+								Next
+								
+								DebugLog CurrAchvAmount																						
+															
+								Select SelectedDifficulty\otherFactors
+									Case EASY
+										If Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+											it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+										Else
+											it2 = CreateItem("Mastercard", "misc", x, y, z)
+										EndIf
+									Case NORMAL
+										If Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+											it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+										Else
+											it2 = CreateItem("Mastercard", "misc", x, y, z)
+										EndIf
+									Case HARD
+										If Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+											it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+										Else
+											it2 = CreateItem("Mastercard", "misc", x, y, z)
+										EndIf
+								End Select									
+							EndIf
 					End Select
 				Case "very fine"
-					CurrAchvAmount%=0
-					For i = 0 To MAXACHIEVEMENTS-1
-						If Achievements(i)=True
-							CurrAchvAmount=CurrAchvAmount+1
-						EndIf
-					Next
 					
-					DebugLog CurrAchvAmount
+					If (GuaranteedOmni) Then
 					
-					Select SelectedDifficulty\otherFactors
-						Case EASY
-							If Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
-								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
-							Else
-								it2 = CreateItem("Mastercard", "misc", x, y, z)
+						it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+						
+					Else
+					
+						CurrAchvAmount%=0
+						For i = 0 To MAXACHIEVEMENTS-1
+							If Achievements(i)=True
+								CurrAchvAmount=CurrAchvAmount+1
 							EndIf
-						Case NORMAL
-							If Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
-								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
-							Else
-								it2 = CreateItem("Mastercard", "misc", x, y, z)
-							EndIf
-						Case HARD
-							If Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
-								it2 = CreateItem("Key Card Omni", "key6", x, y, z)
-							Else
-								it2 = CreateItem("Mastercard", "misc", x, y, z)
-							EndIf
-					End Select
+						Next
+						
+						DebugLog CurrAchvAmount
+						
+						Select SelectedDifficulty\otherFactors
+							Case EASY
+								If Rand(0,((MAXACHIEVEMENTS-1)*3)-((CurrAchvAmount-1)*3))=0
+									it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+								Else
+									it2 = CreateItem("Mastercard", "misc", x, y, z)
+								EndIf
+							Case NORMAL
+								If Rand(0,((MAXACHIEVEMENTS-1)*4)-((CurrAchvAmount-1)*3))=0
+									it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+								Else
+									it2 = CreateItem("Mastercard", "misc", x, y, z)
+								EndIf
+							Case HARD
+								If Rand(0,((MAXACHIEVEMENTS-1)*5)-((CurrAchvAmount-1)*3))=0
+									it2 = CreateItem("Key Card Omni", "key6", x, y, z)
+								Else
+									it2 = CreateItem("Mastercard", "misc", x, y, z)
+								EndIf
+						End Select
+					EndIf
 			End Select
 			
 			RemoveItem(item)
