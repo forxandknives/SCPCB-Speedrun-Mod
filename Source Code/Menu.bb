@@ -333,12 +333,26 @@ Function UpdateMainMenu()
 		
 		; Button to join speedrunning discord.
 		Local discord$ = "Join the discord!"
+		Local leaderboards$ = "Leaderboards"
 		
-		If DrawButton(MonitorWidth * 0.60, MonitorHeight * 0.28, MonitorWidth * 0.35, MonitorHeight * 0.10, discord) Then
+		x = 980 * MenuScale
+		y = 320 * MenuScale
+		width = 600 * MenuScale				
+		
+		If DrawButton(x, y, width, height, discord) Then
 			
 			ExecFile("https://discord.com/invite/bKeJkZ6")
 			
 		EndIf
+		
+		y = 430 * MenuScale
+		
+		If DrawButton(x, y, width, height, leaderboards) Then
+			
+			ExecFile("https://www.speedrun.com/scpcb")
+			
+		EndIf
+
 		
 	Else
 		
