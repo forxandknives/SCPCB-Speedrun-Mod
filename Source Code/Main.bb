@@ -44,8 +44,8 @@ Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
-Global SpeedrunVersion$ = "0.0.5"
-Global VersionDate$ = "January 12 2024 5:00 PM EST"
+Global SpeedrunVersion$ = "0.0.6"
+Global VersionDate$ = "UPDATE WHEN DONE WITH 0.0.6."
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -212,7 +212,7 @@ Global GameSaved%
 
 Global CanSave% = True
 
-AppTitle "SCP - Containment Breach v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion
+AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion
 
 PlayStartupVideos()
 
@@ -5087,8 +5087,10 @@ Function DrawGUI()
 		ShowPointer()
 	Else
 		HidePointer()
-	EndIf 	
+	EndIf 		
 
+
+	; The code to actually show the timer is at the bottom of DrawGUI().	
 	Local ms% = Int(Gametime Mod 1000)
 	Local seconds% = (GameTime / 1000) Mod 60
 	Local minutes% = Int((Gametime / 1000) / 60)
@@ -5106,15 +5108,8 @@ Function DrawGUI()
 	EndIf 
 	
 	If ms < 100 Then
-		msString = "0" + msString
-		
-	EndIf
-		
-	If RunStartTime > 0 And SpeedrunTimer = 1 Then
-		Color TimerR, TimerG, TimerB
-		AASetFont FontMono
-		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
-	EndIf
+		msString = "0" + msString		
+	EndIf	
 	
 	If ShowSeedIsBeatable Then
 		If Not(IsSeedBeatable) Then
@@ -7806,6 +7801,13 @@ Function DrawGUI()
 			End Select
 		EndIf
 	Next
+	
+	If RunStartTime > 0 And SpeedrunTimer = 1 Then				
+		Color TimerR, TimerG, TimerB
+		AASetFont FontMono
+		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
+	EndIf
+
 	
 	If PrevInvOpen And (Not InvOpen) Then MoveMouse viewport_center_x, viewport_center_y
 	
