@@ -331,6 +331,15 @@ Function UpdateMainMenu()
 			;text(x + width / 2, y + height / 2, Str, True, True)
 		Next	
 		
+		; Button to join speedrunning discord.
+		Local discord$ = "Join the discord!"
+		
+		If DrawButton(MonitorWidth * 0.60, MonitorHeight * 0.28, MonitorWidth * 0.35, MonitorHeight * 0.10, discord) Then
+			
+			ExecFile("https://discord.com/invite/bKeJkZ6")
+			
+		EndIf
+		
 	Else
 		
 		x = 159 * MenuScale
