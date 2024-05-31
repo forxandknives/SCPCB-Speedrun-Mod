@@ -1691,6 +1691,13 @@ Function UpdateMainMenu()
 	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " " + VersionDate		 
 	;DrawTiledImageRect(MenuBack, 985 * MenuScale, 860 * MenuScale, 200 * MenuScale, 20 * MenuScale, 1200 * MenuScale, 866 * MenuScale, 300, 20 * MenuScale)
 	
+	Local watermark$ = "Speedrun Mod made by Forx "
+	Local wW% = AAStringWidth(watermark)
+	Local wH% = AAStringHeight(watermark)
+	
+	
+	AAText(MonitorWidth - wW, MonitorHeight - wH, watermark, False, True)
+	
 	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
 	
 	AASetFont Font1
