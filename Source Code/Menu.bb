@@ -276,7 +276,7 @@ Function UpdateMainMenu()
 	EndIf
 	
 	If MainMenuTab = 0 Then
-		For i% = 0 To 3
+		For i% = 0 To 4 ; This used to be 3 before the demo button was added.
 			temp = False
 			x = 159 * MenuScale
 			y = (286 + 100 * i) * MenuScale
@@ -310,6 +310,10 @@ Function UpdateMainMenu()
 					txt = "OPTIONS"
 					If temp Then MainMenuTab = 3
 				Case 3
+					txt = "DEMOS"
+					LoadSavedDemos()
+					If temp Then MainMenuTab = 10
+				Case 4
 					txt = "QUIT"
 					If temp Then
 						;DeInitExt
@@ -353,6 +357,10 @@ Function UpdateMainMenu()
 			
 		EndIf
 
+		
+		;If DrawButton(MonitorWidth / 2, MonitorHeight / 2, MonitorWidth * 0.10, MonitorHeight * 0.10, "Demos") Then
+		
+		;EndIf
 		
 	Else
 		
@@ -1064,8 +1072,7 @@ Function UpdateMainMenu()
 							SaveMSG = ""
 						EndIf
 					EndIf
-				EndIf
-				
+				EndIf				
 				
 				
 				;[End Block]
@@ -1705,6 +1712,148 @@ Function UpdateMainMenu()
 					Next
 				EndIf
 				;[End Block]
+			Case 10
+				;DEMOS
+				y = y + height + 20 * MenuScale
+				width = 580 * MenuScale
+				;height = 300 * MenuScale
+				height = 510 * MenuScale
+				
+				DrawFrame(x, y, width, height)
+				
+				x = 159 * MenuScale
+				y = 286 * MenuScale
+				
+				width = 400 * MenuScale
+				height = 70 * MenuScale
+				
+				Color(255, 255, 255)
+				AASetFont Font2
+				AAText(x + width / 2, y + height / 2, "DEMOS", True, True)
+				
+				x = 160 * MenuScale
+				y = y + height + 20 * MenuScale
+				width = 580 * MenuScale
+				height = 296 * MenuScale
+				
+				AASetFont Font2
+				
+				If CurrLoadDemoPage < Ceil(Float(SavedDemosAmount)/6.0)-1 And DemoName = "" Then 
+					If DrawButton(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, ">") Then
+						CurrLoadDemoPage = CurrLoadDemoPage	+1
+					EndIf
+				Else
+					DrawFrame(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
+					Color(100, 100, 100)
+					AAText(x+555*MenuScale, y + 537.5*MenuScale, ">", True, True)
+				EndIf
+				If CurrLoadDemoPage > 0 And DemoName = "" Then
+					If DrawButton(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, "<") Then
+						CurrLoadDemoPage = CurrLoadDemoPage-1
+					EndIf
+				Else
+					DrawFrame(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
+					Color(100, 100, 100)
+					AAText(x+25*MenuScale, y + 537.5*MenuScale, "<", True, True)
+				EndIf
+				
+				DrawFrame(x+50*MenuScale,y+510*MenuScale,width-100*MenuScale,55*MenuScale)
+				
+				AAText(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadDemoPage+1),1))+"/"+Int(Max((Int(Ceil(Float(SavedDemosAmount)/6.0))),1)),True,True)
+				
+				AASetFont Font1
+				
+				If CurrLoadDemoPage> Ceil(Float(SavedDemosAmount)/6.0)-1 Then
+					CurrLoadDemoPage= CurrLoadDemoPage - 1
+				EndIf
+				
+				If SavedDemosAmount = 0 Then
+					AAText (x + 20 * MenuScale, y + 20 * MenuScale, "No saved demos.")
+				Else
+					x = x + 20 * MenuScale
+					y = y + 20 * MenuScale
+					
+					For i% = (1+(6*CurrLoadDemoPage)) To 6+(6*CurrLoadDemoPage)
+						If i <= SavedDemosAmount Then
+							DrawFrame(x,y,540* MenuScale, 70* MenuScale)
+							
+							;If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
+							;	Color 255,0,0
+							;Else
+							Color 255,255,255
+							;EndIf
+							
+							AAText(x + 20 * MenuScale, y + 10 * MenuScale, SavedDemos(i - 1))
+							;AAText(x + 20 * MenuScale, y + (10+18) * MenuScale, SaveGameTime(i - 1)) ;y + (10+23) * MenuScale
+							;AAText(x + 120 * MenuScale, y + (10+18) * MenuScale, SaveGameDate(i - 1))
+							;AAText(x + 20 * MenuScale, y + (10+36) * MenuScale, SaveGameVersion(i - 1))
+							
+							If DemoName = "" Then
+								;If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
+								;	DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
+								;	Color(255, 0, 0)
+								;	AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
+								;Else
+								If DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False) Then
+									
+									;LoadStartTime = MilliSecs()
+									;
+									;LoadEntities()
+									;LoadAllSounds()
+									;LoadGame(SavePath + SaveGames(i - 1) + "\")
+									;CurrSave = SaveGames(i - 1)
+									;InitLoadGame()
+									;MainMenuOpen = False																													
+									
+								EndIf
+								;EndIf
+								
+								If DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Delete", False) Then
+									DemoName = SavedDemos(i - 1)
+									DebugLog DemoName
+									Exit
+								EndIf
+							Else
+								DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
+								;If SaveGameVersion(i - 1) <> CompatibleNumber And SaveGameVersion(i - 1) <> "1.3.10" Then
+								;	Color(255, 0, 0)
+								;Else
+								;	Color(100, 100, 100)
+								;EndIf
+								AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
+								
+								DrawFrame(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
+								Color(100, 100, 100)
+								AAText(x + 450 * MenuScale, y + 34 * MenuScale, "Delete", True, True)
+							EndIf
+							
+							y = y + 80 * MenuScale
+						Else
+							Exit
+						EndIf
+					Next
+					
+					If DemoName <> ""
+						x = 740 * MenuScale
+						y = 376 * MenuScale
+						DrawFrame(x, y, 420 * MenuScale, 200 * MenuScale)
+						RowText("Are you sure you want to delete this save?", x + 20 * MenuScale, y + 15 * MenuScale, 400 * MenuScale, 200 * MenuScale)
+						;AAText(x + 20 * MenuScale, y + 15 * MenuScale, "Are you sure you want to delete this save?")
+						If DrawButton(x + 50 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Yes", False) Then
+							DeleteFile(CurrentDir() + DemoPath + DemoName + "\demo.txt")
+							DeleteDir(CurrentDir() + DemoPath + DemoName)
+							DemoName = ""
+							LoadSavedDemos()
+						EndIf
+						If DrawButton(x + 250 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "No", False) Then
+							DemoName = ""
+						EndIf
+					EndIf
+				EndIf
+
+
+
+				
 		End Select
 		
 	End If

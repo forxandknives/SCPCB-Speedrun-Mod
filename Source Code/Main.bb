@@ -424,6 +424,13 @@ Global ESP% = False
 
 Global GuaranteedOmni% = False
 
+Global DemoPath$ = "Demos\"
+Global SavedDemosAmount = 0
+Global CurrLoadDemoPage = 0
+Global DemoName$ = ""
+Dim SavedDemos$(1)
+
+
 Function ResetSpeedrunVariables()
 
 	RunStartTime = 0
@@ -3138,6 +3145,11 @@ Include "Source Code/menu.bb"
 MainMenuOpen = True
 
 ;---------------------------------------------------------------------------------------------------
+
+Include "Source Code/demo.bb"
+
+;---------------------------------------------------------------------------------------------------
+
 
 Type MEMORYSTATUS
     Field dwLength%
