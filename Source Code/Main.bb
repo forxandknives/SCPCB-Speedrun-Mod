@@ -432,7 +432,8 @@ Global recordingDemo% = False
 Global demoFile% = 0
 Global demoDelayTime% = 0
 Global demoSavePath$ = ""
-Global DemoUIOpen = False
+Global DemoUIOpen% = False
+Global DemoTimescale# = 1.0
 Dim SavedDemos$(1)
 
 

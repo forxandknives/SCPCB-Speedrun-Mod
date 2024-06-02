@@ -57,6 +57,15 @@ Function DemoMain()
 		FPSfactor = Max(Min(ElapsedTime * 70, 5.0), 0.2)
 		FPSfactor2 = FPSfactor
 		
+		If KeyHit(8) Then
+			DemoTimescale = 0.5
+		Else If KeyHit(9) Then
+			DemoTimescale = 1
+		Else If KeyHit(10) Then
+			DemoTimescale = 2
+		EndIf
+		FPSFactor = FPSFactor * DemoTimescale
+		
 		If DemoUIOpen Or MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0	
 		
 		If Framelimit > 0 Then
