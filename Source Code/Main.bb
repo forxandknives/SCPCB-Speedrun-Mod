@@ -425,9 +425,13 @@ Global ESP% = False
 Global GuaranteedOmni% = False
 
 Global DemoPath$ = "Demos\"
-Global SavedDemosAmount = 0
-Global CurrLoadDemoPage = 0
+Global SavedDemosAmount% = 0
+Global CurrLoadDemoPage% = 0
 Global DemoName$ = ""
+Global recordingDemo% = False
+Global demoFile% = 0
+Global demoDelayTime% = 0
+Global demoSavePath$ = ""
 Dim SavedDemos$(1)
 
 
@@ -973,7 +977,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
 							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
 							CreateConsoleMsg("******************************")
-						Case "e"
+						Case "e"					
 							CreateConsoleMsg("HELP - e")
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Godmode, Noclip, Camerafog 1000, InfStam, Notarget")
@@ -1064,6 +1068,32 @@ Function UpdateConsole()
 					End Select
 					
 					;[End Block]
+				Case "demo"
+					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					
+					Select StrTemp
+						Case "start"
+							If recordingDemo Then
+								CreateConsoleMsg("Demo recording already in process.")
+							Else
+								CreateConsoleMsg("Demo recording started.")
+								recordingDemo = True
+							EndIf
+							
+						Case "stop"
+							If Not recordingDemo Then
+								CreateConsoleMsg("No demo recording in process.")
+							Else
+								CreateConsoleMsg("Demo recording stopped.")
+								StopRecordingDemo()
+								recordingDemo = False
+							EndIf
+							
+						Default 
+							CreateConsoleMsg("Type demo start to start a demo and demo stop to stop the demo.")
+							
+					End Select
+						
 				Case "e"
 					;[Block]
 					GodMode = 1
@@ -3202,6 +3232,10 @@ End Function
 ;----------------------------------------------------------------------------------------------------------------------------------------------------
 
 Repeat
+	
+	If recordingDemo Then
+		RecordDemo()
+	EndIf
 	
 	;This will track how many times the main loop runs in each second, and the average run time for each loop.
 	If DebugHUD2 Then		
