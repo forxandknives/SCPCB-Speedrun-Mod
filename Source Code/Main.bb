@@ -432,6 +432,7 @@ Global recordingDemo% = False
 Global demoFile% = 0
 Global demoDelayTime% = 0
 Global demoSavePath$ = ""
+Global DemoUIOpen = False
 Dim SavedDemos$(1)
 
 
@@ -3292,7 +3293,7 @@ Repeat
 	FPSfactor = Max(Min(ElapsedTime * 70, 5.0), 0.2)
 	FPSfactor2 = FPSfactor
 	
-	If MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0
+	If DemoUIOpen Or MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0	
 	
 	If Framelimit > 0 Then
 	    ;Framelimit
@@ -3415,7 +3416,8 @@ Repeat
 		UpdateCheckpoint1 = False
 		UpdateCheckpoint2 = False
 		
-		If (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
+		
+		If (Not DemoUIOpen) And (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
 			LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 			CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
 			CameraFogColor(Camera, 0,0,0)
@@ -3477,12 +3479,14 @@ Repeat
 		
 		If InfiniteStamina% Then Stamina = Min(100, Stamina + (100.0-Stamina)*0.01*FPSfactor)
 		
+		; HERE
+						
 		If FPSfactor=0
 			UpdateWorld(0)
 		Else
 			UpdateWorld()
 			ManipulateNPCBones()
-		EndIf
+		EndIf				
 		RenderWorld2()
 		
 		BlurVolume = Min(CurveValue(0.0, BlurVolume, 20.0),0.95)
@@ -3631,6 +3635,16 @@ Repeat
 		
 		;[End block]
 		
+		If KeyHit(25) Then
+			If DemoUIOpen Then
+				ResumeSounds()
+				MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+			Else
+				PauseSounds()
+			EndIf
+			DemoUIOpen = Not DemoUIOpen
+		EndIf
+		
 		If KeyHit(KEY_INV) And VomitTimer >= 0 Then
 			If (Not UnableToMove) And (Not IsZombie) And (Not Using294) Then
 				Local W$ = ""
@@ -3719,7 +3733,7 @@ Repeat
 				If ConsoleOpen Then
 					UsedConsole = True
 					ResumeSounds()
-					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0 
 				Else
 					PauseSounds()
 				EndIf
@@ -5129,7 +5143,7 @@ Function DrawGUI()
 	
 	Local e.Events, it.Items
 	
-	If MenuOpen Or ConsoleOpen Or SelectedDoor <> Null Or InvOpen Or OtherOpen<>Null Or EndingTimer < 0 Then
+	If DemoUIOpen Or MenuOpen Or ConsoleOpen Or SelectedDoor <> Null Or InvOpen Or OtherOpen<>Null Or EndingTimer < 0 Then
 		ShowPointer()
 	Else
 		HidePointer()
