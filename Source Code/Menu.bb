@@ -1796,14 +1796,17 @@ Function UpdateMainMenu()
 								;Else
 								If DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False) Then
 									
-									;LoadStartTime = MilliSecs()
-									;
-									;LoadEntities()
-									;LoadAllSounds()
-									;LoadGame(SavePath + SaveGames(i - 1) + "\")
-									;CurrSave = SaveGames(i - 1)
-									;InitLoadGame()
-									;MainMenuOpen = False																													
+									; Ideally when we load the demo, we want to load the access code and apply it to the game.
+									; We also want to load the same seed into the demo, and if it was rng seeded directly.									
+									
+									; This is temporary.
+									SeedRnd(446456054)
+									
+									LoadEntities()
+									LoadAllSounds()
+									InitNewGame()
+									MainMenuOpen = False
+									DemoMain()
 									
 								EndIf
 								;EndIf
