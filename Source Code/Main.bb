@@ -191,7 +191,7 @@ Global MenuScale# = (GraphicHeight / 1024.0)
 SetBuffer(BackBuffer())
 
 Global CurTime%, PrevTime%, LoopDelay%, FPSfactor#, FPSfactor2#, PrevFPSFactor#
-Local CheckFPS%, ElapsedLoops%, FPS%, ElapsedTime#
+Global CheckFPS%, ElapsedLoops%, FPS%, ElapsedTime# ; Could be it
 
 Global Framelimit% = GetINIInt(OptionFile, "options", "framelimit")
 Global Vsync% = GetINIInt(OptionFile, "options", "vsync")
@@ -3276,7 +3276,7 @@ Repeat
 		EndIf
 	EndIf
 	
-	Cls
+	cls
 	
 	If ShouldIncreasePlayTime Then
 		PlayTime = MilliSecs() - RunStartTime

@@ -1,10 +1,7 @@
 Function DemoMain()
 
 	Repeat 
-		If recordingDemo Then
-			RecordDemo()
-		EndIf
-		
+			
 		;This will track how many times the main loop runs in each second, and the average run time for each loop.
 		If DebugHUD2 Then		
 			If StartMainLoopTime = 0 Then
@@ -402,7 +399,7 @@ Function DemoMain()
 			
 			;[End block]
 			
-			If KeyHit(25) Then
+			If KeyHit(25) And (Not ConsoleOpen) Then
 				If DemoUIOpen Then
 					ResumeSounds()
 					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0

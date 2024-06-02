@@ -1800,12 +1800,18 @@ Function UpdateMainMenu()
 									; We also want to load the same seed into the demo, and if it was rng seeded directly.									
 									
 									; This is temporary.
-									SeedRnd(446456054)
+									RandomSeed = "446456054"
+									
+									SeedRnd(GenerateSeedNumber(RandomSeed))
 									
 									LoadEntities()
 									LoadAllSounds()
 									InitNewGame()
 									MainMenuOpen = False
+									
+									FlushKeys()
+									FlushMouse()
+									
 									DemoMain()
 									
 								EndIf
