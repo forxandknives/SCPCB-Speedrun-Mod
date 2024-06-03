@@ -433,6 +433,7 @@ Global demoFile% = 0
 Global demoDelayTime% = 0
 Global demoSavePath$ = ""
 Global DemoUIOpen% = False
+Global DemoPaused = False
 Global DemoTimescale# = 1.0
 Dim SavedDemos$(1)
 
@@ -5185,6 +5186,51 @@ Function DrawGUI()
 		AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
 		
 	EndIf
+	
+	If DemoUIOpen Then
+		
+		ShowPointer()
+		
+		Color 34, 34, 34
+		
+		Local uiX = 0
+		Local uiY = MonitorHeight * 0.25
+		
+		Local uiW = MonitorWidth * 0.20
+		Local uiH = MonitorHeight * 0.20
+		
+		Rect(uiX, uiY, uiW, uiH, True)
+		
+		Color 255, 255, 255
+		
+		AAText(uiX + (uiW * 0.05), uiY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
+		
+		
+		If DemoPaused Then
+			If DrawButton(uiX + (uiW * 0.10), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) Then	
+				DemoPaused = False
+			EndIf
+		Else
+			If DrawButton(uiX + (uiW * 0.10), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
+				DemoPaused = True
+			EndIf
+		EndIf			
+		
+		If DrawButton(uiX + (uiW * 0.30), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ".5x", False) Then
+			DemoTimescale = 0.5
+		EndIf
+		
+		If DrawButton(uiX + (uiW * 0.45), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "1x", False) Then
+			DemoTimescale = 1.0
+		EndIf
+		
+		If DrawButton(uiX + (uiW * 0.60), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "2x", False) Then
+			DemoTimescale = 2.0
+		EndIf
+		
+	Else
+		HidePointer()
+	EndIf 
 	
 	If ESP Then
 		CameraProject(Camera, EntityX(Curr173\Collider), EntityY(Curr173\Collider), EntityZ(Curr173\Collider))				

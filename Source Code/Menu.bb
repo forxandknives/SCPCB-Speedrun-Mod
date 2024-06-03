@@ -1812,7 +1812,11 @@ Function UpdateMainMenu()
 									FlushKeys()
 									FlushMouse()
 									
+									DemoName = SavedDemos(i-1)
+									
 									DemoMain()
+									
+									DemoName = ""
 									
 								EndIf
 								;EndIf

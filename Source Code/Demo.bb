@@ -57,16 +57,9 @@ Function DemoMain()
 		FPSfactor = Max(Min(ElapsedTime * 70, 5.0), 0.2)
 		FPSfactor2 = FPSfactor
 		
-		If KeyHit(8) Then
-			DemoTimescale = 0.5
-		Else If KeyHit(9) Then
-			DemoTimescale = 1
-		Else If KeyHit(10) Then
-			DemoTimescale = 2
-		EndIf
 		FPSFactor = FPSFactor * DemoTimescale
 		
-		If DemoUIOpen Or MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0	
+		If DemoPaused Or MenuOpen Or InvOpen Or OtherOpen<>Null Or ConsoleOpen Or SelectedDoor <> Null Or SelectedScreen <> Null Or Using294 Then FPSfactor = 0	
 		
 		If Framelimit > 0 Then
 		    ;Framelimit
@@ -107,19 +100,9 @@ Function DemoMain()
 		If EnableSFXRelease Then AutoReleaseSounds()
 		
 		If MainMenuOpen Then
-			If ShouldPlay = 21 Then
-				EndBreathSFX = LoadSound("SFX\Ending\MenuBreath.ogg")
-				EndBreathCHN = PlaySound(EndBreathSFX)
-				ShouldPlay = 66
-			ElseIf ShouldPlay = 66
-				If (Not ChannelPlaying(EndBreathCHN)) Then
-					FreeSound(EndBreathSFX)
-					ShouldPlay = 11
-				EndIf
-			Else
-				ShouldPlay = 11
-			EndIf
-			UpdateMainMenu()
+		
+			Goto EndOfMain
+						
 		Else
 			UpdateStreamSounds()
 			
@@ -190,7 +173,7 @@ Function DemoMain()
 			UpdateCheckpoint2 = False
 			
 			
-			If (Not DemoUIOpen) And (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
+			If (Not DemoPaused) And (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
 				LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 				CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
 				CameraFogColor(Camera, 0,0,0)
@@ -409,12 +392,12 @@ Function DemoMain()
 			;[End block]
 			
 			If KeyHit(25) And (Not ConsoleOpen) Then
-				If DemoUIOpen Then
-					ResumeSounds()
-					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
-				Else
-					PauseSounds()
-				EndIf
+				;If DemoUIOpen Then
+				;	ResumeSounds()
+				;	MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+				;Else
+				;	PauseSounds()
+				;EndIf
 				DemoUIOpen = Not DemoUIOpen
 			EndIf
 			
@@ -648,6 +631,8 @@ Function DemoMain()
 			Flip 1
 		EndIf
 	Forever
+
+.EndOfMain
 
 End Function
 
