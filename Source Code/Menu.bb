@@ -1799,10 +1799,21 @@ Function UpdateMainMenu()
 									; Ideally when we load the demo, we want to load the access code and apply it to the game.
 									; We also want to load the same seed into the demo, and if it was rng seeded directly.									
 									
-									; This is temporary.
-									RandomSeed = "446456054"
+									WatchingDemo = True
 									
-									SeedRnd(GenerateSeedNumber(RandomSeed))
+									DemoName = SavedDemos(i-1)
+									
+									demoSavePath = DemoPath + DemoName + "\demo.txt"
+									
+									;ReadDemo will get the seed and if it was seeded directly.
+									ReadDemo(demoSavePath)
+									
+									If SeedDemoDirectly Then
+										SeedRnd(Int(RandomSeed))
+										DirectSeed = Int(RandomSeed)
+									Else
+										SeedRnd(GenerateSeedNumber(RandomSeed))
+									EndIf
 									
 									LoadEntities()
 									LoadAllSounds()
@@ -1810,13 +1821,12 @@ Function UpdateMainMenu()
 									MainMenuOpen = False
 									
 									FlushKeys()
-									FlushMouse()
-									
-									DemoName = SavedDemos(i-1)
+									FlushMouse()																		
 									
 									DemoMain()
 									
 									DemoName = ""
+									WatchingDemo = False
 									
 								EndIf
 								;EndIf

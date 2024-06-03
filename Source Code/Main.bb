@@ -435,6 +435,8 @@ Global demoSavePath$ = ""
 Global DemoUIOpen% = False
 Global DemoPaused = False
 Global DemoTimescale# = 1.0
+Global SeedDemoDirectly% = False
+Global WatchingDemo = False
 Dim SavedDemos$(1)
 
 
@@ -5226,10 +5228,7 @@ Function DrawGUI()
 		
 		If DrawButton(uiX + (uiW * 0.60), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "2x", False) Then
 			DemoTimescale = 2.0
-		EndIf
-		
-	Else
-		HidePointer()
+		EndIf	
 	EndIf 
 	
 	If ESP Then

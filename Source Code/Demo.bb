@@ -663,6 +663,9 @@ Function RecordDemo()
 			
 		EndIf
 		
+		WriteString(demoFile, RandomSeed)
+		WriteByte(demoFile, SeedRNGDirectly)
+		
 		demoDelayTime = MilliSecs()
 		
 		;We do not close the demoPath file until we manually stop the demo.
@@ -671,7 +674,7 @@ Function RecordDemo()
 		
 		If (MilliSecs() - demoDelayTime >= 60) Then ; Arbitrary amount of time (60 ms) to delay saving the user input and what not.		
 		
-			WriteLine(demoFile, CurrentTime())
+			;WriteLine(demoFile, CurrentTime())
 		
 			demoDelayTime = MilliSecs()
 		
@@ -756,3 +759,67 @@ Function LoadSavedDemos()
 	CatchErrors("LoadSavedDemos")
 
 End Function
+
+Function ReadDemo(path$)
+
+	If Not demoFile Then
+		demoFile = ReadFile(path)
+		
+		;Here we will read all the stuff we need before we start reading game state.
+		RandomSeed = ReadString(demoFile)
+		SeedDemoDirectly = ReadByte(demoFile)
+		
+	EndIf
+
+	; We purposely do not want to close the file here.
+	; We need to read the first few things to get seed data.
+	; We have to do that to load the demo map.
+	; Once the map is loaded we can start reading the rest of the demo.
+	
+	;For now I will close file.
+	CloseFile(demoFile)
+	demoFile = 0
+
+End Function
+
+Function EndOfFile()
+End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
