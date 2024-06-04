@@ -215,6 +215,10 @@ Function UpdateMainMenu()
 			
 		;AAText TimerX, TimerY, finalTimeString, True, True						
 		AAText(MonitorWidth - AAStringWidth(finalTimeString), 0, finalTimeString, False, False)
+		
+		If DrawButton(MonitorWidth - AAStringWidth(finalTimeString), AAStringHeight(finalTimeString), AAStringWidth(finalTimeString), MonitorHeight * 0.05, "RESET") Then
+			ResetSpeedrunVariables()
+		EndIf
 				
 	EndIf
 	
