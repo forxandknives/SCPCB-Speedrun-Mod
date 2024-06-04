@@ -1749,7 +1749,7 @@ Function UpdateMainMenu()
 				EndIf
 				If CurrLoadDemoPage > 0 And DemoName = "" Then
 					If DrawButton(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, "<") Then
-						CurrLoadDemoPage = CurrLoadDemoPage-1
+						CurrLoadDemoPage = Max(0, CurrLoadDemoPage-1)
 					EndIf
 				Else
 					DrawFrame(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
@@ -1764,7 +1764,7 @@ Function UpdateMainMenu()
 				AASetFont Font1
 				
 				If CurrLoadDemoPage> Ceil(Float(SavedDemosAmount)/6.0)-1 Then
-					CurrLoadDemoPage= CurrLoadDemoPage - 1
+					CurrLoadDemoPage = Max(CurrLoadDemoPage - 1, 0)
 				EndIf
 				
 				If SavedDemosAmount = 0 Then

@@ -3,7 +3,8 @@ Function DemoMain()
 	Repeat 
 			
 		;This will track how many times the main loop runs in each second, and the average run time for each loop.
-		If DebugHUD2 Then		
+		If DebugHUD2 Then							
+		
 			If StartMainLoopTime = 0 Then
 				StartMainLoopTime = MilliSecs()
 				TimeThisMainLoop = MilliSecs()
@@ -174,6 +175,9 @@ Function DemoMain()
 			
 			
 			If (Not DemoPaused) And (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
+			
+				ReadDemo(demoSavePath)
+			
 				LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 				CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
 				CameraFogColor(Camera, 0,0,0)
@@ -189,7 +193,7 @@ Function DemoMain()
 				CanSave% = True
 				UpdateDeafPlayer()
 				UpdateEmitters()
-				MouseLook()
+				DemoMouseLook()
 				If PlayerRoom\RoomTemplate\Name = "dimension1499" And QuickLoadPercent > 0 And QuickLoadPercent < 100
 					ShouldEntitiesFall = False
 				EndIf
@@ -636,6 +640,248 @@ Function DemoMain()
 
 End Function
 
+Function DemoMouseLook()
+	Local i%
+	
+	CameraShake = Max(CameraShake - (FPSfactor / 10), 0)
+	
+	;CameraZoomTemp = CurveValue(CurrCameraZoom,CameraZoomTemp, 5.0)
+	CameraZoom(Camera, Min(1.0+(CurrCameraZoom/400.0),1.1))
+	CurrCameraZoom = Max(CurrCameraZoom - FPSfactor, 0)
+	
+	If KillTimer >= 0 And FallTimer >=0 Then
+		
+		HeadDropSpeed = 0
+		
+		;If 0 Then 
+		;fixing the black screen bug with some bubblegum code 
+		Local Zero# = 0.0
+		Local Nan1# = 0.0 / Zero
+		If Int(EntityX(Collider))=Int(Nan1) Then
+			
+			PositionEntity Collider, EntityX(Camera, True), EntityY(Camera, True) - 0.5, EntityZ(Camera, True), True
+			Msg = "EntityX(Collider) = NaN, RESETTING COORDINATES    -    New coordinates: "+EntityX(Collider)
+			MsgTimer = 300				
+		EndIf
+		;EndIf
+		
+		Local up# = (Sin(Shake) / (20.0+CrouchState*20.0))*0.6;, side# = Cos(Shake / 2.0) / 35.0		
+		Local roll# = Max(Min(Sin(Shake/2)*2.5*Min(Injuries+0.25,3.0),8.0),-8.0)
+		
+		;käännetään kameraa sivulle jos pelaaja on vammautunut
+		;RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), Max(Min(up*30*Injuries,50),-50)
+		PositionEntity Camera, EntityX(Collider), EntityY(Collider), EntityZ(Collider)
+		;RotateEntity Camera, 0, EntityYaw(Collider), roll*0.5
+		
+		MoveEntity Camera, side, up + 0.6 + CrouchState * -0.3, 0
+		
+		;RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), 0
+		;moveentity player, side, up, 0	
+		; -- Update the smoothing que To smooth the movement of the mouse.
+		mouse_x_speed_1# = CurveValue(MouseXSpeed() * (MouseSens + 0.6) , mouse_x_speed_1, (6.0 / (MouseSens + 1.0))*MouseSmooth) 
+		If Int(mouse_x_speed_1) = Int(Nan1) Then mouse_x_speed_1 = 0
+		If PrevFPSFactor>0 Then
+            If Abs(FPSfactor/PrevFPSFactor-1.0)>1.0 Then
+                ;lag spike detected - stop all camera movement
+                mouse_x_speed_1 = 0.0
+                mouse_y_speed_1 = 0.0
+            EndIf
+        EndIf
+		If InvertMouse Then
+			mouse_y_speed_1# = CurveValue(-MouseYSpeed() * (MouseSens + 0.6), mouse_y_speed_1, (6.0/(MouseSens+1.0))*MouseSmooth) 
+		Else
+			mouse_y_speed_1# = CurveValue(MouseYSpeed () * (MouseSens + 0.6), mouse_y_speed_1, (6.0/(MouseSens+1.0))*MouseSmooth) 
+		EndIf
+		If Int(mouse_y_speed_1) = Int(Nan1) Then mouse_y_speed_1 = 0
+		
+		Local the_yaw# = ((mouse_x_speed_1#)) * mouselook_x_inc# / (1.0+WearingVest)
+		Local the_pitch# = ((mouse_y_speed_1#)) * mouselook_y_inc# / (1.0+WearingVest)
+		
+		TurnEntity Collider, 0.0, -the_yaw#, 0.0 ; Turn the user on the Y (yaw) axis.
+		user_camera_pitch# = user_camera_pitch# + the_pitch#
+		; -- Limit the user;s camera To within 180 degrees of pitch rotation. ;EntityPitch(); returns useless values so we need To use a variable To keep track of the camera pitch.
+		If user_camera_pitch# > 70.0 Then user_camera_pitch# = 70.0
+		If user_camera_pitch# < - 70.0 Then user_camera_pitch# = -70.0
+		
+		;RotateEntity Camera, WrapAngle(user_camera_pitch + Rnd(-CameraShake, CameraShake)), WrapAngle(EntityYaw(Collider) + Rnd(-CameraShake, CameraShake)), roll ; Pitch the user;s camera up And down.
+		
+		If PlayerRoom\RoomTemplate\Name = "pocketdimension" Then
+			If EntityY(Collider)<2000*RoomScale Or EntityY(Collider)>2608*RoomScale Then
+				RotateEntity Camera, WrapAngle(EntityPitch(Camera)),WrapAngle(EntityYaw(Camera)), roll+WrapAngle(Sin(MilliSecs2()/150.0)*30.0) ; Pitch the user;s camera up And down.
+			EndIf
+		EndIf
+		
+	Else
+		HideEntity Collider
+		PositionEntity Camera, EntityX(Head), EntityY(Head), EntityZ(Head)
+		
+		Local CollidedFloor% = False
+		For i = 1 To CountCollisions(Head)
+			If CollisionY(Head, i) < EntityY(Head) - 0.01 Then CollidedFloor = True
+		Next
+		
+		If CollidedFloor = True Then
+			HeadDropSpeed# = 0
+		Else
+			
+			If KillAnim = 0 Then 
+				MoveEntity Head, 0, 0, HeadDropSpeed
+				RotateEntity(Head, CurveAngle(-90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
+				RotateEntity(Camera, CurveAngle(EntityPitch(Head) - 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
+			Else
+				MoveEntity Head, 0, 0, -HeadDropSpeed
+				RotateEntity(Head, CurveAngle(90.0, EntityPitch(Head), 20.0), EntityYaw(Head), EntityRoll(Head))
+				RotateEntity(Camera, CurveAngle(EntityPitch(Head) + 40.0, EntityPitch(Camera), 40.0), EntityYaw(Camera), EntityRoll(Camera))
+			EndIf
+			
+			HeadDropSpeed# = HeadDropSpeed - 0.002 * FPSfactor
+		EndIf
+		
+		If InvertMouse Then
+			TurnEntity (Camera, -MouseYSpeed() * 0.05 * FPSfactor, -MouseXSpeed() * 0.15 * FPSfactor, 0)
+		Else
+			TurnEntity (Camera, MouseYSpeed() * 0.05 * FPSfactor, -MouseXSpeed() * 0.15 * FPSfactor, 0)
+		End If
+		
+	EndIf
+	
+	;pölyhiukkasia
+	If ParticleAmount=2
+		If Rand(35) = 1 Then
+			Local pvt% = CreatePivot()
+			PositionEntity(pvt, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True))
+			RotateEntity(pvt, 0, Rnd(360), 0)
+			If Rand(2) = 1 Then
+				MoveEntity(pvt, 0, Rnd(-0.5, 0.5), Rnd(0.5, 1.0))
+			Else
+				MoveEntity(pvt, 0, Rnd(-0.5, 0.5), Rnd(0.5, 1.0))
+			End If
+			
+			Local p.Particles = CreateParticle(EntityX(pvt), EntityY(pvt), EntityZ(pvt), 2, 0.002, 0, 300)
+			p\speed = 0.001
+			RotateEntity(p\pvt, Rnd(-20, 20), Rnd(360), 0)
+			
+			p\SizeChange = -0.00001
+			
+			FreeEntity pvt
+		End If
+	EndIf
+	
+	; -- Limit the mouse;s movement. Using this method produces smoother mouselook movement than centering the mouse Each loop.
+	If (MouseX() > mouse_right_limit) Or (MouseX() < mouse_left_limit) Or (MouseY() > mouse_bottom_limit) Or (MouseY() < mouse_top_limit)
+		;MoveMouse viewport_center_x, viewport_center_y
+	EndIf
+	
+	If WearingGasMask Or WearingHazmat Or Wearing1499 Then
+		If Wearing714 = False Then
+			If WearingGasMask = 2 Or Wearing1499 = 2 Or WearingHazmat = 2 Then
+				Stamina = Min(100, Stamina + (100.0-Stamina)*0.01*FPSfactor)
+			EndIf
+		EndIf
+		If WearingHazmat = 1 Then
+			Stamina = Min(60, Stamina)
+		EndIf
+		
+		ShowEntity(GasMaskOverlay)
+	Else
+		HideEntity(GasMaskOverlay)
+	End If
+	
+	If (Not WearingNightVision=0) Then
+		ShowEntity(NVOverlay)
+		If WearingNightVision=2 Then
+			EntityColor(NVOverlay, 0,100,255)
+			AmbientLightRooms(15)
+		ElseIf WearingNightVision=3 Then
+			EntityColor(NVOverlay, 255,0,0)
+			AmbientLightRooms(15)
+		Else
+			EntityColor(NVOverlay, 0,255,0)
+			AmbientLightRooms(15)
+		EndIf
+		EntityTexture(Fog, FogNVTexture)
+	Else
+		AmbientLightRooms(0)
+		HideEntity(NVOverlay)
+		EntityTexture(Fog, FogTexture)
+	EndIf
+	
+	For i = 0 To 5
+		If SCP1025state[i]>0 Then
+			Select i
+				Case 0 ;common cold
+					If FPSfactor>0 Then 
+						If Rand(1000)=1 Then
+							If CoughCHN = 0 Then
+								CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
+							Else
+								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
+							End If
+						EndIf
+					EndIf
+					Stamina = Stamina - FPSfactor * 0.3
+				Case 1 ;chicken pox
+					If Rand(9000)=1 And Msg="" Then
+						Msg="Your skin is feeling itchy."
+						MsgTimer =70*4
+					EndIf
+				Case 2 ;cancer of the lungs
+					If FPSfactor>0 Then 
+						If Rand(800)=1 Then
+							If CoughCHN = 0 Then
+								CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
+							Else
+								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
+							End If
+						EndIf
+					EndIf
+					Stamina = Stamina - FPSfactor * 0.1
+				Case 3 ;appendicitis
+					;0.035/sec = 2.1/min
+					If (Not I_427\Using And I_427\Timer < 70*360) Then
+						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.0005
+					EndIf
+					If SCP1025state[i]>20.0 Then
+						If SCP1025state[i]-FPSfactor<=20.0 Then Msg="The pain in your stomach is becoming unbearable."
+						Stamina = Stamina - FPSfactor * 0.3
+					ElseIf SCP1025state[i]>10.0
+						If SCP1025state[i]-FPSfactor<=10.0 Then Msg="Your stomach is aching."
+					EndIf
+				Case 4 ;asthma
+					If Stamina < 35 Then
+						If Rand(Int(140+Stamina*8))=1 Then
+							If CoughCHN = 0 Then
+								CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
+							Else
+								If Not ChannelPlaying(CoughCHN) Then CoughCHN = PlaySound_Strict(CoughSFX(Rand(0, 2)))
+							End If
+						EndIf
+						CurrSpeed = CurveValue(0, CurrSpeed, 10+Stamina*15)
+					EndIf
+				Case 5;cardiac arrest
+					If (Not I_427\Using And I_427\Timer < 70*360) Then
+						SCP1025state[i]=SCP1025state[i]+FPSfactor*0.35
+					EndIf
+					;35/sec
+					If SCP1025state[i]>110 Then
+						HeartBeatRate=0
+						BlurTimer = Max(BlurTimer, 500)
+						If SCP1025state[i]>140 Then 
+							DeathMSG = Chr(34)+"He died of a cardiac arrest after reading SCP-1025, that's for sure. Is there such a thing as psychosomatic cardiac arrest, or does SCP-1025 have some "
+							DeathMSG = DeathMSG + "anomalous properties we are not yet aware of?"+Chr(34)
+							Kill()
+						EndIf
+					Else
+						HeartBeatRate=Max(HeartBeatRate, 70+SCP1025state[i])
+						HeartBeatVolume = 1.0
+					EndIf
+			End Select 
+		EndIf
+	Next
+	
+	
+End Function
+
 Function RecordDemo()
 
 	If Not demoFile Then
@@ -675,6 +921,21 @@ Function RecordDemo()
 		If (MilliSecs() - demoDelayTime >= 60) Then ; Arbitrary amount of time (60 ms) to delay saving the user input and what not.		
 		
 			;WriteLine(demoFile, CurrentTime())
+			
+			WriteInt(demoFile, GameTime)
+			
+			WriteFloat(demoFile, EntityX(Collider))
+			WriteFloat(demoFile, EntityY(Collider))
+			WriteFloat(demoFile, EntityZ(Collider))
+			
+			WriteFloat(demoFile, EntityX(Head))
+			WriteFloat(demoFile, EntityY(Head))
+			WriteFloat(demoFile, EntityZ(Head))	
+			
+			WriteFloat(demoFile, EntityPitch(Camera))
+			WriteFloat(demoFile, EntityYaw(Collider))
+			WriteFloat(demoFile, EntityRoll(Camera))
+			
 		
 			demoDelayTime = MilliSecs()
 		
@@ -767,25 +1028,72 @@ Function ReadDemo(path$)
 		
 		;Here we will read all the stuff we need before we start reading game state.
 		RandomSeed = ReadString(demoFile)
-		SeedDemoDirectly = ReadByte(demoFile)
-		
-	EndIf
+		SeedDemoDirectly = ReadByte(demoFile)		
 
 	; We purposely do not want to close the file here.
 	; We need to read the first few things to get seed data.
 	; We have to do that to load the demo map.
 	; Once the map is loaded we can start reading the rest of the demo.
 	
-	;For now I will close file.
-	CloseFile(demoFile)
-	demoFile = 0
+	Else
+	
+		If (MilliSecs() - demoDelayTime >= 60) Then
+	
+			If Not Eof(demoFile) Then
+			
+				Local gt% = ReadInt(demoFile)	
+				
+				Local px# = ReadFloat(demoFile)
+				Local py# = ReadFloat(demoFile)
+				Local pz$ = ReadFloat(demoFile)
+				
+				Local hx# = ReadFloat(demoFile)
+				Local hy# = ReadFloat(demoFile)
+				Local hz# = ReadFloat(demoFile)
+				
+				Local pitch# = ReadFloat(demoFile)
+				Local yaw#   = ReadFloat(demoFile)	
+				Local roll#  = ReadFloat(demoFile)		
+				
+				PositionEntity(Collider, px, py, pz)
+				ResetEntity(Collider)
+				
+				PositionEntity(Head, hx, hy, hz)
+				ResetEntity(Head)
+				
+				RotateEntity(Collider, 0, yaw, 0, 0)	
+				RotateEntity(Camera, pitch, yaw, roll, 0)
+				
+				
+				;Local oldpx = px
+					
+				demoDelayTime = MilliSecs()
+				
+				;FIGURE OUT WHY CAMERA PITCH/ROLL IS NOT WORKING
+				;IM USING CAMERA HERE
+				;WHEN YOU SAVE THE GAME IT USES COLLIDER PITCH/YAW/ROLL
+				
+			Else
+			
+				demoUIOpen = True
+				demoPaused = True
+			
+				CloseFile(demoFile)
+				demoFile = 0		
+				
+			EndIf			
+		EndIf					
+	EndIf
+End Function
+
+Function Lerp#(s#, e#, p#) 
+	; We do a little lerping...
+	Return (s + (e - s) * p)
 
 End Function
 
 Function EndOfFile()
 End Function
-
-
 
 
 

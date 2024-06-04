@@ -1092,6 +1092,7 @@ Function UpdateConsole()
 								CreateConsoleMsg("Demo recording stopped.")
 								StopRecordingDemo()
 								recordingDemo = False
+								;SavedDemosAmount = SavedDemosAmount + 1
 							EndIf
 							
 						Default 
@@ -5655,6 +5656,21 @@ Function DrawGUI()
 			;AAText x - 50, 100, "Player Rotation: (" + f2s(EntityPitch(Collider), 3) + ", " + f2s(EntityYaw(Collider), 3) + ", " + f2s(EntityRoll(Collider), 3) + ")"
 			;AAText x - 50, 120, "Camera Rotation: (" + f2s(EntityPitch(Camera), 3)+ ", " + f2s(EntityYaw(Camera), 3) +", " + f2s(EntityRoll(Camera), 3) + ")"
 			;AAText x - 50, 150, "Room: " + PlayerRoom\RoomTemplate\Name
+			
+			AAText(x-50, 90, "Collider Pitch: " + Str(EntityPitch(Collider)))
+			AAText(x-50, 110, "Collider Yaw : " + Str(EntityYaw(Collider)))
+			AAText(x-50, 130, "Collider Roll: " + Str(EntityRoll(Collider)))
+			
+			AAText(x-50, 170, "Head Pitch: " + Str(EntityPitch(Head)))
+			AAText(x-50, 190, "Head Yaw  : " + Str(EntityYaw(Head)))
+			AAText(x-50, 210, "Head Roll : " + Str(EntityRoll(Head)))
+			
+			AAText(x-50, 250, "Camera Pitch: " + Str(EntityPitch(Camera)))
+			AAText(x-50, 270, "Camera Yaw  : " + Str(EntityYaw(Camera)))
+			AAText(x-50, 290, "Camera Roll : " + Str(EntityRoll(Camera)))
+
+	
+			
 		EndIf
 		
 	EndIf
