@@ -1,4 +1,21 @@
-﻿Speedrun Mod v0.0.5
+﻿Speedrun Mod v0.0.6
+- Fixed bug where seed rng directly was always set to false when starting the game. It will now be set to whatever the value was when the game closed.
+- Added option to enable and disable all seed warnings.
+	- 100% now works for all dificulties.
+	- You can individually select to show the seed beatable warning and 100% warning.
+	- There is a warnings part of the pause menu in game, and a section for the warnings in the main menu under the "Speedrun" tab.
+- The timer will now continue to run when you are in the main menu.
+	- Timer is displayed in the top right corner of the screen.
+	- The timer will now only reset when you press the reset button in the main menu, start a new game, or finish a run.
+	- The timer will work when you load a saved game from the main menu.
+- Added a console command called "omni".
+	- When enabled, 914 will have a guarenteed chance of giving an omni card, wherever a keycard had a chance of becoming an omni.
+	- There is text at the bottom of the screen saying that this setting is enabled.
+- Added watermark to main menu.
+- Added two buttons to the main menu.
+	- One will take you to the speedrunning discord, and the other will take you to the speedrunning leaderboards.
+
+Speedrun Mod v0.0.5
 - Added option to see how long you lived for.
 	- Can disable showing this in settings.
 - Added autosplitter for use with livesplit.
