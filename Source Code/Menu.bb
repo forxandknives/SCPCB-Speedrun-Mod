@@ -678,16 +678,17 @@ Function UpdateMainMenu()
 						MainMenuOpen = False
 						
 						For plink.Rooms = Each Rooms
-							If plink\RoomTemplate\Name = "008" Then
-								SeedHas008 = True
-							EndIf
+							;If plink\RoomTemplate\Name = "008" Then
+							;	SeedHas008 = True
+							;EndIf
 							
 							If plink\RoomTemplate\Name = "room2ccont" Then
 								SeedHasElectricalCenter = True
+								Exit
 							EndIf
 						Next
 						
-						If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+						If SeedHasElectricalCenter = False Then
 							IsSeedBeatable = False
 						EndIf
 						 
@@ -901,16 +902,16 @@ Function UpdateMainMenu()
 										MainMenuOpen = False										
 										
 										For plink.Rooms = Each Rooms
-											If plink\RoomTemplate\Name = "008" Then
-												SeedHas008 = True
-											EndIf
+											;If plink\RoomTemplate\Name = "008" Then
+											;	SeedHas008 = True
+											;EndIf
 											
 											If plink\RoomTemplate\Name = "room2ccont" Then
 												SeedHasElectricalCenter = True
 											EndIf
 										Next
 										
-										If SeedHas008 = False Or SeedHasElectricalCenter = False Then
+										If SeedHasElectricalCenter = False Then
 											IsSeedBeatable = False
 										EndIf
 										

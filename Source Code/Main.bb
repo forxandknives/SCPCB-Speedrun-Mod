@@ -378,7 +378,7 @@ Global ShowSeedCanBe100% = GetINIInt(OptionFile, "options", "can 100 seed warnin
 Global B2Timer% = 82122 ; Average time to trigger gate b ending to dying, its not always this number, but is only off by at most 6 ms
 
 Global IsSeedBeatable = True
-Global SeedHas008% = False
+;Global SeedHas008% = False
 Global SeedHasElectricalCenter% = False
 
 Global Can100Seed% = False
@@ -436,7 +436,7 @@ Function ResetSpeedrunVariables()
 	RunFinished = False
 	SpeedrunEnding = ""
 	IsSeedBeatable = True
-	SeedHas008 = False
+	;SeedHas008 = False
 	SeedHasElectricalCenter = False
 	Can100Seed = False
 	RoomCounter = 0
@@ -7926,9 +7926,9 @@ Function DrawMenu()
 			
 			If Not(IsSeedBeatable) Then
 				Local missingRooms$ = ""
-				If SeedHas008 = False Then
-					missingRooms = missingRooms + "008 "
-				EndIf
+				;If SeedHas008 = False Then
+				;	missingRooms = missingRooms + "008 "
+				;EndIf
 				If SeedHasElectricalCenter = False Then
 					missingRooms = missingRooms + "room2ccont"
 				EndIf
