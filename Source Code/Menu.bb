@@ -1828,6 +1828,10 @@ Function UpdateMainMenu()
 									DemoName = ""
 									WatchingDemo = False
 									
+									DemoPaused = False
+									DemoTimescale = 1.0
+									
+									
 								EndIf
 								;EndIf
 								

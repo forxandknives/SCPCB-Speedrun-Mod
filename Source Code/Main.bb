@@ -437,6 +437,9 @@ Global DemoPaused = False
 Global DemoTimescale# = 1.0
 Global SeedDemoDirectly% = False
 Global WatchingDemo = False
+Global DemoTick = 0
+Global demo.Demos
+Global lastDemo.Demos
 Dim SavedDemos$(1)
 
 
@@ -1092,7 +1095,7 @@ Function UpdateConsole()
 								CreateConsoleMsg("Demo recording stopped.")
 								StopRecordingDemo()
 								recordingDemo = False
-								;SavedDemosAmount = SavedDemosAmount + 1
+								DemoTick = 0
 							EndIf
 							
 						Default 
@@ -5208,28 +5211,39 @@ Function DrawGUI()
 		
 		AAText(uiX + (uiW * 0.05), uiY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
 		
+		If DrawButton(uiX + (uiW * 0.05), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "<", False) Then
+			demo.Demos = First Demos
+		EndIf
 		
 		If DemoPaused Then
-			If DrawButton(uiX + (uiW * 0.10), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) Then	
+			If DrawButton(uiX + (uiW * 0.20), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) Then	
 				DemoPaused = False
 			EndIf
 		Else
-			If DrawButton(uiX + (uiW * 0.10), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
+			If DrawButton(uiX + (uiW * 0.20), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
 				DemoPaused = True
 			EndIf
 		EndIf			
 		
-		If DrawButton(uiX + (uiW * 0.30), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ".5x", False) Then
+		If DrawButton(uiX + (uiW * 0.40), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ">", False) Then
+			demo.Demos = Last Demos
+		EndIf
+		
+		If DrawButton(uiX + (uiW * 0.55), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ".5x", False) Then
 			DemoTimescale = 0.5
 		EndIf
 		
-		If DrawButton(uiX + (uiW * 0.45), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "1x", False) Then
+		If DrawButton(uiX + (uiW * 0.70), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "1x", False) Then
 			DemoTimescale = 1.0
 		EndIf
 		
-		If DrawButton(uiX + (uiW * 0.60), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "2x", False) Then
+		If DrawButton(uiX + (uiW * 0.85), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "2x", False) Then
 			DemoTimescale = 2.0
 		EndIf	
+		
+		AAText(uiX + (uiW * 0.05), uiY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick), False, True)
+
+				
 	EndIf 
 	
 	If ESP Then
@@ -5669,7 +5683,19 @@ Function DrawGUI()
 			AAText(x-50, 270, "Camera Yaw  : " + Str(EntityYaw(Camera)))
 			AAText(x-50, 290, "Camera Roll : " + Str(EntityRoll(Camera)))
 
-	
+			If demo.Demos <> Null Then	
+				AAText(x-50, 330, "Demo Tick: " + Str(demo\tick))
+			Else
+				AAText(x-50, 330, "demo is null.")
+			EndIf
+			
+			If lastDemo.Demos <> Null Then	
+				AAText(x-50, 350, "Last Demo Tick: " + Str(lastDemo\tick))
+			Else
+				AAText(x-50, 350, "Last Demo is null.")
+			EndIf
+
+			
 			
 		EndIf
 		

@@ -1,3 +1,23 @@
+Type Demos
+
+	Field tick%
+
+	Field gt%
+	
+	Field px#
+	Field py#
+	Field pz#	
+
+	Field hx#
+	Field hy#
+	Field hz#
+	
+	Field pitch#
+	Field yaw#
+	Field roll#
+
+End Type
+
 Function DemoMain()
 
 	Repeat 
@@ -102,6 +122,10 @@ Function DemoMain()
 		
 		If MainMenuOpen Then
 		
+			For demo.Demos = Each Demos
+				Delete demo
+			Next
+		
 			Goto EndOfMain
 						
 		Else
@@ -176,7 +200,7 @@ Function DemoMain()
 			
 			If (Not DemoPaused) And (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
 			
-				ReadDemo(demoSavePath)
+				PlayDemo()
 			
 				LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 				CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
@@ -922,6 +946,8 @@ Function RecordDemo()
 		
 			;WriteLine(demoFile, CurrentTime())
 			
+			WriteInt(demoFile, DemoTick)
+			
 			WriteInt(demoFile, GameTime)
 			
 			WriteFloat(demoFile, EntityX(Collider))
@@ -938,6 +964,8 @@ Function RecordDemo()
 			
 		
 			demoDelayTime = MilliSecs()
+		
+			DemoTick = DemoTick + 1
 		
 		EndIf
 		
@@ -1035,55 +1063,100 @@ Function ReadDemo(path$)
 	; We have to do that to load the demo map.
 	; Once the map is loaded we can start reading the rest of the demo.
 	
-	Else
 	
-		If (MilliSecs() - demoDelayTime >= 60) Then
+		While Not(Eof(demoFile))
 	
-			If Not Eof(demoFile) Then
+			Local d.Demos = New Demos
+		
+			d\tick = ReadInt(demoFile)
+		
+			d\gt = ReadInt(demoFile)
 			
-				Local gt% = ReadInt(demoFile)	
-				
-				Local px# = ReadFloat(demoFile)
-				Local py# = ReadFloat(demoFile)
-				Local pz$ = ReadFloat(demoFile)
-				
-				Local hx# = ReadFloat(demoFile)
-				Local hy# = ReadFloat(demoFile)
-				Local hz# = ReadFloat(demoFile)
-				
-				Local pitch# = ReadFloat(demoFile)
-				Local yaw#   = ReadFloat(demoFile)	
-				Local roll#  = ReadFloat(demoFile)		
-				
-				PositionEntity(Collider, px, py, pz)
-				ResetEntity(Collider)
-				
-				PositionEntity(Head, hx, hy, hz)
-				ResetEntity(Head)
-				
-				RotateEntity(Collider, 0, yaw, 0, 0)	
-				RotateEntity(Camera, pitch, yaw, roll, 0)
-				
-				
-				;Local oldpx = px
-					
-				demoDelayTime = MilliSecs()
-				
-				;FIGURE OUT WHY CAMERA PITCH/ROLL IS NOT WORKING
-				;IM USING CAMERA HERE
-				;WHEN YOU SAVE THE GAME IT USES COLLIDER PITCH/YAW/ROLL
-				
-			Else
+			d\px = ReadFloat(demoFile)
+			d\py = ReadFloat(demoFile)
+			d\pz = ReadFloat(demoFile)
 			
-				demoUIOpen = True
-				demoPaused = True
+			d\hx = ReadFloat(demoFile)
+			d\hy = ReadFloat(demoFile)
+			d\hz = ReadFloat(demoFile)
 			
-				CloseFile(demoFile)
-				demoFile = 0		
-				
-			EndIf			
-		EndIf					
+			d\pitch = ReadFloat(demoFile)
+			d\yaw   = ReadFloat(demoFile)
+			d\roll  = ReadFloat(demoFile)
+	
+	
+		Wend
+	
+	;	If (MilliSecs() - demoDelayTime >= 60) Then
+	;
+	;		If Not Last Demos Then
+	;										
+	;			PositionEntity(Collider, demo\px, demo\py, demo\pz)
+	;			ResetEntity(Collider)
+	;			
+	;			PositionEntity(Head, demo\hx, demo\hy, demo\hz)
+	;			ResetEntity(Head)
+	;			
+	;			RotateEntity(Collider, 0, demo\yaw, 0, 0)	
+	;			RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)
+	;			
+	;			
+	;			;Local oldpx = px
+	;				
+	;			demoDelayTime = MilliSecs()
+	;			
+	;		Else
+	;		
+	;			demoUIOpen = True
+	;			demoPaused = True
+	;		
+		;demo.Demos = First Demos
+		;demo.Demos = After demo
+		;lastDemo.Demos = Last Demos
+		;lastDemo.Demos = Before lastDemo
+		
+		demo.Demos = First Demos
+		lastDemo.Demos = Last Demos
+		
+		CloseFile(demoFile)
+		demoFile = 0		
+	;			
+	;		EndIf			
+	;	EndIf					
 	EndIf
+End Function
+
+Function PlayDemo()
+		
+	If MilliSecs() - demoDelayTime >= 60 Then
+	
+		;If demo = Null Return
+	
+		PositionEntity(Collider, demo\px, demo\py, demo\pz)
+		ResetEntity(Collider)
+		
+		PositionEntity(Head, demo\hx, demo\hy, demo\hz)
+		ResetEntity(Head)
+		
+		RotateEntity(Collider, 0, demo\yaw, 0, 0)	
+		RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)
+
+		demoDelayTime = MilliSecs()
+						
+		If demo\tick = lastDemo\tick Then
+				
+			demoUIOpen = True
+			demoPaused = True
+				
+		Else
+		
+			demo.Demos = After demo	
+			
+		EndIf
+	
+	EndIf	
+
+
 End Function
 
 Function Lerp#(s#, e#, p#) 
