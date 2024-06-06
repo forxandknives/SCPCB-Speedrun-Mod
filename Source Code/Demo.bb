@@ -1092,8 +1092,6 @@ Function ReadDemo(path$)
 		SeedDemoDirectly% = ReadByte(demoFile)				
 		DemoDoorCount% = ReadInt(demoFile)	
 		
-		Local demoCount% = 0
-		
 		While Not(Eof(demoFile))
 	
 			Local d.Demos = New Demos
@@ -1119,21 +1117,14 @@ Function ReadDemo(path$)
 			For i% = 1 To DemoDoorCount ;ddoor.Doors = Each Doors
 				
 				Local open% = ReadByte(demoFile)
-				;d\demoDoors[index] = open
+				d\demoDoors[index] = open
 				;Local asdasd% = ReadByte(demoFile)
 				index = index + 1											
 				
 			Next	
 	
 		Wend
-		
-		For tdemo.Demos = Each Demos
-			demoCount = demoCount + 1
-		Next
-		
-		CreateConsoleMsg("Found " + demoCount + " demo class objects.")
-		ConsoleOpen = True
-		
+								
 		demo.Demos = First Demos
 		prevDemo.Demos = demo
 		lastDemo.Demos = Last Demos
@@ -1162,25 +1153,23 @@ Function PlayDemo()
 		RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)
 		
 		Local index% = 0		
-		For i% = 1 To DemoDoorCount ;de.Doors = Each Doors
+		For de.Doors = Each Doors
 		
-			;Local currentOpen% = demo\demoDoors[index]
-			;Local oldOpen%     = prevDemo\demoDoors[index]
+			Local currentOpen% = demo\demoDoors[index]
+			Local oldOpen%     = prevDemo\demoDoors[index]
 		
-			;DebugLog("Tick " + demo\tick + " Door " + index + " Open " + currentOpen)			
+			;CreateConsoleMsg("Tick " + demo\tick + " Door " + index + " Open " + currentOpen)			
 		
-			;If currentOpen Then;<> oldOpen Then
-				
-			;	CreateConsoleMsg("Door: " + index + " open: " + currentOpen)
-				;ConsoleOpen = True
-				;DemoPaused = True
+			If currentOpen <> oldOpen Then
 			
 				;de\open = demo\demoDoors[index]
-				;UseDoor(de.Doors, True)
+				UseDoor(de.Doors, True)
 			
-			;EndIf
+			EndIf
 			
 			index = index + 1
+		
+			If index+1 > DemoDoorCount Then Exit
 		
 		Next
 		
