@@ -15,7 +15,13 @@ Type Demos
 	Field pitch#
 	Field yaw#
 	Field roll#
-
+	
+	Field doorx#
+	Field doory#
+	Field doorz#
+	
+	Field demoDoors%[300]
+		
 End Type
 
 Function DemoMain()
@@ -936,6 +942,14 @@ Function RecordDemo()
 		WriteString(demoFile, RandomSeed)
 		WriteByte(demoFile, SeedRNGDirectly)
 		
+		Local doorCount% = 0
+		Local amongusDoor.Doors
+		For amongusDoors.Doors = Each Doors
+			doorCount = doorCount + 1
+		Next
+		
+		WriteInt(demoFile, doorCount)
+		
 		demoDelayTime = MilliSecs()
 		
 		;We do not close the demoPath file until we manually stop the demo.
@@ -960,13 +974,25 @@ Function RecordDemo()
 			
 			WriteFloat(demoFile, EntityPitch(Camera))
 			WriteFloat(demoFile, EntityYaw(Collider))
-			WriteFloat(demoFile, EntityRoll(Camera))
-			
+			WriteFloat(demoFile, EntityRoll(Camera))		
 		
+			For d.Doors = Each Doors 
+			
+				; We may have to write the xyz of the doorframeobj if the order of the doors
+				; in the linked list are not the same between the live game and the demo.
+				; Theoretically since we are loading the live game and the demo the same way,
+				; the order of the doors should be the same.
+			
+				WriteByte(demoFile, d\open)
+			
+			Next
+																
 			demoDelayTime = MilliSecs()
 		
 			DemoTick = DemoTick + 1
 		
+		Else		
+					
 		EndIf
 		
 	EndIf
@@ -979,7 +1005,9 @@ Function StopRecordingDemo()
 		CloseFile(demoFile)
 		demoFile = 0
 		
-		CreateConsoleMsg("Demo saved to: " + demoSavePath)
+		CreateConsoleMsg("Demo saved to: " + demoSavePath + " Total Ticks: " + DemoTick)
+		
+		DemoTick = 0
 		
 	EndIf
 
@@ -1054,16 +1082,18 @@ Function ReadDemo(path$)
 	If Not demoFile Then
 		demoFile = ReadFile(path)
 		
+		If Not demoFile Then
+			CreateConsoleMsg("Could not open file: " + path )
+			ConsoleOpen = True
+		EndIf
+		
 		;Here we will read all the stuff we need before we start reading game state.
-		RandomSeed = ReadString(demoFile)
-		SeedDemoDirectly = ReadByte(demoFile)		
-
-	; We purposely do not want to close the file here.
-	; We need to read the first few things to get seed data.
-	; We have to do that to load the demo map.
-	; Once the map is loaded we can start reading the rest of the demo.
-	
-	
+		RandomSeed$ = ReadString(demoFile)
+		SeedDemoDirectly% = ReadByte(demoFile)				
+		DemoDoorCount% = ReadInt(demoFile)	
+		
+		Local demoCount% = 0
+		
 		While Not(Eof(demoFile))
 	
 			Local d.Demos = New Demos
@@ -1084,38 +1114,28 @@ Function ReadDemo(path$)
 			d\yaw   = ReadFloat(demoFile)
 			d\roll  = ReadFloat(demoFile)
 	
+			Local index% = 0
+			Local ddoor.Doors
+			For i% = 1 To DemoDoorCount ;ddoor.Doors = Each Doors
+				
+				Local open% = ReadByte(demoFile)
+				;d\demoDoors[index] = open
+				;Local asdasd% = ReadByte(demoFile)
+				index = index + 1											
+				
+			Next	
 	
 		Wend
-	
-	;	If (MilliSecs() - demoDelayTime >= 60) Then
-	;
-	;		If Not Last Demos Then
-	;										
-	;			PositionEntity(Collider, demo\px, demo\py, demo\pz)
-	;			ResetEntity(Collider)
-	;			
-	;			PositionEntity(Head, demo\hx, demo\hy, demo\hz)
-	;			ResetEntity(Head)
-	;			
-	;			RotateEntity(Collider, 0, demo\yaw, 0, 0)	
-	;			RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)
-	;			
-	;			
-	;			;Local oldpx = px
-	;				
-	;			demoDelayTime = MilliSecs()
-	;			
-	;		Else
-	;		
-	;			demoUIOpen = True
-	;			demoPaused = True
-	;		
-		;demo.Demos = First Demos
-		;demo.Demos = After demo
-		;lastDemo.Demos = Last Demos
-		;lastDemo.Demos = Before lastDemo
+		
+		For tdemo.Demos = Each Demos
+			demoCount = demoCount + 1
+		Next
+		
+		CreateConsoleMsg("Found " + demoCount + " demo class objects.")
+		ConsoleOpen = True
 		
 		demo.Demos = First Demos
+		prevDemo.Demos = demo
 		lastDemo.Demos = Last Demos
 		
 		CloseFile(demoFile)
@@ -1140,7 +1160,30 @@ Function PlayDemo()
 		
 		RotateEntity(Collider, 0, demo\yaw, 0, 0)	
 		RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)
-
+		
+		Local index% = 0		
+		For i% = 1 To DemoDoorCount ;de.Doors = Each Doors
+		
+			;Local currentOpen% = demo\demoDoors[index]
+			;Local oldOpen%     = prevDemo\demoDoors[index]
+		
+			;DebugLog("Tick " + demo\tick + " Door " + index + " Open " + currentOpen)			
+		
+			;If currentOpen Then;<> oldOpen Then
+				
+			;	CreateConsoleMsg("Door: " + index + " open: " + currentOpen)
+				;ConsoleOpen = True
+				;DemoPaused = True
+			
+				;de\open = demo\demoDoors[index]
+				;UseDoor(de.Doors, True)
+			
+			;EndIf
+			
+			index = index + 1
+		
+		Next
+		
 		demoDelayTime = MilliSecs()
 						
 		If demo\tick = lastDemo\tick Then
@@ -1149,8 +1192,44 @@ Function PlayDemo()
 			demoPaused = True
 				
 		Else
-		
+			
+			prevDemo.Demos = demo.Demos
 			demo.Demos = After demo	
+			
+			ShouldLerp = True
+			
+		EndIf
+	
+	Else
+		
+		;We try to lerp the player position and camera pitch/yaw/roll in between tick updates.
+		;We will start by doing this only once between ticks.
+		
+		If ShouldLerp And (MilliSecs() - demoDelayTime >= 30) Then
+			
+			Local lpx# = Lerp(prevDemo\px, demo\px, 0.50)
+			Local lpy# = Lerp(prevDemo\py, demo\py, 0.50)
+			Local lpz# = Lerp(prevDemo\pz, demo\pz, 0.50)
+			
+			Local lhx# = Lerp(prevDemo\hx, demo\hx, 0.50)
+			Local lhy# = Lerp(prevDemo\hy, demo\hy, 0.50)
+			Local lhz# = Lerp(prevDemo\hz, demo\hz, 0.50)
+			
+			Local lpitch# = Lerp(prevDemo\pitch, demo\pitch, 0.50)
+			Local lyaw#   = Lerp(prevDemo\yaw, demo\yaw, 0.50)
+			Local lroll#  = Lerp(prevDemo\roll, demo\roll, 0.50)
+			
+			PositionEntity(Collider, lpx, lpy, lpz)
+			ResetEntity(Collider)
+			
+			PositionEntity(Head, lhx, lhy, lhz)
+			ResetEntity(Head)
+			
+			RotateEntity(Collider, 0, lyaw, 0, 0)
+			RotateEntity(Camera, lpitch, lyaw, lroll, 0)
+			
+			
+			ShouldLerp = False
 			
 		EndIf
 	
@@ -1167,8 +1246,6 @@ End Function
 
 Function EndOfFile()
 End Function
-
-
 
 
 

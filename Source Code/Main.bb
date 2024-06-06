@@ -439,7 +439,12 @@ Global SeedDemoDirectly% = False
 Global WatchingDemo = False
 Global DemoTick = 0
 Global demo.Demos
+Global prevDemo.Demos
 Global lastDemo.Demos
+Global ShouldLerp = False
+Global QueueNumber = False
+Global DoorPrevOpenState = False
+Global DemoDoorCount% = 0
 Dim SavedDemos$(1)
 
 
@@ -1094,8 +1099,7 @@ Function UpdateConsole()
 							Else
 								CreateConsoleMsg("Demo recording stopped.")
 								StopRecordingDemo()
-								recordingDemo = False
-								DemoTick = 0
+								recordingDemo = False								
 							EndIf
 							
 						Default 
@@ -5197,6 +5201,8 @@ Function DrawGUI()
 		
 		ShowPointer()
 		
+		;AASetFont Font1
+		
 		Color 34, 34, 34
 		
 		Local uiX = 0
@@ -5693,9 +5699,14 @@ Function DrawGUI()
 				AAText(x-50, 350, "Last Demo Tick: " + Str(lastDemo\tick))
 			Else
 				AAText(x-50, 350, "Last Demo is null.")
-			EndIf
-
+			EndIf															
 			
+			Local count% = 0
+			For d.Doors = Each Doors
+				count = count + 1
+			Next
+			
+			AAText(x-50, 390, "Total Doors: " + count)
 			
 		EndIf
 		
