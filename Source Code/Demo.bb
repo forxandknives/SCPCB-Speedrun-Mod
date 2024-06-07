@@ -16,11 +16,10 @@ Type Demos
 	Field yaw#
 	Field roll#
 	
+	Field readDoorPosition%
 	Field doorx#
 	Field doory#
-	Field doorz#
-	
-	Field demoDoors%[300]
+	Field doorz#	
 		
 End Type
 
@@ -945,7 +944,18 @@ Function RecordDemo()
 		Local doorCount% = 0
 		Local amongusDoor.Doors
 		For amongusDoors.Doors = Each Doors
-			doorCount = doorCount + 1
+			doorCount = doorCount + 1			
+		Next
+		
+		;We have to do this loop twice because I need the amount of doors on the map
+		;so that I can re-dim the PrevDoorOpen array to the correct size.
+		Dim PrevDoorOpen(doorCount)
+		Local index% = 0
+		For amongus.Doors = Each Doors
+	
+			PrevDoorOpen(index) = amongus\open
+			index = index + 1
+			
 		Next
 		
 		WriteByte(demoFile, doorCount)		
@@ -975,17 +985,32 @@ Function RecordDemo()
 			WriteFloat(demoFile, EntityPitch(Camera))
 			WriteFloat(demoFile, EntityYaw(Collider))
 			WriteFloat(demoFile, EntityRoll(Camera))		
-		
-			For d.Doors = Each Doors 
+						
+			Local reachedEnd% = True
+			index% = 0 
+			For d.Doors = Each Doors
 			
-				; We may have to write the xyz of the doorframeobj if the order of the doors
-				; in the linked list are not the same between the live game and the demo.
-				; Theoretically since we are loading the live game and the demo the same way,
-				; the order of the doors should be the same.
-			
-				WriteByte(demoFile, d\open)
+				If d\open <> PrevDoorOpen(index) Then
+					;This byte will signal to ReadDemo() that it must read another 3 floats.					
+					WriteByte(demoFile, 1)
+					WriteFloat(demoFile, EntityX(d\frameobj))
+					WriteFloat(demoFile, EntityY(d\frameobj))
+					WriteFloat(demoFile, EntityZ(d\frameobj))
+					reachedEnd = False
+					PrevDoorOpen(index) = d\open
+					Exit
+				EndIf
+				index = index + 1				
 			
 			Next
+			
+			; If this is true it means that no door on the map had its open state changed
+			; since the last time we logged its state.					
+			; We will write a 0 to the file so that ReadDemo() knows that it does not have to 
+			; read anothe 3 floats.
+			If reachedEnd Then
+				WriteByte(demoFile, 0)
+			EndIf
 																
 			demoDelayTime = MilliSecs()
 		
@@ -1121,16 +1146,19 @@ Function ReadDemo(path$)
 			d\yaw   = ReadFloat(demoFile)
 			d\roll  = ReadFloat(demoFile)
 	
-			Local index% = 0
-			Local ddoor.Doors
-			For i% = 1 To DemoDoorCount ;ddoor.Doors = Each Doors
+			Local shouldReadDoorPosition% = ReadByte(demoFile)
+			
+			d\readDoorPosition = shouldReadDoorPosition
+			
+			If d\readDoorPosition Then	
+				Local x# = ReadFloat(demoFile)
+				Local y# = ReadFloat(demoFile)
+				Local z$ = ReadFloat(demoFile)
 				
-				Local open% = ReadByte(demoFile)
-				d\demoDoors[index] = open
-				;Local asdasd% = ReadByte(demoFile)
-				index = index + 1											
-				
-			Next	
+				d\doorx = x
+				d\doory = y
+				d\doorz = z			
+			EndIf					
 	
 		Wend
 								
@@ -1161,26 +1189,16 @@ Function PlayDemo()
 		RotateEntity(Collider, 0, demo\yaw, 0, 0)	
 		RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)
 		
-		Local index% = 0		
-		For de.Doors = Each Doors
-		
-			Local currentOpen% = demo\demoDoors[index]
-			Local oldOpen%     = prevDemo\demoDoors[index]
-		
-			;CreateConsoleMsg("Tick " + demo\tick + " Door " + index + " Open " + currentOpen)			
-		
-			If currentOpen <> oldOpen Then
+		If demo\readDoorPosition Then
+			For r.Doors = Each Doors
 			
-				;de\open = demo\demoDoors[index]
-				UseDoor(de.Doors, True)
-			
-			EndIf
-			
-			index = index + 1
-		
-			If index+1 > DemoDoorCount Then Exit
-		
-		Next
+				; We have found the correct door that we have to do UseDoor() on.
+				If EntityX(r\frameobj) = demo\doorx And EntityZ(r\frameobj) = demo\doorz And EntityY(r\frameobj) = demo\doory Then
+					UseDoor(r, True)
+					Exit
+				EndIf
+			Next		
+		EndIf
 		
 		demoDelayTime = MilliSecs()
 						

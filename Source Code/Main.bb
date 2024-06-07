@@ -446,6 +446,7 @@ Global QueueNumber = False
 Global DoorPrevOpenState = False
 Global DemoDoorCount% = 0
 Dim SavedDemos$(1)
+Dim PrevDoorOpen%(1)
 
 
 Function ResetSpeedrunVariables()
