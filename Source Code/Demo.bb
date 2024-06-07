@@ -948,7 +948,7 @@ Function RecordDemo()
 			doorCount = doorCount + 1
 		Next
 		
-		WriteInt(demoFile, doorCount)
+		WriteByte(demoFile, doorCount)		
 		
 		demoDelayTime = MilliSecs()
 		
@@ -1090,7 +1090,16 @@ Function ReadDemo(path$)
 		;Here we will read all the stuff we need before we start reading game state.
 		RandomSeed$ = ReadString(demoFile)
 		SeedDemoDirectly% = ReadByte(demoFile)				
-		DemoDoorCount% = ReadInt(demoFile)	
+		
+		DemoDoorCount% = ReadByte(demoFile)	
+		
+		; This is a small optimization. The door count for any map is usually bigger than 255.
+		; Normally, we would save it as an int, but we can save it into a byte.
+		; We can pick an arbitrarily high number (100 in this case). There are usually no more than 280 doors per map.
+		; When we read the door count value, we add 256 to it to get the true number of doors on the map.
+		If DemoDoorCount < 100 Then 
+			DemoDoorCount = DemoDoorCount + 256
+		EndIf
 		
 		While Not(Eof(demoFile))
 	
@@ -1235,7 +1244,6 @@ End Function
 
 Function EndOfFile()
 End Function
-
 
 
 
