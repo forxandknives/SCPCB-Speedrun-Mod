@@ -68,6 +68,7 @@ Type NPCs
 	Field LastSeen%, LastDist#
 	
 	Field PrevX#, PrevY#, PrevZ#
+	Field DemoPrevX#, DemoPrevY#, DemoPrevZ#	
 	
 	Field Target.NPCs, TargetID%
 	Field EnemyX#, EnemyY#, EnemyZ#
