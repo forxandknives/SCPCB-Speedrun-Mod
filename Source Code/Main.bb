@@ -445,6 +445,10 @@ Global ShouldLerp = False
 Global QueueNumber = False
 Global DoorPrevOpenState = False
 Global DemoDoorCount% = 0
+Global DemoUIX% = 0
+Global DemoUIY% = MonitorHeight * 0.25
+Global DraggingDemoUIX% = 0 ; 0 For not dragging, anything above for dragging. 
+Global DraggingDemoUIY% = 0
 Dim SavedDemos$(1)
 Dim PrevDoorOpen%(1)
 
@@ -5204,53 +5208,79 @@ Function DrawGUI()
 		
 		;AASetFont Font1
 		
-		Color 34, 34, 34
+		Color 34, 34, 34				
 		
-		Local uiX = 0
-		Local uiY = MonitorHeight * 0.25
+		Local uiW% = MonitorWidth * 0.20
+		Local uiH% = MonitorHeight * 0.20
 		
-		Local uiW = MonitorWidth * 0.20
-		Local uiH = MonitorHeight * 0.20
+		; Checking to see if we are draggin the top of the demo ui box.
+		If MouseDown(1) And DraggingDemoUIX = 0 And DraggingDemoUIY = 0 And (MouseX() >= DemoUIX And MouseX() <= DemoUIX + uiW) And (MouseY() >= DemoUIY And MouseY() <= DemoUIY + (uiH * 0.15)) Then										
+			
+			DraggingDemoUIX = MouseX() - DemoUIX
+			DraggingDemoUIY = MouseY() - DemoUIY
+			
+		EndIf		
 		
-		Rect(uiX, uiY, uiW, uiH, True)
+		If Not MouseDown(1) And DraggingDemoUIX And DraggingDemoUIY Then
+			DraggingDemoUIX = 0
+			DraggingDemoUIY = 0
+		EndIf
 		
+		If DraggingDemoUIX Then
+			DemoUIX = MouseX() - DraggingDemoUIX
+			DemoUIY = MouseY() - DraggingDemoUIY
+			
+			If DemoUIX < 0 Then DemoUIX = 0
+			If DemoUIY < 0 Then DemoUIY = 0
+			If DemoUIX + uiW > MonitorWidth Then DemoUIX = MonitorWidth - uiW
+			If DemoUIY + uiH > MonitorHeight Then DemoUIY = MonitorHeight - uiH
+		EndIf
+		
+		Rect(DemoUIX, DemoUIY, uiW, uiH, True)
+		
+		Color 255, 0, 0
+		Rect(DemoUIX, DemoUIY, uiW, uiH * 0.15, False)
+								
 		Color 255, 255, 255
 		
-		AAText(uiX + (uiW * 0.025), uiY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
 		
-		If DrawButton(uiX + (uiW * 0.05), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "<", False) Then
+		If DrawButton(DemoUIX + (uiW * 0.05), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "<", False) Then
 			demo.Demos = First Demos
 		EndIf
 		
 		If DemoPaused Then
-			If DrawButton(uiX + (uiW * 0.20), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) Then	
+			If DrawButton(DemoUIX + (uiW * 0.20), DemoUIY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) And demo\tick <> lastDemo\tick Then	
 				DemoPaused = False
 			EndIf
 		Else
-			If DrawButton(uiX + (uiW * 0.20), uiY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
+			If DrawButton(DemoUIX + (uiW * 0.20), DemoUIY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
 				DemoPaused = True
 			EndIf
 		EndIf			
 		
-		If DrawButton(uiX + (uiW * 0.40), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ">", False) Then
+		If DrawButton(DemoUIX + (uiW * 0.40), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ">", False) Then
 			demo.Demos = Last Demos
 		EndIf
 		
-		If DrawButton(uiX + (uiW * 0.55), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ".5x", False) Then
+		If DrawButton(DemoUIX + (uiW * 0.55), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ".5x", False) Then
 			DemoTimescale = 0.5
 		EndIf
 		
-		If DrawButton(uiX + (uiW * 0.70), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "1x", False) Then
+		If DrawButton(DemoUIX + (uiW * 0.70), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "1x", False) Then
 			DemoTimescale = 1.0
 		EndIf
 		
-		If DrawButton(uiX + (uiW * 0.85), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "2x", False) Then
+		If DrawButton(DemoUIX + (uiW * 0.85), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "2x", False) Then
 			DemoTimescale = 2.0
 		EndIf	
 		
-		AAText(uiX + (uiW * 0.025), uiY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick), False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick), False, True)
 		
-		AAText(uiX + (uiW * 0.025), uiY + (uiH * 0.475), "Gametime: " + Str(demo\gt) + " / " + Str(lastDemo\gt), False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.475), "Gametime: " + Str(demo\gt) + " / " + Str(lastDemo\gt), False, True)
+		
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.55), "Dragging Demo: " + Str(DraggingDemoUIX), False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.625), "Dragging Demo: " + Str(DraggingDemoUIY), False, True)
 
 				
 	EndIf 
