@@ -18,6 +18,8 @@ Type Demos
 	
 	Field stamina#
 	
+	Field blink#
+	
 	Field readDoorPosition%
 	Field doorx#
 	Field doory#
@@ -339,13 +341,13 @@ Function DemoMain()
 							Case HARD
 								BLINKFREQ = Rnd(420,630)
 						End Select 
-						BlinkTimer = BLINKFREQ
+						;BlinkTimer = BLINKFREQ
 					EndIf
 					
-					BlinkTimer = BlinkTimer - FPSfactor
+					;BlinkTimer = BlinkTimer - FPSfactor
 				Else
-					BlinkTimer = BlinkTimer - FPSfactor * 0.6 * BlinkEffect
-					If EyeIrritation > 0 Then BlinkTimer=BlinkTimer-Min(EyeIrritation / 100.0 + 1.0, 4.0) * FPSfactor
+					;BlinkTimer = BlinkTimer - FPSfactor * 0.6 * BlinkEffect
+					;If EyeIrritation > 0 Then BlinkTimer=BlinkTimer-Min(EyeIrritation / 100.0 + 1.0, 4.0) * FPSfactor
 					
 					darkA = Max(darkA, 0.0)
 				End If
@@ -1228,8 +1230,8 @@ Function DemoMovePlayer()
 	EndIf
 		
 	If Playable Then
-		If KeyHit(KEY_BLINK) Then BlinkTimer = 0
-		If KeyDown(KEY_BLINK) And BlinkTimer < - 10 Then BlinkTimer = -10
+		;If KeyHit(KEY_BLINK) Then BlinkTimer = 0
+		;If KeyDown(KEY_BLINK) And BlinkTimer < - 10 Then BlinkTimer = -10
 	EndIf
 	
 	
@@ -5780,6 +5782,8 @@ Function RecordDemo()
 			
 			WriteFloat(demoFile, Stamina)
 			
+			WriteFloat(demoFile, BlinkTimer)
+			
 			;[Doors]
 						
 			Local reachedEnd% = True
@@ -6000,6 +6004,8 @@ Function ReadDemo(path$)
 			d\roll  = ReadFloat(demoFile)
 	
 			d\stamina = ReadFloat(demoFile)
+			
+			d\blink = ReadFloat(demoFile)
 	
 			;[Doors]
 	
@@ -6067,6 +6073,8 @@ Function PlayDemo()
 		RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)		
 		
 		Stamina = demo\stamina
+		
+		BlinkTimer = demo\blink
 		
 		If demo\readDoorPosition Then
 			For r.Doors = Each Doors

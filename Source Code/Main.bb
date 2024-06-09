@@ -5279,8 +5279,8 @@ Function DrawGUI()
 		
 		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.475), "Gametime: " + Str(demo\gt) + " / " + Str(lastDemo\gt), False, True)
 		
-		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.55), "Dragging Demo: " + Str(DraggingDemoUIX), False, True)
-		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.625), "Dragging Demo: " + Str(DraggingDemoUIY), False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.55), "Dragging Demo X: " + Str(DraggingDemoUIX), False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.625), "Dragging Demo Y: " + Str(DraggingDemoUIY), False, True)
 
 				
 	EndIf 
