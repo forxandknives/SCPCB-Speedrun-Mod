@@ -5216,7 +5216,7 @@ Function DrawGUI()
 		
 		Color 255, 255, 255
 		
-		AAText(uiX + (uiW * 0.05), uiY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
+		AAText(uiX + (uiW * 0.025), uiY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
 		
 		If DrawButton(uiX + (uiW * 0.05), uiY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "<", False) Then
 			demo.Demos = First Demos
@@ -5248,7 +5248,9 @@ Function DrawGUI()
 			DemoTimescale = 2.0
 		EndIf	
 		
-		AAText(uiX + (uiW * 0.05), uiY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick), False, True)
+		AAText(uiX + (uiW * 0.025), uiY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick), False, True)
+		
+		AAText(uiX + (uiW * 0.025), uiY + (uiH * 0.475), "Gametime: " + Str(demo\gt) + " / " + Str(lastDemo\gt), False, True)
 
 				
 	EndIf 
