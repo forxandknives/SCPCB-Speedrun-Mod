@@ -5252,10 +5252,12 @@ Function DrawGUI()
 		If DemoPaused Then
 			If DrawButton(DemoUIX + (uiW * 0.20), DemoUIY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) And demo\tick <> lastDemo\tick Then	
 				DemoPaused = False
+				ResumeSounds()
 			EndIf
 		Else
 			If DrawButton(DemoUIX + (uiW * 0.20), DemoUIY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
 				DemoPaused = True
+				PauseSounds()
 			EndIf
 		EndIf			
 		
