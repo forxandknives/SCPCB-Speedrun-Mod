@@ -1,6 +1,12 @@
 Global MenuBack% = LoadImage_Strict("GFX\menu\back.jpg")
 Global MenuText% = LoadImage_Strict("GFX\menu\scptext.jpg")
-Global Menu173% = LoadImage_Strict("GFX\menu\173back.jpg")
+Global Menu173%
+SeedRnd(MilliSecs())
+If Rand(1, 100) = 1 Then
+	Menu173 = LoadImage_Strict("GFX\menu\Floppaback.png")
+Else
+	Menu173 = LoadImage_Strict("GFX\menu\173back.jpg")
+EndIf
 MenuWhite = LoadImage_Strict("GFX\menu\menuwhite.jpg")
 MenuBlack = LoadImage_Strict("GFX\menu\menublack.jpg")
 MaskImage MenuBlack, 255,255,0
