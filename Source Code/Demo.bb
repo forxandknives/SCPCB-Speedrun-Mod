@@ -6199,10 +6199,34 @@ Function Lerp#(s#, e#, p#)
 
 End Function
 
-Function EndOfFile()
+Function DemoSlideBar(x%, y%, width%, value%, maxValue%)
+
+	If MouseDown1 And OnSliderID=0 Then
+		If ScaledMouseX() >= x And ScaledMouseX() <= x + width + 14 And ScaledMouseY() >= y And ScaledMouseY() <= y + 20 Then
+			value = Min(Max((ScaledMouseX() - x) * maxValue / width, 0), maxValue)
+		EndIf
+	EndIf
+	
+	Color 255,255,255
+	Rect(x, y, width + 14, 20,False)
+	
+	DrawImage(BlinkMeterIMG, x + width * value / Float(maxValue) +3, y+3)
+	
+	For d.Demos = Each Demos
+		If d\tick = value Then
+			demo.Demos = d
+			UpdateDemo(demo)
+			Exit
+		EndIf
+	Next
+			
+	Return value
+
+
 End Function
 
-
+Function EndOfFile()
+End Function
 
 
 

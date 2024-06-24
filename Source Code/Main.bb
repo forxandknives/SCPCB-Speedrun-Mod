@@ -5256,12 +5256,12 @@ Function DrawGUI()
 		EndIf
 		
 		If DemoPaused Then
-			If DrawButton(DemoUIX + (uiW * 0.20), DemoUIY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Resume", False) And demo\tick <> lastDemo\tick Then	
+			If DrawButton(DemoUIX + (uiW * 0.175), DemoUIY + (uiH * 0.15), uiW * 0.20, uiH * 0.20, "Resume", False) And demo\tick <> lastDemo\tick Then	
 				DemoPaused = False
 				ResumeSounds()
 			EndIf
 		Else
-			If DrawButton(DemoUIX + (uiW * 0.20), DemoUIY + (uiH * 0.15), uiW * 0.15, uiH * 0.20, "Pause", False) Then
+			If DrawButton(DemoUIX + (uiW * 0.175), DemoUIY + (uiH * 0.15), uiW * 0.20, uiH * 0.20, "Pause", False) Then
 				DemoPaused = True
 				PauseSounds()
 			EndIf
@@ -5287,12 +5287,9 @@ Function DrawGUI()
 			DemoTimescale = 2.0
 		EndIf	
 		
-		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick), False, True)
+		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.40), "Tick: " + Str(demo\tick) + " / " + Str(lastDemo\tick) + " Gametime: " + Str(demo\gt) + " / " + Str(lastDemo\gt), False, True)		
 		
-		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.475), "Gametime: " + Str(demo\gt) + " / " + Str(lastDemo\gt), False, True)
-		
-		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.55), "Dragging Demo X: " + Str(DraggingDemoUIX), False, True)
-		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.625), "Dragging Demo Y: " + Str(DraggingDemoUIY), False, True)
+		demo\tick = DemoSlideBar(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.50), uiW * 0.90, demo\tick, lastDemo\tick)
 
 				
 	EndIf 
@@ -5753,9 +5750,11 @@ Function DrawGUI()
 				
 				AAText(x-50, 170, "Blink: " + Str(demo\blink))
 				
+				AAText(x-50, 190, "Dragging Demo X: " + Str(DraggingDemoUIX))
+				AAText(x-50, 210, "Dragging Demo Y: " + Str(DraggingDemoUIY))
 				
 			Else
-				AAText(x-50, 330, "demo is null.")
+				AAText(x-50, 50, "demo is null.")
 			EndIf
 			
 			
