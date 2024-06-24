@@ -1110,8 +1110,9 @@ Function UpdateConsole()
 						Default 
 							CreateConsoleMsg("Type demo start to start a demo and demo stop to stop the demo.")
 							
-					End Select
-						
+					End Select								
+				Case "demodebug"
+					DemoDebug = Not DemoDebug
 				Case "e"
 					;[Block]
 					GodMode = 1
@@ -1960,6 +1961,7 @@ CreateConsoleMsg("  - spawn [npc type]")
 
 Global DebugHUD%
 Global DebugHUD2%
+Global DemoDebug%
 
 Global BlurVolume#, BlurTimer#
 
@@ -5246,7 +5248,11 @@ Function DrawGUI()
 		AAText(DemoUIX + (uiW * 0.025), DemoUIY + (uiH * 0.05), "Demo Playback: " + DemoName, False, True)
 		
 		If DrawButton(DemoUIX + (uiW * 0.05), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, "<", False) Then
-			demo.Demos = First Demos
+			;demo.Demos = First Demos
+			If demo\tick Then
+				demo.Demos = Before demo			
+				UpdateDemo(demo)
+			EndIf								
 		EndIf
 		
 		If DemoPaused Then
@@ -5262,7 +5268,11 @@ Function DrawGUI()
 		EndIf			
 		
 		If DrawButton(DemoUIX + (uiW * 0.40), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ">", False) Then
-			demo.Demos = Last Demos
+			;demo.Demos = Last Demos
+			If demo\tick <> lastDemo\tick Then
+				demo.Demos = After demo
+				UpdateDemo(demo)
+			EndIf
 		EndIf
 		
 		If DrawButton(DemoUIX + (uiW * 0.55), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ".5x", False) Then
@@ -5723,25 +5733,33 @@ Function DrawGUI()
 			AAText(x-50, 250, "Camera Pitch: " + Str(EntityPitch(Camera)))
 			AAText(x-50, 270, "Camera Yaw  : " + Str(EntityYaw(Camera)))
 			AAText(x-50, 290, "Camera Roll : " + Str(EntityRoll(Camera)))
+						
+		EndIf
+		
+		If DemoDebug Then
 
 			If demo.Demos <> Null Then	
-				AAText(x-50, 330, "Demo Tick: " + Str(demo\tick))
+				AAText(x-50, 50, "Demo Tick: " + Str(demo\tick))
+				
+				AAText(x-50, 70, "Game Time: " + Str(demo\gt))
+				
+				AAText(x-50, 90, "Collider: " + Str(demo\px) + " " + Str(demo\py) + " " + Str(demo\pz))
+				
+				AAText(x-50, 110, "Head: " + Str(demo\hx) + " " + Str(demo\hy) + " " + Str(demo\hz))
+				
+				AAText(x-50, 130, "Pitch Yaw Roll: " + Str(demo\pitch) + " " + Str(demo\yaw) + " " + Str(demo\roll))
+			
+				AAText(x-50, 150, "Stamina: " + Str(demo\stamina))
+				
+				AAText(x-50, 170, "Blink: " + Str(demo\blink))
+				
+				
 			Else
 				AAText(x-50, 330, "demo is null.")
 			EndIf
 			
-			If lastDemo.Demos <> Null Then	
-				AAText(x-50, 350, "Last Demo Tick: " + Str(lastDemo\tick))
-			Else
-				AAText(x-50, 350, "Last Demo is null.")
-			EndIf															
 			
-			Local count% = 0
-			For d.Doors = Each Doors
-				count = count + 1
-			Next
-			
-			AAText(x-50, 390, "Total Doors: " + count)
+
 			
 		EndIf
 		

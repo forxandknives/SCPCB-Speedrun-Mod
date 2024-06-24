@@ -1,3 +1,12 @@
+; TODO
+;
+; I would like to take all of the logic that sets the game state, i.e. player pos, npc pos, event data etc., and put that in one function that gets called every 
+; 60 ms when playing the demo. Pass in demo object as varible and set it from there.
+; When we use the < and > button, for now instead of going to the start or end, we advance the demo,
+; or go backwards in the demo by 1 tick. When we hit those buttons the demo state is set to the data stored in that demo tick.
+;
+; Ideally we would use the same function that sets the data, to also set the lerped data.
+
 Type Demos
 
 	Field tick%
@@ -11,6 +20,10 @@ Type Demos
 	Field hx#
 	Field hy#
 	Field hz#
+	
+	Field cx#
+	Field cy#
+	Field cz#
 	
 	Field pitch#
 	Field yaw#
@@ -708,10 +721,15 @@ Function DemoMouseLook()
 		
 		;käännetään kameraa sivulle jos pelaaja on vammautunut
 		;RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), Max(Min(up*30*Injuries,50),-50)
-		PositionEntity Camera, EntityX(Collider), EntityY(Collider), EntityZ(Collider)
+		
+		;Might cause issue if commented out. Trying to fix camera position not being same as player position when
+		;iterating through the demo tick by tick. 
+		
+		;PositionEntity Camera, EntityX(Collider), EntityY(Collider), EntityZ(Collider)
+		
 		;RotateEntity Camera, 0, EntityYaw(Collider), roll*0.5
 		
-		MoveEntity Camera, side, up + 0.6 + CrouchState * -0.3, 0
+		;MoveEntity Camera, side, up + 0.6 + CrouchState * -0.3, 0
 		
 		;RotateEntity Collider, EntityPitch(Collider), EntityYaw(Collider), 0
 		;moveentity player, side, up, 0	
@@ -5776,6 +5794,10 @@ Function RecordDemo()
 			WriteFloat(demoFile, EntityY(Head))
 			WriteFloat(demoFile, EntityZ(Head))	
 			
+			WriteFloat(demoFile, EntityX(Camera))
+			WriteFloat(demoFile, EntityY(Camera))
+			WriteFloat(demoFile, EntityZ(Camera))
+			
 			WriteFloat(demoFile, EntityPitch(Camera))
 			WriteFloat(demoFile, EntityYaw(Collider))
 			WriteFloat(demoFile, EntityRoll(Camera))		
@@ -5999,6 +6021,10 @@ Function ReadDemo(path$)
 			d\hy = ReadFloat(demoFile)
 			d\hz = ReadFloat(demoFile)
 			
+			d\cx = ReadFloat(demoFile)
+			d\cy = ReadFloat(demoFile)
+			d\cz = ReadFloat(demoFile)
+			
 			d\pitch = ReadFloat(demoFile)
 			d\yaw   = ReadFloat(demoFile)
 			d\roll  = ReadFloat(demoFile)
@@ -6057,52 +6083,59 @@ Function ReadDemo(path$)
 	EndIf
 End Function
 
+Function UpdateDemo(d.Demos)
+
+	PositionEntity(Collider, d\px, d\py, d\pz)
+	ResetEntity(Collider)
+	
+	PositionEntity(Head, d\hx, d\hy, d\hz)
+	ResetEntity(Head)
+	
+	PositionEntity(Camera, d\cx, d\cy,  d\cz)
+	RotateEntity(Collider, 0, d\yaw, 0, 0)	
+	RotateEntity(Camera, d\pitch, d\yaw, d\roll, 0)		
+
+	Stamina = d\stamina
+	
+	BlinkTimer = d\blink
+	
+	If d\readDoorPosition Then
+		For r.Doors = Each Doors
+		
+			; We have found the correct door that we have to do UseDoor() on.
+			If EntityX(r\frameobj) = d\doorx And EntityZ(r\frameobj) = d\doorz And EntityY(r\frameobj) = d\doory Then
+				UseDoor(r, True)
+				Exit
+			EndIf
+		Next		
+	EndIf
+	
+	If demo\readNutPosition Then
+		PositionEntity(Curr173\collider, d\nutX, d\nutY, d\nutZ)
+		ResetEntity(Curr173\collider)
+		PointEntity(Curr173\Collider, Collider)
+		;If PlayerRoom\RoomTemplate\Name <> "start"
+		;	Local n.NPCs
+		;	For n.NPCs = Each NPCs
+		;		Select n\NPCtype
+		;			Case NPCtype173
+		;				PositionEntity(Curr173\collider, demo\nutX, demo\nutY, demo\nutZ)
+		;				ResetEntity(Curr173\collider)
+		;		End Select
+		;	Next
+		;EndIf
+	EndIf
+
+End Function
+
 Function PlayDemo()
 		
 	If MilliSecs() - demoDelayTime >= 60 Then
 	
 		;If demo = Null Return
 	
-		PositionEntity(Collider, demo\px, demo\py, demo\pz)
-		ResetEntity(Collider)
-		
-		PositionEntity(Head, demo\hx, demo\hy, demo\hz)
-		ResetEntity(Head)
-		
-		RotateEntity(Collider, 0, demo\yaw, 0, 0)	
-		RotateEntity(Camera, demo\pitch, demo\yaw, demo\roll, 0)		
-		
-		Stamina = demo\stamina
-		
-		BlinkTimer = demo\blink
-		
-		If demo\readDoorPosition Then
-			For r.Doors = Each Doors
-			
-				; We have found the correct door that we have to do UseDoor() on.
-				If EntityX(r\frameobj) = demo\doorx And EntityZ(r\frameobj) = demo\doorz And EntityY(r\frameobj) = demo\doory Then
-					UseDoor(r, True)
-					Exit
-				EndIf
-			Next		
-		EndIf
-		
-		If demo\readNutPosition Then
-			PositionEntity(Curr173\collider, demo\nutX, demo\nutY, demo\nutZ)
-			ResetEntity(Curr173\collider)
-			PointEntity(Curr173\Collider, Collider)
-			;If PlayerRoom\RoomTemplate\Name <> "start"
-			;	Local n.NPCs
-			;	For n.NPCs = Each NPCs
-			;		Select n\NPCtype
-			;			Case NPCtype173
-			;				PositionEntity(Curr173\collider, demo\nutX, demo\nutY, demo\nutZ)
-			;				ResetEntity(Curr173\collider)
-			;		End Select
-			;	Next
-			;EndIf
-		EndIf 
-		
+		UpdateDemo(demo)
+					
 		demoDelayTime = MilliSecs()
 						
 		If demo\tick = lastDemo\tick Then
@@ -6115,7 +6148,7 @@ Function PlayDemo()
 			prevDemo.Demos = demo.Demos
 			demo.Demos = After demo	
 			
-			ShouldLerp = True
+			;ShouldLerp = True
 			
 		EndIf
 	
@@ -6168,9 +6201,6 @@ End Function
 
 Function EndOfFile()
 End Function
-
-
-
 
 
 
