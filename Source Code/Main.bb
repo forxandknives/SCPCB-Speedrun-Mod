@@ -438,6 +438,7 @@ Global DemoTimescale# = 1.0
 Global SeedDemoDirectly% = False
 Global WatchingDemo = False
 Global DemoTick = 0
+Global DemoTickTime = 30 ; The amount of time we want to wait in between each tick.
 Global demo.Demos
 Global prevDemo.Demos
 Global lastDemo.Demos
@@ -5251,6 +5252,7 @@ Function DrawGUI()
 			;demo.Demos = First Demos
 			If demo\tick Then
 				demo.Demos = Before demo			
+				prevDemo.Demos = Before demo
 				UpdateDemo(demo)
 			EndIf								
 		EndIf
@@ -5270,6 +5272,7 @@ Function DrawGUI()
 		If DrawButton(DemoUIX + (uiW * 0.40), DemoUIY + (uiH * 0.15), uiW * 0.10, uiH * 0.20, ">", False) Then
 			;demo.Demos = Last Demos
 			If demo\tick <> lastDemo\tick Then
+				prevDemo.Demos = demo
 				demo.Demos = After demo
 				UpdateDemo(demo)
 			EndIf
@@ -5753,6 +5756,32 @@ Function DrawGUI()
 				AAText(x-50, 190, "Dragging Demo X: " + Str(DraggingDemoUIX))
 				AAText(x-50, 210, "Dragging Demo Y: " + Str(DraggingDemoUIY))
 				
+				AAText(x-50, 230, "")
+				
+				AAText(x-50, 250, "Collider Yaw: " + Str(EntityYaw(Collider))) ; This and camera yaw should always be the same.
+				
+				AAText(x-50, 270, "Camera Pitch: " + Str(demo\pitch))
+				Color 255, 0, 0
+				AAText(x-50, 290, "Camera Yaw: " + Str(demo\yaw))
+				Color 255, 255, 255
+				AAText(x-50, 310, "Camera Roll: " + Str(demo\roll))
+				
+				AAText(x-50, 330, "Prev Camera Pitch: " + Str(prevDemo\pitch))
+				Color 255, 0, 0
+				AAText(x-50, 350, "Prev Camera Yaw: " + Str(prevDemo\yaw))
+				Color 255, 255, 255
+				AAText(x-50, 370, "Prev Camera Roll: " + Str(prevDemo\roll))
+												
+				AAText(x-50, 390, "Lerped Camera Pitch: " + Str(Lerp(prevDemo\pitch, demo\pitch, 0.50)))
+				Color 255, 0, 0
+				Local lerpedGUIYaw# = Lerp(prevDemo\yaw, demo\yaw, 0.50)
+				If (prevDemo\yaw >= 135 And prevDemo\yaw <= 180 And demo\yaw >= -180 And demo\yaw <= -135) Or (prevDemo\yaw >= -180 And prevDemo\yaw <= -130 And demo\yaw >= 135 And demo\yaw <= 180) Then
+					lerpedGUIYaw = lerpedGUIYaw + 180
+				EndIf
+				AAText(x-50, 410, "Lerped Camera Yaw: " + Str(lerpedGUIYaw))
+				Color 255, 255, 255
+				AAText(x-50, 430, "Lerped Camera Roll: " + Str(Lerp(prevDemo\roll, demo\roll, 0.50)))
+								
 			Else
 				AAText(x-50, 50, "demo is null.")
 			EndIf

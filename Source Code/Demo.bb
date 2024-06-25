@@ -5778,7 +5778,7 @@ Function RecordDemo()
 				
 	Else		
 		
-		If (MilliSecs() - demoDelayTime >= 60) Then ; Arbitrary amount of time (60 ms) to delay saving the user input and what not.		
+		If (MilliSecs() - demoDelayTime >= DemoTickTime) Then ; Arbitrary amount of time (60 ms) to delay saving the user input and what not.		
 		
 			;WriteLine(demoFile, CurrentTime())
 			
@@ -6130,7 +6130,7 @@ End Function
 
 Function PlayDemo()
 		
-	If MilliSecs() - demoDelayTime >= 60 Then
+	If MilliSecs() - demoDelayTime >= DemoTickTime Then
 	
 		;If demo = Null Return
 	
@@ -6148,7 +6148,7 @@ Function PlayDemo()
 			prevDemo.Demos = demo.Demos
 			demo.Demos = After demo	
 			
-			;ShouldLerp = True
+			ShouldLerp = True
 			
 		EndIf
 	
@@ -6157,7 +6157,7 @@ Function PlayDemo()
 		;We try to lerp the player position and camera pitch/yaw/roll in between tick updates.
 		;We will start by doing this only once between ticks.
 		
-		If ShouldLerp And (MilliSecs() - demoDelayTime >= 30) Then
+		If ShouldLerp And (MilliSecs() - demoDelayTime >= DemoTickTime / 2) Then
 			
 			;[Player]
 			
@@ -6169,8 +6169,30 @@ Function PlayDemo()
 			Local lhy# = Lerp(prevDemo\hy, demo\hy, 0.50)
 			Local lhz# = Lerp(prevDemo\hz, demo\hz, 0.50)
 			
+			Local lcx# = Lerp(prevDemo\cx, demo\cx, 0.50)
+			Local lcy# = Lerp(prevDemo\cy, demo\cy, 0.50)
+			Local lcz# = Lerp(prevDemo\cz, demo\cz, 0.50)
+			
 			Local lpitch# = Lerp(prevDemo\pitch, demo\pitch, 0.50)
-			Local lyaw#   = Lerp(prevDemo\yaw, demo\yaw, 0.50)
+												;
+			; This may seem very confusing and it is...
+			; 
+			; The reason this long if is here is beacuse the game does not use 360 degress to measure an objects yaw.
+			; Going counter clockwise from the bottom side of a circle, it goes from 0 at the bottom to 180 at the top.
+			; Once you pass the top part of the circle, it goes from +180 to -180. Then -180 to -90 at the left side of the circle,
+			; back to 0 once it you reach the bottom.
+			; The problem is that when we try to lerp on the tick that the angle transitions from negative to positive or positive to negative at the top part of the circle,
+			; the lerp freaks out and spits out a value that is 180 degrees off.
+			; All we need to do to fix it is to add 180 to the lerped yaw value, but only when we are transition at the +180 -180 part of the circle.
+			; Lerp already works properly when we transition from -0 to +0 at the bottom of the circle.
+			
+			; (PrevDemo yaw is positive AND demo yaw is negative) OR (PrevDemo yaw is negative AND Demo yaw is positive) 
+			; We will also pick an arbitrary angle that is above 0 and below 180/bigger than -180.
+			Local lyaw# = Lerp(prevDemo\yaw, demo\yaw, 0.50)
+			If (prevDemo\yaw >= 135 And prevDemo\yaw <= 180 And demo\yaw >= -180 And demo\yaw <= -135) Or (prevDemo\yaw >= -180 And prevDemo\yaw <= -130 And demo\yaw >= 135 And demo\yaw <= 180) Then
+				lyaw = lyaw + 180
+			EndIf
+			
 			Local lroll#  = Lerp(prevDemo\roll, demo\roll, 0.50)
 			
 			PositionEntity(Collider, lpx, lpy, lpz)
@@ -6178,6 +6200,8 @@ Function PlayDemo()
 			
 			PositionEntity(Head, lhx, lhy, lhz)
 			ResetEntity(Head)
+			
+			PositionEntity(Camera, lcx, lcy, lcz)
 			
 			RotateEntity(Collider, 0, lyaw, 0, 0)
 			RotateEntity(Camera, lpitch, lyaw, lroll, 0)
@@ -6227,7 +6251,6 @@ End Function
 
 Function EndOfFile()
 End Function
-
 
 
 
