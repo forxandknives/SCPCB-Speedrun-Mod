@@ -5236,7 +5236,7 @@ Function DrawGUI()
 			If DemoUIX < 0 Then DemoUIX = 0
 			If DemoUIY < 0 Then DemoUIY = 0
 			If DemoUIX + uiW > MonitorWidth Then DemoUIX = MonitorWidth - uiW
-			If DemoUIY + uiH > MonitorHeight Then DemoUIY = MonitorHeight - uiH
+			If DemoUIY + (uiH * 0.15) > MonitorHeight Then DemoUIY = MonitorHeight - (uiH * 0.15)
 		EndIf
 		
 		Rect(DemoUIX, DemoUIY, uiW, uiH, True)
