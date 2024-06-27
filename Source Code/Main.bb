@@ -5780,7 +5780,13 @@ Function DrawGUI()
 				EndIf
 				AAText(x-50, 410, "Lerped Camera Yaw: " + Str(lerpedGUIYaw))
 				Color 255, 255, 255
-				AAText(x-50, 430, "Lerped Camera Roll: " + Str(Lerp(prevDemo\roll, demo\roll, 0.50)))
+				AAText(x-50, 430, "Lerped Camera Roll: " + Str(Lerp(prevDemo\roll, demo\roll, 0.50)))								
+				
+				If demo\readDoorPosition Then				
+					AAText(x-50, 450, "Door X: " + Str(demo\doorx))
+					AAText(x-50, 470, "Door Y: " + Str(demo\doory))
+					AAText(x-50, 490, "Door Z: " + Str(demo\doorz))
+				EndIf
 								
 			Else
 				AAText(x-50, 50, "demo is null.")

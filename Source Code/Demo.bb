@@ -33,6 +33,8 @@ Type Demos
 	
 	Field blink#
 	
+	Field inv%
+	
 	Field readDoorPosition%
 	Field doorx#
 	Field doory#
@@ -222,12 +224,21 @@ Function DemoMain()
 			EndIf
 			
 			UpdateCheckpoint1 = False
-			UpdateCheckpoint2 = False
+			UpdateCheckpoint2 = False			
 			
+			If Not DemoPaused Then
+				PlayDemo()
+			EndIf
+			
+			If DemoPaused Or MenuOpen Or InvOpen Or OtherOpen <> Null Or ConsoleOpen Or Using294 And EndingTimer => 0 Then
+				PauseSounds()
+			Else
+				ResumeSounds()
+			EndIf
 			
 			If (Not DemoPaused) And (Not MenuOpen) And (Not InvOpen) And (OtherOpen=Null) And (SelectedDoor = Null) And (ConsoleOpen = False) And (Using294 = False) And (SelectedScreen = Null) And EndingTimer=>0 Then
 			
-				PlayDemo()
+				;PlayDemo()
 			
 				LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 				CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
@@ -5806,6 +5817,8 @@ Function RecordDemo()
 			
 			WriteFloat(demoFile, BlinkTimer)
 			
+			WriteByte(demoFile, InvOpen)
+			
 			;[Doors]
 						
 			Local reachedEnd% = True
@@ -6033,6 +6046,8 @@ Function ReadDemo(path$)
 			
 			d\blink = ReadFloat(demoFile)
 	
+			d\inv = ReadByte(demoFile)
+	
 			;[Doors]
 	
 			Local shouldReadDoorPosition% = ReadByte(demoFile)
@@ -6079,7 +6094,14 @@ Function ReadDemo(path$)
 		demoFile = 0		
 	;			
 	;		EndIf			
-	;	EndIf					
+	;	EndIf		
+		
+		Local index% = 0
+		For r.Doors = Each Doors
+			PrevDoorOpen(index) = r\open
+			index = index + 1
+		Next
+					
 	EndIf
 End Function
 
@@ -6099,8 +6121,12 @@ Function UpdateDemo(d.Demos)
 	
 	BlinkTimer = d\blink
 	
+	InvOpen = d\inv
+	
+	Local index% = 1
+	
 	If d\readDoorPosition Then
-		For r.Doors = Each Doors
+		For r.Doors = Each Doors						
 		
 			; We have found the correct door that we have to do UseDoor() on.
 			If EntityX(r\frameobj) = d\doorx And EntityZ(r\frameobj) = d\doorz And EntityY(r\frameobj) = d\doory Then
