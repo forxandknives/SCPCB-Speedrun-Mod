@@ -44,8 +44,8 @@ Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
-Global SpeedrunVersion$ = "0.0.6"
-Global VersionDate$ = "June 4 2024 6:50 PM EST"
+Global SpeedrunVersion$ = "0.0.7"
+Global VersionDate$ = "CHANGE BEFORE SHIPPING"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -423,6 +423,8 @@ Global endRoom2% = 0
 Global ESP% = False
 
 Global GuaranteedOmni% = False
+
+Global ShowInputs% = False
 
 Function ResetSpeedrunVariables()
 
@@ -1056,6 +1058,10 @@ Function UpdateConsole()
 							CreateConsoleMsg("There is no help available for that command.",255,150,0)
 					End Select
 					
+					;[End Block]
+				Case "showinputs"
+					;[Block]
+					ShowInputs = Not ShowInputs
 					;[End Block]
 				Case "e"
 					;[Block]
@@ -5132,6 +5138,40 @@ Function DrawGUI()
 		
 		Local omniText$ = "Guaranteed omni enabled"
 		AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
+		
+	EndIf
+	
+	If ShowInputs Then
+		
+		Local boxSize% = MonitorHeight * 0.075
+		Local padding% = MonitorHeight * 0.005		
+		Local startingPositionX% = MonitorWidth - 5 * (boxSize / 2) - (padding * 3)		
+		Local startingPositionY% = MonitorHeight - padding - (boxSize / 2)
+		
+		Color 0, 255, 0
+		If KeyHit(KEY_LEFT) Or KeyDown(KEY_LEFT) Then
+			Rect(startingPositionX - (boxSize / 2), startingPositionY - (boxSize / 2), boxSize, boxSize, True) ; A
+		Else	
+			Rect(startingPositionX - (boxSize / 2), startingPositionY - (boxSize / 2), boxSize, boxSize, False) ; A
+		EndIf
+		
+		If KeyHit(KEY_DOWN) Or KeyDown(KEY_DOWN) Then			
+			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - (boxSize / 2), boxSize, boxSize, True) ; S	
+		Else
+			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - (boxSize / 2), boxSize, boxSize, False) ; S	
+		EndIf
+		
+		If KeyHit(KEY_UP) Or KeyDown(KEY_UP) Then
+			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - 3*(boxSize / 2) - padding, boxSize, boxSize, True) ; W
+		Else
+			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - 3*(boxSize / 2) - padding, boxSize, boxSize, False) ; W
+		EndIf
+		
+		If KeyHit(KEY_RIGHT) Or KeyDown(KEY_RIGHT)		
+			Rect(startingPositionX + 3*(boxSize / 2) + 2*padding, startingPositionY - (boxSize / 2), boxSize, boxSize, True) ; D
+		Else
+			Rect(startingPositionX + 3*(boxSize / 2) + 2*padding, startingPositionY - (boxSize / 2), boxSize, boxSize, False) ; D
+		EndIf
 		
 	EndIf
 	
