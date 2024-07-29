@@ -5144,36 +5144,67 @@ Function DrawGUI()
 	If ShowInputs Then
 		
 		Local boxSize% = MonitorHeight * 0.075
-		Local padding% = MonitorHeight * 0.005		
-		Local startingPositionX% = MonitorWidth - 5 * (boxSize / 2) - (padding * 3)		
-		Local startingPositionY% = MonitorHeight - padding - (boxSize / 2)
+		Local padding1% = MonitorHeight * 0.005		
 		
-		Color 0, 255, 0
-		If KeyHit(KEY_LEFT) Or KeyDown(KEY_LEFT) Then
-			Rect(startingPositionX - (boxSize / 2), startingPositionY - (boxSize / 2), boxSize, boxSize, True) ; A
-		Else	
-			Rect(startingPositionX - (boxSize / 2), startingPositionY - (boxSize / 2), boxSize, boxSize, False) ; A
+		Local barWidth% = (boxSize * 3) + (padding1 * 2)
+		Local barHeight% = boxSize / 2
+		
+		Local rectHeight = boxSize * 2
+		Local rectWidth  = boxSize
+		
+		Local mouseWidth% = padding1*2 + rectWidth*2
+		
+		; Beautiful looking code here mhm...
+		
+		Local mouse2Pressed% = False
+		If MouseHit(2) Or MouseDown(2) Then
+			mouse2Pressed = True
 		EndIf
+		Rect(MonitorWidth - padding1 - rectWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse2Pressed)
 		
-		If KeyHit(KEY_DOWN) Or KeyDown(KEY_DOWN) Then			
-			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - (boxSize / 2), boxSize, boxSize, True) ; S	
-		Else
-			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - (boxSize / 2), boxSize, boxSize, False) ; S	
+		Local mouse1Pressed% = False
+		If MouseHit(1) Or MouseDown(1) Then
+			mouse1Pressed = True
 		EndIf
+		Rect(MonitorWidth - mouseWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse1Pressed)
+	
+		Local dPressed% = False
+		If KeyHit(KEY_RIGHT) Or KeyDown(KEY_RIGHT) Then 		
+			dPressed = True
+		EndIf
+		Rect(MonitorWidth - padding1 - boxSize - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, dPressed)
+	
+		Local sPressed% = False
+		If KeyHit(KEY_DOWN) Or KeyDown(KEY_DOWN) Then		
+			sPressed = True
+		EndIf	
+		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, sPressed)
 		
+		Local wPressed% = False	
 		If KeyHit(KEY_UP) Or KeyDown(KEY_UP) Then
-			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - 3*(boxSize / 2) - padding, boxSize, boxSize, True) ; W
-		Else
-			Rect(startingPositionX + (boxSize / 2) + padding, startingPositionY - 3*(boxSize / 2) - padding, boxSize, boxSize, False) ; W
+			wPressed = True				
 		EndIf
+		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, wPressed)
 		
-		If KeyHit(KEY_RIGHT) Or KeyDown(KEY_RIGHT)		
-			Rect(startingPositionX + 3*(boxSize / 2) + 2*padding, startingPositionY - (boxSize / 2), boxSize, boxSize, True) ; D
-		Else
-			Rect(startingPositionX + 3*(boxSize / 2) + 2*padding, startingPositionY - (boxSize / 2), boxSize, boxSize, False) ; D
+		Local aPressed% = False
+		If KeyHit(KEY_LEFT) Or KeyDown(KEY_LEFT) Then
+			aPressed = True				
 		EndIf
+		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, aPressed)
 		
-	EndIf
+		Local spacePressed% = False
+		If KeyHit(KEY_BLINK) Or KeyDown(KEY_BLINK) Then
+			spacePressed = True
+		EndIf
+		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1 - barHeight, barWidth, barHeight, spacePressed)
+		
+		Local shiftPressed% = False
+		If KeyHit(KEY_SPRINT) Or KeyDown(KEY_SPRINT) Then
+			shiftPressed = True
+		EndIf
+		Rect(MonitorWidth - padding1*4 - boxSize*4 - mouseWidth, MonitorHeight - padding1 - boxSize, boxSize, boxSize, shiftPressed)
+		
+	EndIf	
 	
 	If ESP Then
 		CameraProject(Camera, EntityX(Curr173\Collider), EntityY(Curr173\Collider), EntityZ(Curr173\Collider))				
@@ -13011,11 +13042,3 @@ Function RotateEntity90DegreeAngles(entity%)
 	EndIf
 	
 End Function
-
-
-
-
-;~IDEal Editor Parameters:
-;~F#39#DDA#1626#2434#2B30
-;~B#11EA#1462#1C00
-;~C#Blitz3D
