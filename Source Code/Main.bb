@@ -424,7 +424,21 @@ Global ESP% = False
 
 Global GuaranteedOmni% = False
 
+;;;;;;;;;;;;;;;
 Global ShowInputs% = False
+
+Global boxSize% = MonitorHeight * 0.075
+Global padding1% = MonitorHeight * 0.005		
+
+Global barWidth% = (boxSize * 3) + (padding1 * 2)
+Global barHeight% = boxSize / 2
+
+Global rectHeight = boxSize * 2
+Global rectWidth  = boxSize
+
+Global mouseWidth% = padding1*2 + rectWidth*2
+
+;;;;;;;;;;;;;;;
 
 Function ResetSpeedrunVariables()
 
@@ -5141,65 +5155,56 @@ Function DrawGUI()
 		
 	EndIf
 	
-	If ShowInputs Then
-		
-		Local boxSize% = MonitorHeight * 0.075
-		Local padding1% = MonitorHeight * 0.005		
-		
-		Local barWidth% = (boxSize * 3) + (padding1 * 2)
-		Local barHeight% = boxSize / 2
-		
-		Local rectHeight = boxSize * 2
-		Local rectWidth  = boxSize
-		
-		Local mouseWidth% = padding1*2 + rectWidth*2
+	If ShowInputs Then			
 		
 		; Beautiful looking code here mhm...
 		
+		Color TimerR, TimerG, TimerB
+		
 		Local mouse2Pressed% = False
-		If MouseHit(2) Or MouseDown(2) Then
+		If MouseDown(2) Then
 			mouse2Pressed = True
 		EndIf
 		Rect(MonitorWidth - padding1 - rectWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse2Pressed)
 		
 		Local mouse1Pressed% = False
-		If MouseHit(1) Or MouseDown(1) Then
+		If MouseDown(1) Then
 			mouse1Pressed = True
 		EndIf
 		Rect(MonitorWidth - mouseWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse1Pressed)
 	
 		Local dPressed% = False
-		If KeyHit(KEY_RIGHT) Or KeyDown(KEY_RIGHT) Then 		
+		If KeyDown(KEY_RIGHT) Then 		
 			dPressed = True
 		EndIf
 		Rect(MonitorWidth - padding1 - boxSize - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, dPressed)
 	
 		Local sPressed% = False
-		If KeyHit(KEY_DOWN) Or KeyDown(KEY_DOWN) Then		
+		If KeyDown(KEY_DOWN) Then		
 			sPressed = True
 		EndIf	
 		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, sPressed)
 		
 		Local wPressed% = False	
-		If KeyHit(KEY_UP) Or KeyDown(KEY_UP) Then
+		If KeyDown(KEY_UP) Then
 			wPressed = True				
 		EndIf
 		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, wPressed)
 		
 		Local aPressed% = False
-		If KeyHit(KEY_LEFT) Or KeyDown(KEY_LEFT) Then
+		If KeyDown(KEY_LEFT) Then
 			aPressed = True				
 		EndIf
 		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, aPressed)
 		
 		Local spacePressed% = False
-		If KeyHit(KEY_BLINK) Or KeyDown(KEY_BLINK) Then
+		If KeyDown(KEY_BLINK) Then
 			spacePressed = True
 		EndIf
 		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1 - barHeight, barWidth, barHeight, spacePressed)
 		
 		Local shiftPressed% = False
-		If KeyHit(KEY_SPRINT) Or KeyDown(KEY_SPRINT) Then
+		If KeyDown(KEY_SPRINT) Then
 			shiftPressed = True
 		EndIf
 		Rect(MonitorWidth - padding1*4 - boxSize*4 - mouseWidth, MonitorHeight - padding1 - boxSize, boxSize, boxSize, shiftPressed)
