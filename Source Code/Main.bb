@@ -3184,7 +3184,7 @@ Global m.MEMORYSTATUS = New MEMORYSTATUS
 FlushKeys()
 FlushMouse()
 
-DrawLoading(100, True)
+DrawLoading(99, True)
 
 LoopDelay = MilliSecs()
 
