@@ -8431,7 +8431,7 @@ Function DrawMenu()
 
 					y = y + 50*MenuScale
 					
-					If DrawButton(x+325*MenuScale,y,100*MenuScale,30*MenuScale,"WARNINGS",False) Then OptionsMenu = 6
+					If DrawButton(x+325*MenuScale,y,100*MenuScale,30*MenuScale,"MORE",False) Then OptionsMenu = 6
 					
 					Color 255,255,255
 					AAText(x, y, "Display Timer in Game:")
@@ -8508,6 +8508,22 @@ Function DrawMenu()
 					ShowSeedCanBe100% = DrawTick(x + 270 * MenuScale, y + MenuScale, ShowSeedCanBe100%)
 						
 					y = y + 30 * MenuScale
+					
+					AAText(x, y, "Show Inputs:")
+					ShowInputs% = DrawTick(x + 270 * MenuScale, y, ShowInputs%)
+					
+					y = y + 30 * MenuScale
+					
+					AAText(x, y, "Show Inputs Size:")
+					ShowInputsSlider# = (SlideBar(x + 220*MenuScale, y, 150*MenuScale, ShowInputsSlider * 100.0)/100.0)				
+					boxSize = Int(Float(defaultBoxSize) * (ShowInputsSlider + 1.0))
+					; Have to recalculate all the of the other variables that rely on box size.
+					barWidth% = (boxSize * 3) + (padding1 * 2)
+					barHeight% = boxSize / 2					
+					rectHeight = boxSize * 2
+					rectWidth  = boxSize					
+					mouseWidth% = padding1*2 + rectWidth*2
+					;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 					
 					;[End Block]		
