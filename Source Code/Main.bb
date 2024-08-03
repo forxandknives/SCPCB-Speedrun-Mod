@@ -425,9 +425,12 @@ Global ESP% = False
 Global GuaranteedOmni% = False
 
 ;;;;;;;;;;;;;;;
-Global ShowInputs% = False
+Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
 
-Global boxSize% = MonitorHeight * 0.075
+Global ShowInputsSlider# = GetINIFloat(OptionFile, "options", "show inputs size")
+; The value for boxSize is just an arbirary value I've picked.
+Global defaultBoxSize = MonitorHeight * 0.025
+Global boxSize% = defaultBoxSize;0.050
 Global padding1% = MonitorHeight * 0.005		
 
 Global barWidth% = (boxSize * 3) + (padding1 * 2)
@@ -439,6 +442,12 @@ Global rectWidth  = boxSize
 Global mouseWidth% = padding1*2 + rectWidth*2
 
 ;;;;;;;;;;;;;;;
+
+Const DEBUG_MODE% = False
+
+If DEBUG_MODE Then
+	AllocConsole()
+EndIf
 
 Function ResetSpeedrunVariables()
 
@@ -5157,57 +5166,7 @@ Function DrawGUI()
 	
 	If ShowInputs Then			
 		
-		; Beautiful looking code here mhm...
-		
-		Color TimerR, TimerG, TimerB
-		
-		Local mouse2Pressed% = False
-		If MouseDown(2) Then
-			mouse2Pressed = True
-		EndIf
-		Rect(MonitorWidth - padding1 - rectWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse2Pressed)
-		
-		Local mouse1Pressed% = False
-		If MouseDown(1) Then
-			mouse1Pressed = True
-		EndIf
-		Rect(MonitorWidth - mouseWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse1Pressed)
-	
-		Local dPressed% = False
-		If KeyDown(KEY_RIGHT) Then 		
-			dPressed = True
-		EndIf
-		Rect(MonitorWidth - padding1 - boxSize - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, dPressed)
-	
-		Local sPressed% = False
-		If KeyDown(KEY_DOWN) Then		
-			sPressed = True
-		EndIf	
-		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, sPressed)
-		
-		Local wPressed% = False	
-		If KeyDown(KEY_UP) Then
-			wPressed = True				
-		EndIf
-		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, wPressed)
-		
-		Local aPressed% = False
-		If KeyDown(KEY_LEFT) Then
-			aPressed = True				
-		EndIf
-		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, aPressed)
-		
-		Local spacePressed% = False
-		If KeyDown(KEY_BLINK) Then
-			spacePressed = True
-		EndIf
-		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1 - barHeight, barWidth, barHeight, spacePressed)
-		
-		Local shiftPressed% = False
-		If KeyDown(KEY_SPRINT) Then
-			shiftPressed = True
-		EndIf
-		Rect(MonitorWidth - padding1*4 - boxSize*4 - mouseWidth, MonitorHeight - padding1 - boxSize, boxSize, boxSize, shiftPressed)
+		DrawInputs()
 		
 	EndIf	
 	
@@ -7888,6 +7847,62 @@ Function DrawGUI()
 	If PrevInvOpen And (Not InvOpen) Then MoveMouse viewport_center_x, viewport_center_y
 	
 	CatchErrors("DrawGUI")
+End Function
+
+Function DrawInputs()
+
+		; Beautiful looking code here mhm...
+		
+		Color TimerR, TimerG, TimerB
+		
+		Local mouse2Pressed% = False
+		If MouseDown(2) Then
+			mouse2Pressed = True
+		EndIf
+		Rect(MonitorWidth - padding1 - rectWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse2Pressed)
+		
+		Local mouse1Pressed% = False
+		If MouseDown(1) Then
+			mouse1Pressed = True
+		EndIf
+		Rect(MonitorWidth - mouseWidth, MonitorHeight - padding1 - rectHeight, rectWidth, rectHeight, mouse1Pressed)
+	
+		Local dPressed% = False
+		If KeyDown(KEY_RIGHT) Then 		
+			dPressed = True
+		EndIf
+		Rect(MonitorWidth - padding1 - boxSize - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, dPressed)
+	
+		Local sPressed% = False
+		If KeyDown(KEY_DOWN) Then		
+			sPressed = True
+		EndIf	
+		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, sPressed)
+		
+		Local wPressed% = False	
+		If KeyDown(KEY_UP) Then
+			wPressed = True				
+		EndIf
+		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, wPressed)
+		
+		Local aPressed% = False
+		If KeyDown(KEY_LEFT) Then
+			aPressed = True				
+		EndIf
+		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, aPressed)
+		
+		Local spacePressed% = False
+		If KeyDown(KEY_BLINK) Then
+			spacePressed = True
+		EndIf
+		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1 - barHeight, barWidth, barHeight, spacePressed)
+		
+		Local shiftPressed% = False
+		If KeyDown(KEY_SPRINT) Then
+			shiftPressed = True
+		EndIf
+		Rect(MonitorWidth - padding1*4 - boxSize*4 - mouseWidth, MonitorHeight - padding1 - boxSize, boxSize, boxSize, shiftPressed)
+
 End Function
 
 Function DrawMenu()
@@ -12134,6 +12149,8 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "timer b", TimerB)
 	PutINIValue(OptionFile, "options", "timer x", TimerXSlider)
 	PutINIValue(OptionFile, "options", "timer y", TimerYSlider)
+	PutINIValue(OptionFile, "options", "show inputs", ShowInputs)
+	PutINIValue(OptionFile, "options", "show inputs size", ShowInputsSlider)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
 	PutINIValue(OptionFile, "audio", "sound volume", PrevSFXVolume)

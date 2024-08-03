@@ -1554,7 +1554,7 @@ Function UpdateMainMenu()
 					
 				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
 					;[Block] 320
-					height = 360 * MenuScale ; Height of white box around settings
+					height = 420 * MenuScale ; Height of white box around settings
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -1577,6 +1577,28 @@ Function UpdateMainMenu()
 					AAText(x + 20 * MenuScale, y, "Display Death Time:")
 					ShowDeathTime% = DrawTick(x + 310 * MenuScale, y, ShowDeathTime)
 					
+					y = y + 30 * MenuScale
+					
+					AAText(x + 20 * MenuScale, y, "Show Inputs:")
+					ShowInputs% = DrawTick(x + 310 * MenuScale, y, ShowInputs%)
+					
+					y = y + 30 * MenuScale
+					
+					AAText(x + 20 * MenuScale, y, "Show Inputs Size:")
+					ShowInputsSlider# = (SlideBar(x + 310*MenuScale, y, 150*MenuScale, ShowInputsSlider * 100.0)/100.0)				
+					boxSize = Int(Float(defaultBoxSize) * (ShowInputsSlider + 1.0))
+					; Have to recalculate all the of the other variables that rely on box size.
+					barWidth% = (boxSize * 3) + (padding1 * 2)
+					barHeight% = boxSize / 2					
+					rectHeight = boxSize * 2
+					rectWidth  = boxSize					
+					mouseWidth% = padding1*2 + rectWidth*2
+					;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					If DEBUG_MODE Then
+						FPrint(Str("Slider: " + ShowInputsSlider))
+						FPrint(Str("BoxSize: " + boxSize))
+					EndIf
+										
 					y = y + 35 * MenuScale
 					
 					AAText(x + 20 * MenuScale, y, "Enter values from 0 To 255.")
@@ -1619,11 +1641,13 @@ Function UpdateMainMenu()
 					TimerYSlider = (SlideBar(x + 310*MenuScale, y + 20 * MenuScale, 150*MenuScale, TimerYSlider * 100.0)/100.0)
 					TimerY = TimerYSlider * GraphicHeight
 
-					y = y + 30 * MenuScale
+					y = y + 30 * MenuScale									
 					
 					Color TimerR, TimerG, TimerB
 					AASetFont FontMono
 					AAText(TimerX, TimerY, "1:23.456", True, True)
+					
+					If ShowInputs Then DrawInputs()
 
 					;[EndBlock]
 				EndIf
