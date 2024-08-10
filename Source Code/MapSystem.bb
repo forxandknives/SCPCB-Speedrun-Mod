@@ -8229,7 +8229,17 @@ Dim CHUNKDATA(64,64)
 Function SetChunkDataValues()
 	Local StrTemp$,i%,j%
 	StrTemp$ = ""
-	SeedRnd GenerateSeedNumber(RandomSeed)
+	
+	If SeedRNGDirectly Then
+		If DirectSeed <> -1 Then
+			SeedRnd DirectSeed
+		Else
+			SeedRnd Int(RandomSeed)
+		EndIf
+	Else
+		SeedRnd GenerateSeedNumber(RandomSeed)
+	EndIf
+	;SeedRnd GenerateSeedNumber(RandomSeed)
 	
 	For i = 0 To 63
 		For j = 0 To 63
@@ -8255,7 +8265,18 @@ Function CreateChunkParts(r.Rooms)
 	Local chp.ChunkPart,chp2.ChunkPart
 	Local obj%
 	StrTemp$ = ""
-	SeedRnd GenerateSeedNumber(RandomSeed)
+	
+	If SeedRNGDirectly Then
+		If DirectSeed <> -1 Then
+			SeedRnd DirectSeed
+		Else
+			SeedRnd Int(RandomSeed)
+		EndIf
+	Else
+		SeedRnd GenerateSeedNumber(RandomSeed)
+	EndIf
+	
+	;SeedRnd GenerateSeedNumber(RandomSeed)
 	
 	For i = 0 To ChunkAmount%
 		Local loc% = GetINISectionLocation(File$,"chunk"+i)

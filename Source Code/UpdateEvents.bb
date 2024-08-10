@@ -3166,7 +3166,17 @@ Function UpdateEvents()
 						e\room\grid = New Grids
 						
 						oldSeed% = RndSeed()
-						SeedRnd GenerateSeedNumber(RandomSeed)
+						
+						If SeedRNGDirectly Then
+							If DirectSeed <> -1 Then
+								SeedRnd DirectSeed
+							Else
+								SeedRnd Int(RandomSeed)
+							EndIf
+						Else
+							SeedRnd GenerateSeedNumber(RandomSeed)
+						EndIf
+						;SeedRnd GenerateSeedNumber(RandomSeed)
 						
 						Local dir%
 						
