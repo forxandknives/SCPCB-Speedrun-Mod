@@ -441,6 +441,8 @@ Global rectWidth  = boxSize
 
 Global mouseWidth% = padding1*2 + rectWidth*2
 
+Global ShowSeed% = False
+
 ;;;;;;;;;;;;;;;
 
 Const DEBUG_MODE% = False
@@ -5116,6 +5118,7 @@ Function DrawGUI()
 		ShowPointer()
 	Else
 		HidePointer()
+		ShowSeed = False
 	EndIf 		
 
 
@@ -8030,13 +8033,21 @@ Function DrawMenu()
 			EndIf
 			
 			AAText x, y, "Difficulty: "+SelectedDifficulty\name + " " + seedBeatableText 
-			AAText x, y+20*MenuScale, "Save: "+CurrSave
 			
-			If SeedRNGDirectly Then	
-				AAText x, y+40*MenuScale, "Map seed: " + RandomSeed + " (RNG SEEDED DIRECTLY)"
+			AAText x, y+20*MenuScale, "Save: "+CurrSave			
+			
+			If ShowSeed Then
+				If SeedRNGDirectly Then	
+					AAText x, y+40*MenuScale, "Map seed: " + RandomSeed + " (RNG SEEDED DIRECTLY)"
+				Else
+					AAText x, y+40*MenuScale, "Map seed: " + RandomSeed
+				EndIf	
 			Else
-				AAText x, y+40*MenuScale, "Map seed: " + RandomSeed
-			EndIf																	
+				AAText x, y+40*MenuScale, "Map seed: "
+				If DrawButton(x + AAStringWidth("Map seed: "), y+40*MenuScale, AAStringWidth(CurrSave), AAStringHeight(CurrSave), "Show Seed", False) Then
+					ShowSeed = True
+				EndIf
+			EndIf																							
 			
 		ElseIf AchievementsMenu <= 0 And OptionsMenu > 0 And QuitMSG <= 0 And KillTimer >= 0
 			If DrawButton(x + 101 * MenuScale, y + 390 * MenuScale, 230 * MenuScale, 60 * MenuScale, "Back") Then
