@@ -138,8 +138,8 @@ init {
     vars.gameTime     = new MemoryWatcher<int>(bytesPtr + 0x18);
     vars.runFinished  = new MemoryWatcher<int>(bytesPtr + 0x20);
     vars.gotOmni      = new MemoryWatcher<int>(achievementOmni);
-    vars.room2sl      = new MemoryWatcher<int>(bytesPtr + 0x98);
-    vars.contained008 = new MemoryWatcher<int>(bytesPtr + 0x9C);
+    vars.room2sl      = new MemoryWatcher<int>(bytesPtr + 0xDC);
+    vars.contained008 = new MemoryWatcher<int>(bytesPtr + 0xE0);
     vars.activated079 = new MemoryWatcher<int>(achievement079);
     vars.currentZone  = new MemoryWatcher<int>(zone);
     vars.remoteDoorControl = new MemoryWatcher<int>(doorControl);
