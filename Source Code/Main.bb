@@ -448,6 +448,8 @@ Global green% = 0
 Global blue%  = 0
 Global rainbowIndex% = 0
 
+Global RainbowEnabled% = False
+
 ;;;;;;;;;;;;;;;
 
 Const DEBUG_MODE% = False
@@ -634,42 +636,46 @@ Function RainbowColor(rainbow%)
 	
 		Case 0
 			If green = 255 Then 
-				rainbow = 1
+				rainbowIndex = 1
 			Else				
 				green = green + 1
 			EndIf
 		Case 1
 			If red = 0 Then 
-				rainbow = 2
+				rainbowIndex = 2
 			Else 
 				red = red - 1
 			EndIf
 		Case 2
 			If blue = 255 Then 
-				rainbow = 3
+				rainbowIndex = 3
 			Else
 				blue = blue + 1
 			EndIf
 		Case 3
 			If green = 0 Then 
-				rainbow = 4
+				rainbowIndex = 4
 			Else				
 				green = green - 1
 			EndIf
 		Case 4
 			If red = 255 Then
-				rainbow = 5
+				rainbowIndex= 5
 			Else
 				red = red + 1
 			EndIf
 		Case 5
 			If blue = 0 Then 
-				rainbow = 0
+				rainbowIndex= 0
 			Else				
 				blue = blue - 1
 			EndIf
 		Default
 	End Select	
+	
+	If DEBUG_MODE Then
+		FPrint("Red: " + Str(red) + " Green: " + Str(green) + " Blue: " + Str(blue))
+	EndIf
 	
 	Color red, green, blue
 
@@ -7893,7 +7899,15 @@ Function DrawGUI()
 	Next
 	
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then				
-		Color TimerR, TimerG, TimerB
+		If RainbowEnabled Then
+			; We only want to run this function once every main loop.
+			; So we run it here where we draw the timer, 
+			; and then we just take the rgb values for the 
+			; show inputs stuff.
+			RainbowColor(rainbowIndex%)
+		Else
+			Color TimerR, TimerG, TimerB
+		EndIf
 		AASetFont FontMono
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
 	EndIf
@@ -7908,9 +7922,12 @@ Function DrawInputs()
 
 		; Beautiful looking code here mhm...
 		
-		Color TimerR, TimerG, TimerB
-		
-		;RainbowColor(rainbowIndex%)
+		If RainbowEnabled Then
+			Color red, green, blue
+		Else	
+			Color TimerR, TimerG, TimerB
+		EndIf
+						
 		
 		Local mouse2Pressed% = False
 		If MouseDown(2) Then
