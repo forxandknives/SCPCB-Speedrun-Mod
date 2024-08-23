@@ -430,7 +430,7 @@ Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
 Global ShowInputsSlider# = GetINIFloat(OptionFile, "options", "show inputs size")
 ; The value for boxSize is just an arbirary value I've picked.
 Global defaultBoxSize = MonitorHeight * 0.025
-Global boxSize% = defaultBoxSize;0.050
+Global boxSize% = Int(Float(defaultBoxSize) * (ShowInputsSlider + 1.0));0.050
 Global padding1% = MonitorHeight * 0.005		
 
 Global barWidth% = (boxSize * 3) + (padding1 * 2)
@@ -442,6 +442,11 @@ Global rectWidth  = boxSize
 Global mouseWidth% = padding1*2 + rectWidth*2
 
 Global ShowSeed% = False
+
+Global red%   = 0
+Global green% = 0
+Global blue%  = 0
+Global rainbowIndex% = 0
 
 ;;;;;;;;;;;;;;;
 
@@ -622,6 +627,53 @@ Type ConsoleMsg
 	Field isCommand%
 	Field r%,g%,b%
 End Type
+
+Function RainbowColor(rainbow%)
+
+	Select(rainbow)
+	
+		Case 0
+			If green = 255 Then 
+				rainbow = 1
+			Else				
+				green = green + 1
+			EndIf
+		Case 1
+			If red = 0 Then 
+				rainbow = 2
+			Else 
+				red = red - 1
+			EndIf
+		Case 2
+			If blue = 255 Then 
+				rainbow = 3
+			Else
+				blue = blue + 1
+			EndIf
+		Case 3
+			If green = 0 Then 
+				rainbow = 4
+			Else				
+				green = green - 1
+			EndIf
+		Case 4
+			If red = 255 Then
+				rainbow = 5
+			Else
+				red = red + 1
+			EndIf
+		Case 5
+			If blue = 0 Then 
+				rainbow = 0
+			Else				
+				blue = blue - 1
+			EndIf
+		Default
+	End Select	
+	
+	Color red, green, blue
+
+End Function
 
 Function CreateConsoleMsg(txt$,r%=-1,g%=-1,b%=-1,isCommand%=False)
 	Local c.ConsoleMsg = New ConsoleMsg
@@ -7857,6 +7909,8 @@ Function DrawInputs()
 		; Beautiful looking code here mhm...
 		
 		Color TimerR, TimerG, TimerB
+		
+		;RainbowColor(rainbowIndex%)
 		
 		Local mouse2Pressed% = False
 		If MouseDown(2) Then
