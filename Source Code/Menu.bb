@@ -1554,7 +1554,7 @@ Function UpdateMainMenu()
 					
 				ElseIf MainMenuTab = 8 Then ; Speedrun Settings				
 					;[Block] 320
-					height = 420 * MenuScale ; Height of white box around settings
+					height = 460 * MenuScale ; Height of white box around settings
 					DrawFrame(x, y, width, height)	
 					
 					y = y + 20*MenuScale
@@ -1643,9 +1643,16 @@ Function UpdateMainMenu()
 
 					y = y + 30 * MenuScale									
 					
-					Color TimerR, TimerG, TimerB
+					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Rainbow Mode:")
+					RainbowMode = DrawTick(x + 310 * MenuScale, y + 25 * MenuScale, RainbowMode)
+					
+					If RainbowMode Then
+						RainbowColor(rainbowIndex)
+					Else						
+						Color TimerR, TimerG, TimerB
+					EndIf
 					AASetFont FontMono
-					AAText(TimerX, TimerY, "1:23.456", True, True)
+					AAText(TimerX, TimerY, "1:23.456", True, True)															
 					
 					If ShowInputs Then DrawInputs()
 

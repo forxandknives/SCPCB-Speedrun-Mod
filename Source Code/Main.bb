@@ -448,7 +448,7 @@ Global green% = 0
 Global blue%  = 0
 Global rainbowIndex% = 0
 
-Global RainbowEnabled% = False
+Global RainbowMode% = GetINIInt(OptionFile, "options", "rainbow mode")
 
 ;;;;;;;;;;;;;;;
 
@@ -7899,7 +7899,7 @@ Function DrawGUI()
 	Next
 	
 	If RunStartTime > 0 And SpeedrunTimer = 1 Then				
-		If RainbowEnabled Then
+		If RainbowMode Then
 			; We only want to run this function once every main loop.
 			; So we run it here where we draw the timer, 
 			; and then we just take the rgb values for the 
@@ -7922,7 +7922,7 @@ Function DrawInputs()
 
 		; Beautiful looking code here mhm...
 		
-		If RainbowEnabled Then
+		If RainbowMode Then
 			Color red, green, blue
 		Else	
 			Color TimerR, TimerG, TimerB
@@ -8571,6 +8571,12 @@ Function DrawMenu()
 					AAText(x, y, "Timer Y Position:")					
 					TimerYSlider = (SlideBar(x + 250*MenuScale, y, 100*MenuScale, TimerYSlider * 100.0)/100.0)
 					TimerY = TimerYSlider * GraphicHeight
+					
+					y = y + 40 * MenuScale
+					
+					AAText(x, y, "Rainbow Mode:")
+					RainbowMode% = DrawTick(x + 270 * MenuScale, y, RainbowMode)
+					
 					
 					;[End Block]	
 				Case 6
@@ -12249,6 +12255,7 @@ Function SaveOptionsINI()
 	PutINIValue(OptionFile, "options", "timer y", TimerYSlider)
 	PutINIValue(OptionFile, "options", "show inputs", ShowInputs)
 	PutINIValue(OptionFile, "options", "show inputs size", ShowInputsSlider)
+	PutINIValue(OptionFile, "options", "rainbow mode", RainbowMode)
 	
 	PutINIValue(OptionFile, "audio", "music volume", MusicVolume)
 	PutINIValue(OptionFile, "audio", "sound volume", PrevSFXVolume)
