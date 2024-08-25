@@ -3,7 +3,7 @@
 //December 10 2023
 
 state("SCP - Containment Breach Speedrun Mod", "Speedrun Mod") {
-    float playerY : "SCP - Containment Breach Speedrun Mod.exe", 0x000FA7EC, 0xC, 0x4, 0x44; // player y pos
+    float playerY : "SCP - Containment Breach Speedrun Mod.exe", 0x000FB83C, 0xC, 0x4, 0x44; // player y pos
 }
 
 startup {
