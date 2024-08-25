@@ -1,4 +1,13 @@
-﻿Speedrun Mod v0.0.6
+﻿Speedrun Mod v0.0.7
+- Removed gore pictures in 895 and replaced them with floppa.
+- Added an option to show inputs on screen, and change size of them.
+ - Color is same as timer color.
+- Added rainbow mode to timer and input shower.
+- The seed is now hidden in-game until you press the button to show the seed.
+- Fixed bug in autosplitter which caused some splits not to split.
+- Fixed bug where maintenance tunnels were not 1:1 between vanilla and speedrun mod seeds when they should of been.
+
+Speedrun Mod v0.0.6
 - Fixed bug where seed rng directly was always set to false when starting the game. It will now be set to whatever the value was when the game closed.
 - Added option to enable and disable all seed warnings.
 	- 100% now works for all dificulties.
