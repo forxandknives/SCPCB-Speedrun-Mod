@@ -44,8 +44,8 @@ Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
-Global SpeedrunVersion$ = "0.0.7"
-Global VersionDate$ = "August 25 2024 2:30 AM EST"
+Global SpeedrunVersion$ = "0.0.8"
+Global VersionDate$ = "CHANGE BEFORE SHIPPING"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -7898,7 +7898,7 @@ Function DrawGUI()
 		EndIf
 	Next
 	
-	If RunStartTime > 0 And SpeedrunTimer = 1 Then				
+	If RunStartTime <> 0 And SpeedrunTimer = 1 Then				
 		If RainbowMode Then
 			; We only want to run this function once every main loop.
 			; So we run it here where we draw the timer, 
