@@ -9288,7 +9288,8 @@ Function UpdateEndings()
 										SpeedrunEnding = "B1"
 									Else
 										SpeedrunEnding = "B2"
-										GameTime = GameTime + B2Timer
+										;GameTime = GameTime + B2Timer 
+										;No More!
 									EndIf																									
 									
 									e\EventState = 2.0
