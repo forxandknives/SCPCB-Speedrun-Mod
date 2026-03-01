@@ -1,4 +1,10 @@
-﻿Speedrun Mod v0.0.7
+﻿Speedrun Mod v0.0.8
+- Fixed bug where timer would disappear.
+- Timer now shows in loading screen.
+- Speedrun stats now show in the end-game menu.
+- Removed time that was added to B2 runs.
+
+Speedrun Mod v0.0.7
 - Removed gore pictures in 895 and replaced them with floppa.
 - Added an option to show inputs on screen, and change size of them.
  - Color is same as timer color.
