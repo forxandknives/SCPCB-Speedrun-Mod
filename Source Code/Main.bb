@@ -4264,7 +4264,7 @@ Function DrawEnding()
 	
 	ShouldPlay = 66
 	
-	Cls
+	Cls										
 	
 	If EndingTimer<-200 Then
 		
@@ -4326,7 +4326,7 @@ Function DrawEnding()
 				
 				Color(255, 255, 255)
 				AASetFont Font2
-				AAText(x + width / 2 + 40*MenuScale, y + 20*MenuScale, "THE END", True)
+				AAText(x + width / 2 + 40*MenuScale, y + 20*MenuScale, "THE END", True)				
 				AASetFont Font1
 				
 				If AchievementsMenu=0 Then 
@@ -4411,6 +4411,45 @@ Function DrawEnding()
 			EndIf
 			
 		EndIf
+		
+	EndIf
+	
+	;Speedrun
+	If RunFinished Then
+		AASetFont FontMono
+		
+		Color 0, 255, 0
+		
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.40, "Ending " + SpeedrunEnding, False, True)
+		Local ms% = Int(Gametime Mod 1000)
+		Local seconds% = (GameTime / 1000) Mod 60
+		Local minutes% = Int((Gametime / 1000) / 60)
+			
+		Local secondsString$ = Str(seconds)
+			
+		If seconds < 10 Then
+			secondsString = "0" + secondsString
+		EndIf
+		
+		Local msString$ = Str(ms)
+		
+		If ms < 10 Then
+			msString = "00" + msString
+		EndIf 
+		
+		If ms < 100 Then
+			msString = "0" + msString		
+		EndIf
+		
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Finished in: " + Str(minuted) + ":" + Str(secondsString) + "." + Str(msString), False, True)
+		
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.50, "Seed: " + RandomSeed, False, True)
+		
+		If SeedRNGDirectly Then
+			AAText(GraphicWidth * 0.01, GraphicHeight * 0.55, "RNG Seeded Directly", False, True)
+		EndIf
+		
+		Color 255, 255, 255
 		
 	EndIf
 	
