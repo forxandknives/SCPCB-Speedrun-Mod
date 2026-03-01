@@ -2251,6 +2251,41 @@ Function DrawLoading(percent%, shortloading=False)
 		EntityBlend fresize_image,1
 		EntityAlpha fresize_image,1.0
 		
+		If RunStartTime <> 0 And SpeedrunTimer = 1 Then				
+			If RainbowMode Then
+				; We only want to run this function once every main loop.
+				; So we run it here where we draw the timer, 
+				; and then we just take the rgb values for the 
+				; show inputs stuff.
+				RainbowColor(rainbowIndex%)
+			Else
+				Color TimerR, TimerG, TimerB
+			EndIf
+			
+			Local ms% = Int(Gametime Mod 1000)
+			Local seconds% = (GameTime / 1000) Mod 60
+			Local minutes% = Int((Gametime / 1000) / 60)
+				
+			Local secondsString$ = Str(seconds)
+				
+			If seconds < 10 Then
+				secondsString = "0" + secondsString
+			EndIf
+			
+			Local msString$ = Str(ms)
+			
+			If ms < 10 Then
+				msString = "00" + msString
+			EndIf 
+			
+			If ms < 100 Then
+				msString = "0" + msString		
+			EndIf
+			
+			AASetFont FontMono
+			AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
+		EndIf
+		
 		Flip False
 		
 		firstloop = False
