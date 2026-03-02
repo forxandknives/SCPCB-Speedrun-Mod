@@ -8665,6 +8665,9 @@ Function DrawMenu()
 				If AbleToSave
 					QuitButton = 140
 					If DrawButton(x, y + 60*MenuScale, 390*MenuScale, 60*MenuScale, "Save & Quit") Then
+					
+						LoadStartTime = MilliSecs()
+						
 						DropSpeed = 0
 						SaveAndQuitGame(SavePath + CurrSave + "\")
 						NullGame()
@@ -8679,11 +8682,16 @@ Function DrawMenu()
 	
 						FlushKeys()
 						
+						LoadTime = LoadTime + MilliSecs() - LoadStartTime
+						
 					EndIf
 				EndIf
 			EndIf
 			
 			If DrawButton(x, y + QuitButton*MenuScale, 390*MenuScale, 60*MenuScale, "Quit") Then
+				
+				LoadStartTime = MilliSecs()
+			
 				NullGame()
 				MenuOpen = False
 				MainMenuOpen = True
@@ -8695,6 +8703,9 @@ Function DrawMenu()
 				EndIf
 				
 				FlushKeys()
+				
+				LoadTime = LoadTime + MilliSecs() - LoadStartTime
+
 			EndIf
 			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
