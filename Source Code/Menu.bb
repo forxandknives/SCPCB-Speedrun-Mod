@@ -2106,6 +2106,7 @@ Function DrawLoading(percent%, shortloading=False)
 		x% = GraphicWidth / 2 - width / 2
 		y% = GraphicHeight / 2 + 30 - 100
 		
+		Color 255, 255, 255
 		Rect(x, y, width+4, height, False)
 		For  i% = 1 To Int((width - 2) * (percent / 100.0) / 10)
 			DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
