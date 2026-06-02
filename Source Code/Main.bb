@@ -45,7 +45,7 @@ Global ConsoleFont%
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
 Global SpeedrunVersion$ = "0.0.8"
-Global VersionDate$ = "March 2 1:00 PM EST"
+Global VersionDate$ = "June 1 9:00 PM EST"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -4441,7 +4441,7 @@ Function DrawEnding()
 			msString = "0" + msString		
 		EndIf
 		
-		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Finished in: " + Str(minutes) + ":" + Str(secondsString) + "." + Left(msString, 3), False, True)
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Finished in: " + Str(minuted) + ":" + Str(secondsString) + "." + Left(msString, 3), False, True)
 		
 		AAText(GraphicWidth * 0.01, GraphicHeight * 0.50, "Seed: " + RandomSeed, False, True)
 		
@@ -8665,9 +8665,6 @@ Function DrawMenu()
 				If AbleToSave
 					QuitButton = 140
 					If DrawButton(x, y + 60*MenuScale, 390*MenuScale, 60*MenuScale, "Save & Quit") Then
-					
-						LoadStartTime = MilliSecs()
-						
 						DropSpeed = 0
 						SaveAndQuitGame(SavePath + CurrSave + "\")
 						NullGame()
@@ -8682,16 +8679,11 @@ Function DrawMenu()
 	
 						FlushKeys()
 						
-						LoadTime = LoadTime + MilliSecs() - LoadStartTime
-						
 					EndIf
 				EndIf
 			EndIf
 			
 			If DrawButton(x, y + QuitButton*MenuScale, 390*MenuScale, 60*MenuScale, "Quit") Then
-				
-				LoadStartTime = MilliSecs()
-			
 				NullGame()
 				MenuOpen = False
 				MainMenuOpen = True
@@ -8703,9 +8695,6 @@ Function DrawMenu()
 				EndIf
 				
 				FlushKeys()
-				
-				LoadTime = LoadTime + MilliSecs() - LoadStartTime
-
 			EndIf
 			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
