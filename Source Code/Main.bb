@@ -4441,7 +4441,7 @@ Function DrawEnding()
 			msString = "0" + msString		
 		EndIf
 		
-		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Finished in: " + Str(minuted) + ":" + Str(secondsString) + "." + Left(msString, 3), False, True)
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Finished in: " + Str(minutes) + ":" + Str(secondsString) + "." + Left(msString, 3), False, True)
 		
 		AAText(GraphicWidth * 0.01, GraphicHeight * 0.50, "Seed: " + RandomSeed, False, True)
 		
