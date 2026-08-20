@@ -3653,9 +3653,9 @@ Repeat
 				darkA = Max(darkA, Min(Abs(FallTimer / 400.0), 1.0))				
 			EndIf
 			
-			If SelectedItem <> Null Then
-				If SelectedItem\itemtemplate\tempname = "navigator" Or SelectedItem\itemtemplate\tempname = "nav" Then darkA = Max(darkA, 0.5)
-			End If
+			;If SelectedItem <> Null Then
+			;	If SelectedItem\itemtemplate\tempname = "navigator" Or SelectedItem\itemtemplate\tempname = "nav" Then darkA = Max(darkA, 0.5)
+			;End If
 			If SelectedScreen <> Null Then darkA = Max(darkA, 0.5)
 			
 			EntityAlpha(Dark, darkA)	
