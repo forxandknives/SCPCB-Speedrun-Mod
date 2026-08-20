@@ -423,6 +423,7 @@ Global endRoom2% = 0
 Global ESP% = False
 
 Global GuaranteedOmni% = False
+Global GuaranteedPD%   = False
 
 ;;;;;;;;;;;;;;;
 Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
@@ -1195,7 +1196,17 @@ Function UpdateConsole()
 						CreateConsoleMsg("Guarenteed omni disabled.")
 					EndIf
 						
-					;[End Block]									
+					;[End Block]	
+				Case "pd"
+					;[Block]
+					GuaranteedPD = Not GuaranteedPD
+					
+					If (GuaranteedPD) Then
+						CreateConsoleMsg("Guaranteed PD exit enabled.")
+					Else												
+						CreateConsoleMsg("Guaranteed PD exit disabled.")
+					EndIf
+					;[End Block]											
 				Case "asd"
 					;[Block]
 					WireFrame 1
@@ -6591,8 +6602,14 @@ Function DrawGUI()
 					;[End Block]
 				Case "veryfinefirstaid"
 					;[Block]
-					If CanUseItem(False, False, True)
-						Select Rand(5)
+					If CanUseItem(False, False, True)						
+						Local StrangeBottleRandom% = Rand(5)
+						
+						If (GuaranteedPD) Then
+							StrangeBottleRandom = 5
+						EndIf
+						
+						Select StrangeBottleRandom
 							Case 1
 								Injuries = 3.5
 								Msg = "You started bleeding heavily."
@@ -6636,7 +6653,6 @@ Function DrawGUI()
 									MsgTimer = 70*8
 								EndIf
 						End Select
-						
 						RemoveItem(SelectedItem)
 					EndIf
 					;[End Block]
