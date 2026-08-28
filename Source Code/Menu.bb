@@ -1753,7 +1753,7 @@ Function UpdateMainMenu()
 	
 	Color 255,255,255
 	AASetFont ConsoleFont
-	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " " + VersionDate		 
+	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " Fast53 " + VersionDate		 
 	;DrawTiledImageRect(MenuBack, 985 * MenuScale, 860 * MenuScale, 200 * MenuScale, 20 * MenuScale, 1200 * MenuScale, 866 * MenuScale, 300, 20 * MenuScale)
 	
 	Local watermark$ = "Speedrun Mod made by Forx "

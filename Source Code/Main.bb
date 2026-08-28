@@ -212,7 +212,7 @@ Global GameSaved%
 
 Global CanSave% = True
 
-AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion
+AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " Fast53"
 
 PlayStartupVideos()
 
