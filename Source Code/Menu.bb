@@ -167,6 +167,7 @@ LoadSaveGames()
 Global CurrLoadGamePage% = 0
 
 Function UpdateMainMenu()
+
 	Local x%, y%, width%, height%, temp%
 	
 	Color 0,0,0
@@ -1766,6 +1767,9 @@ Function UpdateMainMenu()
 	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
 	
 	AASetFont Font1
+	
+	UpdateConsole()
+	
 End Function
 
 Function UpdateLauncher()

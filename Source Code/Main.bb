@@ -2001,6 +2001,9 @@ CreateConsoleMsg("  - disable106/enable106")
 CreateConsoleMsg("  - 173state/106state/096state")
 CreateConsoleMsg("  - spawn [npc type]")
 
+ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 0
+CreateConsoleMsg("WARNING: Using the console in the main menu may cause the game to crash!")
+
 ;---------------------------------------------------------------------------------------------------
 
 Global DebugHUD%
@@ -3399,6 +3402,29 @@ Repeat
 		Else
 			ShouldPlay = 11
 		EndIf
+		
+		If KeyHit(KEY_CONSOLE) Then
+			If CanOpenConsole
+				If ConsoleOpen Then
+					;UsedConsole = True
+					;ResumeSounds()
+					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+				Else
+					;PauseSounds()
+				EndIf
+				
+				;ConsoleOpen = (Not ConsoleOpen)
+				If Not(ConsoleOpen) Then
+					ConsoleOpen = True
+					CursorIndex = Len(ConsoleInput)
+				Else
+					ConsoleOpen = False
+				EndIf
+				
+				FlushKeys()
+			EndIf
+		EndIf	
+		
 		UpdateMainMenu()
 	Else
 		UpdateStreamSounds()
