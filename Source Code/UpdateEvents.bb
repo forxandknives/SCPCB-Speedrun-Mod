@@ -2353,8 +2353,24 @@ Function UpdateEvents()
 							
 							Local PDTemp% = Rand(25)
 							
-							If (GuaranteedPD) Then
-								PDTemp = 16
+							If (GuaranteedPD) Then						
+								Local foundTunnel% = False
+								For r.Rooms = Each Rooms
+									If r\RoomTemplate\Name = "tunnel" Then
+										foundTunnel = True;
+										Exit
+									EndIf									
+								Next	
+								If foundTunnel Then
+									PDTemp = 16
+								Else
+									PDTemp = 13
+								EndIf
+								
+								If DEBUG_MODE Then
+									FPrint("PDTemp: " + Str(PDTemp))
+								EndIf
+								
 							EndIf
 							
 							Select PDTemp
