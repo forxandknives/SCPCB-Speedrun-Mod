@@ -5291,15 +5291,15 @@ Function DrawGUI()
 		EndIf
 	EndIf
 	
-	If (GuaranteedOmni) Then 
-		
-		AASetFont ConsoleFont
-		Color 255, 255, 255
-		
-		Local omniText$ = "Guaranteed omni enabled"
-		AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
-		
-	EndIf
+	;If (GuaranteedOmni) Then 
+	;	
+	;	AASetFont ConsoleFont
+	;	Color 255, 255, 255
+	;	
+	;	Local omniText$ = "Guaranteed omni enabled"
+	;	AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
+	;	
+	;EndIf
 	
 	If ShowInputs Then			
 		
