@@ -635,8 +635,33 @@ Function UpdateMainMenu()
 					
 						RandomSeed = Abs(MilliSecs())
 						
-						If SeedRNGDirectly Then
+						If SeedRNGDirectly Then							
+							
+							;POSSIBLE TEMPORARY WORK
+							
+							;Right now just checking if seed is 100%able, because most seeds aren't.
+							Local returnValue% = 0							
+							
+							While returnValue <> SEED_CAN_BE_100 
+							
+								returnValue = CPUGenerator(RandomSeed)																
+								
+								If returnValue <> SEED_CAN_BE_100 Then
+								
+									FPrint("Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " Code: " + Str(returnValue))
+									RandomSeed = Abs(MilliSecs())
+									SeedsRerolled = SeedsRerolled + 1
+								
+								EndIf
+							
+							Wend
+							
+							FPrint("Total Rerolls: " + Str(SeedsRerolled) + " Good Seed: " + Str(RandomSeed))
+							
+							;;;;;;;;;;;;;;;;;;;;;;;;
+							
 							SeedRnd Int(RandomSeed)
+							
 						Else	
 							SeedRnd GenerateSeedNumber(RandomSeed)
 						EndIf
@@ -810,7 +835,7 @@ Function UpdateMainMenu()
 						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);							
 	
 						RunStartTime = MilliSecs()
-						DeathStartTime = MilliSecs()
+						DeathStartTime = MilliSecs()						
 						
 					EndIf					
 				EndIf
@@ -2197,6 +2222,28 @@ Function DrawLoading(percent%, shortloading=False)
 			
 		EndIf
 		
+		;;;;;;;;;;;;;;;;;;;Display how many times we rerolled seed.
+		
+		If SeedsRerolled > 0 Then		
+		
+			Local rerollString$ = ""
+			
+			If SeedsRerolled = 1 Then
+				rerollString = "Rerolled " + Str(SeedsRerolled) + " time."
+			Else
+				rerollString = "Rerolled " + Str(SeedsRerolled) + " times."
+			EndIf
+			
+			Color 255,255,255
+			AASetFont FontMono
+			
+			AAText(GraphicWidth / 2, GraphicHeight * 0.10, rerollString, True, True)
+			
+			AASetFont Font1
+		
+		EndIf
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		
 		Color 0,0,0
 		AAText(GraphicWidth / 2 + 1, GraphicHeight / 2 - 100 + 1, "LOADING - " + percent + " %", True, True)
 		Color 255,255,255
@@ -2208,7 +2255,8 @@ Function DrawLoading(percent%, shortloading=False)
 		Else
 			FlushKeys()
 			FlushMouse()
-		EndIf
+		EndIf				
+			
 		
 		If BorderlessWindowed Then
 			If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then

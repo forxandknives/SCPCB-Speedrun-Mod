@@ -467,7 +467,7 @@ If DEBUG_MODE Then
 	AllocConsole()
 EndIf
 
-FlopFunction()
+;FlopFunction()
 
 Function ResetSpeedrunVariables()
 
@@ -493,7 +493,7 @@ Function ResetSpeedrunVariables()
 	Contained008 = False
 	DeathStartTime = 0
 	DeathEndTime = 0
-	SeedsRerolled = 0
+	;SeedsRerolled = 0
 	
 End Function
 
@@ -9691,12 +9691,14 @@ Function InitNewGame()
 	Next
 	
 	FreeTextureCache
-	DrawLoading(100)
+	DrawLoading(100)		
 	
 	FlushKeys
 	FlushMouse
 	
 	DropSpeed = 0
+	
+	SeedsRerolled = 0
 	
 	ShouldIncreasePlayTime = True
 	
