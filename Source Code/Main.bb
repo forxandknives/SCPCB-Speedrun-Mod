@@ -363,6 +363,9 @@ Dim RadioCHN%(8)
 
 Dim OldAiPics%(5)
 
+Function START_OF_SPEEDRUN_BLOCK()
+End Function
+
 ;Speedrun stuff
 Global RunStartTime%
 Global LoadStartTime%
@@ -427,6 +430,8 @@ Global ESP% = False
 Global GuaranteedOmni% = False
 Global GuaranteedPD%   = False
 
+Global SeedsRerolled% = 0
+
 ;;;;;;;;;;;;;;;
 Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
 
@@ -488,6 +493,7 @@ Function ResetSpeedrunVariables()
 	Contained008 = False
 	DeathStartTime = 0
 	DeathEndTime = 0
+	SeedsRerolled = 0
 	
 End Function
 
