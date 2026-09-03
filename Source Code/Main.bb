@@ -432,6 +432,11 @@ Global GuaranteedPD%   = False
 
 Global SeedsRerolled% = 0
 
+;CHANGE THIS INTO OPTIONS FILE
+Global Rerollbeatable% = False
+Global Reroll99%       = False
+Global Reroll100       = False
+
 ;;;;;;;;;;;;;;;
 Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
 
@@ -467,7 +472,7 @@ If DEBUG_MODE Then
 	AllocConsole()
 EndIf
 
-;FlopFunction()
+FlopFunction()
 
 Function ResetSpeedrunVariables()
 

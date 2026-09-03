@@ -514,6 +514,7 @@ Function UpdateMainMenu()
 				CurrSave = Replace(CurrSave,"?","")
 				CurrSave = Replace(CurrSave,Chr(34),"")
 				CurrSave = Replace(CurrSave,"*","")
+							
 				
 				Color 255,255,255
 				If SelectedMap = "" Then
@@ -599,6 +600,40 @@ Function UpdateMainMenu()
 					LoadSavedMaps()
 				EndIf
 				
+				;;;;;;;;;;;;;;;;Seed Reroller;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				Local checkX% = (x + 180 * MenuScale) 
+				Local checkY% = (y + height + 20 * MenuScale)
+				
+				RerollBeatable = DrawTick(checkX, checkY, RerollBeatable)
+				AAText(checkX + 30 * MenuScale, checkY, "Only beatable seeds")
+				
+				If RerollBeatable Then
+					Reroll99 = False
+					Reroll100 = False
+				EndIf
+				
+				checkY = checkY + 25 * MenuScale
+				
+				Reroll99 = DrawTick(checkX, checkY, Reroll99)
+				AAText(checkX + 30 * MenuScale, checkY, "Only 99%able seeds")
+				
+				If Reroll99 Then
+					RerollBeatable = False
+					Reroll100 = False
+				EndIf
+				
+				checkY = checkY + 25 * MenuScale
+
+				Reroll100 = DrawTick(checkX, checkY, Reroll100)
+				AAText(checkX + 30 * MenuScale, checkY, "Only 100%able seeds")
+				
+				If Reroll100 Then
+					RerollBeatable = False
+					Reroll99 = False
+				EndIf
+				
+				;;;;;;;;;;;;;;;;Seed Reroller;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				;Add Seed and Delete Seed
 				
@@ -623,7 +658,7 @@ Function UpdateMainMenu()
 					EndIf	
 				EndIf
 				
-				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;								
 				
 				AASetFont Font2
 				
@@ -644,7 +679,7 @@ Function UpdateMainMenu()
 							
 							While returnValue <> SEED_CAN_BE_100 
 							
-								returnValue = CPUGenerator(RandomSeed)																
+								returnValue = CPUGenerator(RandomSeed, CHECK_FOR_100)
 								
 								If returnValue <> SEED_CAN_BE_100 Then
 								

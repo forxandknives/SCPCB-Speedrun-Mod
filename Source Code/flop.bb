@@ -14,14 +14,16 @@ Const SEED_CAN_BE_100   = 8
 
 Const INVALID_SEED      = 9
 
+Const NO_CHECK_SPECIFIED = 10
+Const INVALID_CHECK      = 11
+
+Const CHECK_FOR_BEATABLE = 12
+Const CHECK_FOR_99       = 13
+Const CHECK_FOR_100      = 14
+
 Function FlopFunction()
 
-	FPrint("hello flop")
-
-	Local dllNumber% = NotFlopFunction()
-	FPrint("dllNumber: " + Str(dllNumber))
-
-	Local cpuReturn% = CPUGenerator(9780);2536653)
+	Local cpuReturn% = CPUGenerator(Abs(MilliSecs()), CHECK_FOR_BEATABLE);2536653)
 	FPrint("CPU: " + Str(cpuReturn))
 
 
