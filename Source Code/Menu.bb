@@ -677,29 +677,42 @@ Function UpdateMainMenu()
 					
 						RandomSeed = Abs(MilliSecs())
 						
-						If SeedRNGDirectly Then							
-							
-							;POSSIBLE TEMPORARY WORK
-							
-							;Right now just checking if seed is 100%able, because most seeds aren't.
-							Local returnValue% = 0							
-							
-							While returnValue <> SEED_CAN_BE_100 
-							
-								returnValue = CPUGenerator(RandomSeed, CHECK_FOR_100)
+						If SeedRNGDirectly Then														
 								
-								If returnValue <> SEED_CAN_BE_100 Then
+							If RerollChoice <> DO_NOT_REROLL Then	 
+							
+								Local expectedReturn% = NO_CHECK_SPECIFIED
+								Select (RerollChoice)
+									Case CHECK_FOR_BEATABLE
+										expectedReturn = SEED_IS_BEATABLE
+									Case CHECK_FOR_99
+										expectedReturn = SEED_CAN_BE_99
+									Case CHECK_FOR_100
+										expectedReturn = SEED_CAN_BE_100
+								End Select
 								
-									FPrint("Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " Code: " + Str(returnValue))
-									RandomSeed = Abs(MilliSecs())
-									SeedsRerolled = SeedsRerolled + 1
+								Local returnValue% = 0							
 								
-								EndIf
-							
-							Wend
-							
-							FPrint("Total Rerolls: " + Str(SeedsRerolled) + " Good Seed: " + Str(RandomSeed))
-							
+								While (returnValue <> expectedReturn)
+								
+									returnValue = CPUGenerator(RandomSeed, RerollChoice)
+									
+									If returnValue <> expectedReturn Then
+									
+										If DEBUG_MODE Then
+											FPrint(Str(RerollChoice) + ": Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " Code: " + Str(returnValue))
+										EndIf	
+										RandomSeed = Abs(MilliSecs())
+										SeedsRerolled = SeedsRerolled + 1
+																			
+									EndIf
+								
+								Wend
+								
+								If DEBUG_MODE Then								
+									FPrint("Total Rerolls: " + Str(SeedsRerolled) + " Good Seed: " + Str(RandomSeed))
+								EndIf				
+							EndIf		
 							;;;;;;;;;;;;;;;;;;;;;;;;
 							
 							SeedRnd Int(RandomSeed)
