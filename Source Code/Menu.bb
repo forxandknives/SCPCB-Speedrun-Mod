@@ -675,52 +675,60 @@ Function UpdateMainMenu()
 					
 					If RandomSeed = "" Then
 					
-						RandomSeed = Abs(MilliSecs())
+						RandomSeed = Abs(MilliSecs())																			
+								
+						If RerollChoice <> DO_NOT_REROLL Then	 
 						
-						If SeedRNGDirectly Then														
-								
-							If RerollChoice <> DO_NOT_REROLL Then	 
+							Local expectedReturn% = NO_CHECK_SPECIFIED
+							Select (RerollChoice)
+								Case CHECK_FOR_BEATABLE
+									expectedReturn = SEED_IS_BEATABLE
+								Case CHECK_FOR_99
+									expectedReturn = SEED_CAN_BE_99
+								Case CHECK_FOR_100
+									expectedReturn = SEED_CAN_BE_100
+							End Select
 							
-								Local expectedReturn% = NO_CHECK_SPECIFIED
-								Select (RerollChoice)
-									Case CHECK_FOR_BEATABLE
-										expectedReturn = SEED_IS_BEATABLE
-									Case CHECK_FOR_99
-										expectedReturn = SEED_CAN_BE_99
-									Case CHECK_FOR_100
-										expectedReturn = SEED_CAN_BE_100
-								End Select
-								
-								Local returnValue% = 0							
-								
-								While (returnValue <> expectedReturn)
-								
+							Local returnValue% = 0							
+							
+							While (returnValue <> expectedReturn)
+							
+								If SeedRNGDirectly Then
 									returnValue = CPUGenerator(RandomSeed, RerollChoice)
-									
-									If returnValue <> expectedReturn Then
-									
-										If DEBUG_MODE Then
+								Else
+									returnValue = CPUGenerator(GenerateSeedNumber(RandomSeed), RerollChoice)
+								EndIf
+								
+								If returnValue <> expectedReturn Then
+								
+									If DEBUG_MODE Then
+										If SeedRNGDirectly Then
 											FPrint(Str(RerollChoice) + ": Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " Code: " + Str(returnValue))
-										EndIf	
-										RandomSeed = Abs(MilliSecs())
-										SeedsRerolled = SeedsRerolled + 1
-																			
-									EndIf
-								
-								Wend
-								
-								If DEBUG_MODE Then								
-									FPrint("Total Rerolls: " + Str(SeedsRerolled) + " Good Seed: " + Str(RandomSeed))
-								EndIf				
-							EndIf		
-							;;;;;;;;;;;;;;;;;;;;;;;;
+										Else
+											FPrint(Str(RerollChoice) + ": Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " (" + GenerateSeedNumber(RandomSeed) + ") Code: " + Str(returnValue))
+										EndIf
+										
+									EndIf	
+									
+									RandomSeed = Abs(MilliSecs())
+									SeedsRerolled = SeedsRerolled + 1
+																		
+								EndIf
 							
+							Wend
+							
+							If DEBUG_MODE Then								
+								FPrint("Total Rerolls: " + Str(SeedsRerolled) + " Good Seed: " + Str(RandomSeed))
+							EndIf				
+						EndIf		
+						;;;;;;;;;;;;;;;;;;;;;;;;
+						
+						If SeedRNGDirectly Then								
 							SeedRnd Int(RandomSeed)
-							
-						Else	
+						Else
 							SeedRnd GenerateSeedNumber(RandomSeed)
 						EndIf
-						
+							
 					Else
 					
 						If SeedRNGDirectly Then
