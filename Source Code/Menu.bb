@@ -635,6 +635,10 @@ Function UpdateMainMenu()
 					RerollChoice = CHECK_FOR_100
 				EndIf
 				
+				If (Not RerollBeatable) And (Not Reroll99) And (Not Reroll100) Then
+					RerollChoice = DO_NOT_REROLL
+				EndIf
+				
 				;;;;;;;;;;;;;;;;Seed Reroller;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
