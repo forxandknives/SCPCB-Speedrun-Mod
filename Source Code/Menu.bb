@@ -610,6 +610,7 @@ Function UpdateMainMenu()
 				If RerollBeatable Then
 					Reroll99 = False
 					Reroll100 = False
+					RerollChoice = CHECK_FOR_BEATABLE
 				EndIf
 				
 				checkY = checkY + 25 * MenuScale
@@ -620,6 +621,7 @@ Function UpdateMainMenu()
 				If Reroll99 Then
 					RerollBeatable = False
 					Reroll100 = False
+					RerollChoice = CHECK_FOR_99
 				EndIf
 				
 				checkY = checkY + 25 * MenuScale
@@ -630,6 +632,7 @@ Function UpdateMainMenu()
 				If Reroll100 Then
 					RerollBeatable = False
 					Reroll99 = False
+					RerollChoice = CHECK_FOR_100
 				EndIf
 				
 				;;;;;;;;;;;;;;;;Seed Reroller;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -867,7 +870,8 @@ Function UpdateMainMenu()
 						FlushMouse()
 						
 						PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
-						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);							
+						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%)
+						PutINIValue(OptionFile, "options", "reroll seeds", RerollChoice%)						
 	
 						RunStartTime = MilliSecs()
 						DeathStartTime = MilliSecs()						

@@ -21,6 +21,8 @@ Const CHECK_FOR_BEATABLE = 12
 Const CHECK_FOR_99       = 13
 Const CHECK_FOR_100      = 14
 
+Const DO_NOT_REROLL      = 15
+
 Function FlopFunction()
 
 	Local cpuReturn% = CPUGenerator(Abs(MilliSecs()), CHECK_FOR_BEATABLE);2536653)

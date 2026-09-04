@@ -433,9 +433,28 @@ Global GuaranteedPD%   = False
 Global SeedsRerolled% = 0
 
 ;CHANGE THIS INTO OPTIONS FILE
+Global RerollChoice% = GETINIInt(OptionFile, "options", "reroll seeds")
+
 Global Rerollbeatable% = False
 Global Reroll99%       = False
 Global Reroll100       = False
+
+If (RerollChoice < CHECK_FOR_BEATABLE Or RerollChoice > DO_NOT_REROLL) Then
+	RerollChoice = DO_NOT_REROLL
+Else
+	Select (RerollChoice)
+		Case CHECK_FOR_BEATABLE
+			RerollChoice = CHECK_FOR_BEATABLE
+			RerollBeatable = True
+		Case CHECK_FOR_99
+			RerollChoice = CHECK_FOR_99
+			Reroll99 = True
+		Case CHECK_FOR_100
+			RerollChoice = CHECK_FOR_100
+			Reroll100 = True
+	End Select
+
+EndIf
 
 ;;;;;;;;;;;;;;;
 Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
