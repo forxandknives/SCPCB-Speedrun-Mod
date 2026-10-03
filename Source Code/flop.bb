@@ -30,3 +30,25 @@ Function FlopFunction()
 
 
 End Function
+
+Global UseFlopConsole = False
+
+Function 
+
+Type SplitStrings
+	
+	Field s$
+
+End Type
+
+Function Split(s$, delimiter$)
+
+	Local length% = Len(s)
+	
+	If s = 0 Then Return
+	
+	For i = 1 To length
+	
+	
+
+End Function
