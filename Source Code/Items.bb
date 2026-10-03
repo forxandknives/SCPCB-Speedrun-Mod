@@ -522,7 +522,7 @@ Function UpdateItems()
 					i\xspeed = 0.0
 					i\zspeed = 0.0
 				Else
-					If ShouldEntitiesFall
+					If ShouldEntitiesFall And i\name <> "SCP-500-01" Then
 						pick = LinePick(EntityX(i\collider),EntityY(i\collider),EntityZ(i\collider),0,-10,0)
 						If pick
 							i\DropSpeed = i\DropSpeed - 0.0004 * FPSfactor

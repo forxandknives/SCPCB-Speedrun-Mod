@@ -22,6 +22,8 @@ Include "Source Code/StrictLoads.bb"
 Include "Source Code/fullscreen_window_fix.bb"
 Include "Source Code/KeyName.bb"
 
+Include "Source Code/flop.bb"
+
 Global OptionFile$ = "options.ini"
 
 Include "Source Code/Blitz_Basic_Bank.bb"
@@ -45,7 +47,7 @@ Global ConsoleFont%
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
 Global SpeedrunVersion$ = "0.0.8"
-Global VersionDate$ = "March 2 1:00 PM EST"
+Global VersionDate$ = "CHANGE THIS"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -212,7 +214,7 @@ Global GameSaved%
 
 Global CanSave% = True
 
-AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion
+AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " Fast53"
 
 PlayStartupVideos()
 
@@ -361,6 +363,9 @@ Dim RadioCHN%(8)
 
 Dim OldAiPics%(5)
 
+Function START_OF_SPEEDRUN_BLOCK()
+End Function
+
 ;Speedrun stuff
 Global RunStartTime%
 Global LoadStartTime%
@@ -423,6 +428,33 @@ Global endRoom2% = 0
 Global ESP% = False
 
 Global GuaranteedOmni% = False
+Global GuaranteedPD%   = False
+
+Global SeedsRerolled% = 0
+
+;CHANGE THIS INTO OPTIONS FILE
+Global RerollChoice% = GETINIInt(OptionFile, "options", "reroll seeds")
+
+Global Rerollbeatable% = False
+Global Reroll99%       = False
+Global Reroll100       = False
+
+If (RerollChoice < CHECK_FOR_BEATABLE Or RerollChoice > DO_NOT_REROLL) Then
+	RerollChoice = DO_NOT_REROLL
+Else
+	Select (RerollChoice)
+		Case CHECK_FOR_BEATABLE
+			RerollChoice = CHECK_FOR_BEATABLE
+			RerollBeatable = True
+		Case CHECK_FOR_99
+			RerollChoice = CHECK_FOR_99
+			Reroll99 = True
+		Case CHECK_FOR_100
+			RerollChoice = CHECK_FOR_100
+			Reroll100 = True
+	End Select
+
+EndIf
 
 ;;;;;;;;;;;;;;;
 Global ShowInputs% = GetINIInt(OptionFile, "options", "show inputs")
@@ -452,11 +484,14 @@ Global RainbowMode% = GetINIInt(OptionFile, "options", "rainbow mode")
 
 ;;;;;;;;;;;;;;;
 
-Const DEBUG_MODE% = False
+Const DEBUG_MODE% = True
+
 
 If DEBUG_MODE Then
 	AllocConsole()
 EndIf
+
+FlopFunction()
 
 Function ResetSpeedrunVariables()
 
@@ -482,6 +517,7 @@ Function ResetSpeedrunVariables()
 	Contained008 = False
 	DeathStartTime = 0
 	DeathEndTime = 0
+	;SeedsRerolled = 0
 	
 End Function
 
@@ -1195,7 +1231,17 @@ Function UpdateConsole()
 						CreateConsoleMsg("Guarenteed omni disabled.")
 					EndIf
 						
-					;[End Block]									
+					;[End Block]	
+				Case "pd"
+					;[Block]
+					GuaranteedPD = Not GuaranteedPD
+					
+					If (GuaranteedPD) Then
+						CreateConsoleMsg("Guaranteed PD exit enabled.")
+					Else												
+						CreateConsoleMsg("Guaranteed PD exit disabled.")
+					EndIf
+					;[End Block]											
 				Case "asd"
 					;[Block]
 					WireFrame 1
@@ -1989,6 +2035,9 @@ CreateConsoleMsg("  - disable173/enable173")
 CreateConsoleMsg("  - disable106/enable106")
 CreateConsoleMsg("  - 173state/106state/096state")
 CreateConsoleMsg("  - spawn [npc type]")
+
+ConsoleR = 255 : ConsoleG = 0 : ConsoleB = 0
+CreateConsoleMsg("WARNING: Using the console in the main menu may cause the game to crash!")
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -3388,6 +3437,29 @@ Repeat
 		Else
 			ShouldPlay = 11
 		EndIf
+		
+		If KeyHit(KEY_CONSOLE) Then
+			If CanOpenConsole
+				If ConsoleOpen Then
+					;UsedConsole = True
+					;ResumeSounds()
+					MouseXSpeed() : MouseYSpeed() : MouseZSpeed() : mouse_x_speed_1#=0.0 : mouse_y_speed_1#=0.0
+				Else
+					;PauseSounds()
+				EndIf
+				
+				;ConsoleOpen = (Not ConsoleOpen)
+				If Not(ConsoleOpen) Then
+					ConsoleOpen = True
+					CursorIndex = Len(ConsoleInput)
+				Else
+					ConsoleOpen = False
+				EndIf
+				
+				FlushKeys()
+			EndIf
+		EndIf	
+		
 		UpdateMainMenu()
 	Else
 		UpdateStreamSounds()
@@ -3653,9 +3725,9 @@ Repeat
 				darkA = Max(darkA, Min(Abs(FallTimer / 400.0), 1.0))				
 			EndIf
 			
-			If SelectedItem <> Null Then
-				If SelectedItem\itemtemplate\tempname = "navigator" Or SelectedItem\itemtemplate\tempname = "nav" Then darkA = Max(darkA, 0.5)
-			End If
+			;If SelectedItem <> Null Then
+			;	If SelectedItem\itemtemplate\tempname = "navigator" Or SelectedItem\itemtemplate\tempname = "nav" Then darkA = Max(darkA, 0.5)
+			;End If
 			If SelectedScreen <> Null Then darkA = Max(darkA, 0.5)
 			
 			EntityAlpha(Dark, darkA)	
@@ -5254,15 +5326,15 @@ Function DrawGUI()
 		EndIf
 	EndIf
 	
-	If (GuaranteedOmni) Then 
-		
-		AASetFont ConsoleFont
-		Color 255, 255, 255
-		
-		Local omniText$ = "Guaranteed omni enabled"
-		AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
-		
-	EndIf
+	;If (GuaranteedOmni) Then 
+	;	
+	;	AASetFont ConsoleFont
+	;	Color 255, 255, 255
+	;	
+	;	Local omniText$ = "Guaranteed omni enabled"
+	;	AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
+	;	
+	;EndIf
 	
 	If ShowInputs Then			
 		
@@ -6591,8 +6663,14 @@ Function DrawGUI()
 					;[End Block]
 				Case "veryfinefirstaid"
 					;[Block]
-					If CanUseItem(False, False, True)
-						Select Rand(5)
+					If CanUseItem(False, False, True)						
+						Local StrangeBottleRandom% = Rand(5)
+						
+						If (GuaranteedPD) Then
+							StrangeBottleRandom = 5
+						EndIf
+						
+						Select StrangeBottleRandom
 							Case 1
 								Injuries = 3.5
 								Msg = "You started bleeding heavily."
@@ -6636,7 +6714,6 @@ Function DrawGUI()
 									MsgTimer = 70*8
 								EndIf
 						End Select
-						
 						RemoveItem(SelectedItem)
 					EndIf
 					;[End Block]
@@ -8665,9 +8742,6 @@ Function DrawMenu()
 				If AbleToSave
 					QuitButton = 140
 					If DrawButton(x, y + 60*MenuScale, 390*MenuScale, 60*MenuScale, "Save & Quit") Then
-					
-						LoadStartTime = MilliSecs()
-						
 						DropSpeed = 0
 						SaveAndQuitGame(SavePath + CurrSave + "\")
 						NullGame()
@@ -8682,16 +8756,11 @@ Function DrawMenu()
 	
 						FlushKeys()
 						
-						LoadTime = LoadTime + MilliSecs() - LoadStartTime
-						
 					EndIf
 				EndIf
 			EndIf
 			
 			If DrawButton(x, y + QuitButton*MenuScale, 390*MenuScale, 60*MenuScale, "Quit") Then
-				
-				LoadStartTime = MilliSecs()
-			
 				NullGame()
 				MenuOpen = False
 				MainMenuOpen = True
@@ -8703,9 +8772,6 @@ Function DrawMenu()
 				EndIf
 				
 				FlushKeys()
-				
-				LoadTime = LoadTime + MilliSecs() - LoadStartTime
-
 			EndIf
 			
 			If DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back") Then
@@ -9649,12 +9715,14 @@ Function InitNewGame()
 	Next
 	
 	FreeTextureCache
-	DrawLoading(100)
+	DrawLoading(100)		
 	
 	FlushKeys
 	FlushMouse
 	
 	DropSpeed = 0
+	
+	SeedsRerolled = 0
 	
 	ShouldIncreasePlayTime = True
 	

@@ -167,6 +167,7 @@ LoadSaveGames()
 Global CurrLoadGamePage% = 0
 
 Function UpdateMainMenu()
+
 	Local x%, y%, width%, height%, temp%
 	
 	Color 0,0,0
@@ -513,6 +514,7 @@ Function UpdateMainMenu()
 				CurrSave = Replace(CurrSave,"?","")
 				CurrSave = Replace(CurrSave,Chr(34),"")
 				CurrSave = Replace(CurrSave,"*","")
+							
 				
 				Color 255,255,255
 				If SelectedMap = "" Then
@@ -598,6 +600,47 @@ Function UpdateMainMenu()
 					LoadSavedMaps()
 				EndIf
 				
+				;;;;;;;;;;;;;;;;Seed Reroller;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				Local checkX% = (x + 180 * MenuScale) 
+				Local checkY% = (y + height + 20 * MenuScale)
+				
+				RerollBeatable = DrawTick(checkX, checkY, RerollBeatable)
+				AAText(checkX + 30 * MenuScale, checkY, "Only beatable seeds")
+				
+				If RerollBeatable Then
+					Reroll99 = False
+					Reroll100 = False
+					RerollChoice = CHECK_FOR_BEATABLE
+				EndIf
+				
+				checkY = checkY + 25 * MenuScale
+				
+				Reroll99 = DrawTick(checkX, checkY, Reroll99)
+				AAText(checkX + 30 * MenuScale, checkY, "Only 99%able seeds")
+				
+				If Reroll99 Then
+					RerollBeatable = False
+					Reroll100 = False
+					RerollChoice = CHECK_FOR_99
+				EndIf
+				
+				checkY = checkY + 25 * MenuScale
+
+				Reroll100 = DrawTick(checkX, checkY, Reroll100)
+				AAText(checkX + 30 * MenuScale, checkY, "Only 100%able seeds")
+				
+				If Reroll100 Then
+					RerollBeatable = False
+					Reroll99 = False
+					RerollChoice = CHECK_FOR_100
+				EndIf
+				
+				If (Not RerollBeatable) And (Not Reroll99) And (Not Reroll100) Then
+					RerollChoice = DO_NOT_REROLL
+				EndIf
+				
+				;;;;;;;;;;;;;;;;Seed Reroller;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				;Add Seed and Delete Seed
 				
@@ -622,7 +665,7 @@ Function UpdateMainMenu()
 					EndIf	
 				EndIf
 				
-				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;								
 				
 				AASetFont Font2
 				
@@ -632,14 +675,60 @@ Function UpdateMainMenu()
 					
 					If RandomSeed = "" Then
 					
-						RandomSeed = Abs(MilliSecs())
+						RandomSeed = Abs(MilliSecs())																			
+								
+						If RerollChoice <> DO_NOT_REROLL Then	 
 						
-						If SeedRNGDirectly Then
+							Local expectedReturn% = NO_CHECK_SPECIFIED
+							Select (RerollChoice)
+								Case CHECK_FOR_BEATABLE
+									expectedReturn = SEED_IS_BEATABLE
+								Case CHECK_FOR_99
+									expectedReturn = SEED_CAN_BE_99
+								Case CHECK_FOR_100
+									expectedReturn = SEED_CAN_BE_100
+							End Select
+							
+							Local returnValue% = 0							
+							
+							While (returnValue <> expectedReturn)
+							
+								If SeedRNGDirectly Then
+									returnValue = CPUGenerator(RandomSeed, RerollChoice)
+								Else
+									returnValue = CPUGenerator(GenerateSeedNumber(RandomSeed), RerollChoice)
+								EndIf
+								
+								If returnValue <> expectedReturn Then
+								
+									If DEBUG_MODE Then
+										If SeedRNGDirectly Then
+											FPrint(Str(RerollChoice) + ": Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " Code: " + Str(returnValue))
+										Else
+											FPrint(Str(RerollChoice) + ": Rerolled " + Str(SeedsRerolled) + " With Seed: " + Str(RandomSeed) + " (" + GenerateSeedNumber(RandomSeed) + ") Code: " + Str(returnValue))
+										EndIf
+										
+									EndIf	
+									
+									RandomSeed = Abs(MilliSecs())
+									SeedsRerolled = SeedsRerolled + 1
+																		
+								EndIf
+							
+							Wend
+							
+							If DEBUG_MODE Then								
+								FPrint("Total Rerolls: " + Str(SeedsRerolled) + " Good Seed: " + Str(RandomSeed))
+							EndIf				
+						EndIf		
+						;;;;;;;;;;;;;;;;;;;;;;;;
+						
+						If SeedRNGDirectly Then								
 							SeedRnd Int(RandomSeed)
-						Else	
+						Else
 							SeedRnd GenerateSeedNumber(RandomSeed)
 						EndIf
-						
+							
 					Else
 					
 						If SeedRNGDirectly Then
@@ -806,10 +895,11 @@ Function UpdateMainMenu()
 						FlushMouse()
 						
 						PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled%)
-						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%);							
+						PutINIValue(OptionFile, "options", "seed rng directly", SeedRNGDirectly%)
+						PutINIValue(OptionFile, "options", "reroll seeds", RerollChoice%)						
 	
 						RunStartTime = MilliSecs()
-						DeathStartTime = MilliSecs()
+						DeathStartTime = MilliSecs()						
 						
 					EndIf					
 				EndIf
@@ -1753,7 +1843,7 @@ Function UpdateMainMenu()
 	
 	Color 255,255,255
 	AASetFont ConsoleFont
-	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " " + VersionDate		 
+	AAText 20,GraphicHeight-30,"v"+VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " Fast53 " + VersionDate		 
 	;DrawTiledImageRect(MenuBack, 985 * MenuScale, 860 * MenuScale, 200 * MenuScale, 20 * MenuScale, 1200 * MenuScale, 866 * MenuScale, 300, 20 * MenuScale)
 	
 	Local watermark$ = "Speedrun Mod made by Forx "
@@ -1766,6 +1856,9 @@ Function UpdateMainMenu()
 	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
 	
 	AASetFont Font1
+	
+	UpdateConsole()
+	
 End Function
 
 Function UpdateLauncher()
@@ -2193,6 +2286,28 @@ Function DrawLoading(percent%, shortloading=False)
 			
 		EndIf
 		
+		;;;;;;;;;;;;;;;;;;;Display how many times we rerolled seed.
+		
+		If SeedsRerolled > 0 Then		
+		
+			Local rerollString$ = ""
+			
+			If SeedsRerolled = 1 Then
+				rerollString = "Rerolled " + Str(SeedsRerolled) + " time."
+			Else
+				rerollString = "Rerolled " + Str(SeedsRerolled) + " times."
+			EndIf
+			
+			Color 255,255,255
+			AASetFont FontMono
+			
+			AAText(GraphicWidth / 2, GraphicHeight * 0.10, rerollString, True, True)
+			
+			AASetFont Font1
+		
+		EndIf
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		
 		Color 0,0,0
 		AAText(GraphicWidth / 2 + 1, GraphicHeight / 2 - 100 + 1, "LOADING - " + percent + " %", True, True)
 		Color 255,255,255
@@ -2204,7 +2319,8 @@ Function DrawLoading(percent%, shortloading=False)
 		Else
 			FlushKeys()
 			FlushMouse()
-		EndIf
+		EndIf				
+			
 		
 		If BorderlessWindowed Then
 			If (RealGraphicWidth<>GraphicWidth) Or (RealGraphicHeight<>GraphicHeight) Then
