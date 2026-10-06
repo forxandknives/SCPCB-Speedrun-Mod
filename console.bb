@@ -1,6 +1,6 @@
 Graphics 1280,720,32,2
 
-Const DEBUG_MODE% = False
+Const DEBUG_MODE% = True
 
 If DEBUG_MODE Then AllocConsole()
 
@@ -168,23 +168,23 @@ Repeat
 	
 	If KeyHit(1) Then Exit
 
-	If KeyDown(203) Then rectX = rectX - (moveSpeed * dt)
-	If KeyDown(205) Then rectX = rectX + (moveSpeed * dt)
-	
-	If KeyHit(200) Then 
-		TargetFPS = TargetFPS + 10 
-		If TargetFPS > 200 Then
-			TargetFPS = 200
-		EndIf
-		frameDelay# = 1000.0 / Float(TargetFPS)
-	EndIf
-	If KeyHit(208) Then 
-		TargetFPS = TargetFPS - 10
-		If TargetFPS = 0 Then
-			TargetFPS = 10
-		EndIf
-		frameDelay# = 1000.0 / Float(TargetFPS)
-	EndIf
+	;If KeyDown(203) Then rectX = rectX - (moveSpeed * dt)
+	;If KeyDown(205) Then rectX = rectX + (moveSpeed * dt)
+	;
+	;If KeyHit(200) Then 
+	;	TargetFPS = TargetFPS + 10 
+	;	If TargetFPS > 200 Then
+	;		TargetFPS = 200
+	;	EndIf
+	;	frameDelay# = 1000.0 / Float(TargetFPS)
+	;EndIf
+	;If KeyHit(208) Then 
+	;	TargetFPS = TargetFPS - 10
+	;	If TargetFPS = 0 Then
+	;		TargetFPS = 10
+	;	EndIf
+	;	frameDelay# = 1000.0 / Float(TargetFPS)
+	;EndIf
 
 	;;;;;;;;;;;;;;;;;;;;;;;;LOGIC END;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 			
@@ -248,6 +248,7 @@ Type FlopConsole
 	Field inputBoxHeight%
 	
 	Field inputText$
+	Field storedInputText$
 	Field consolePadding%
 	
 	Field cursorIndex%
@@ -255,12 +256,17 @@ Type FlopConsole
 	Field cursorHeight%
 
 	Field commandHistory.ConsoleCommands
+	
+	Field commandAmount%
+	
+	Field historyIndex%
 
 End Type
 
 Type ConsoleCommands
 
 	Field command$
+	Field displayText$
 
 End Type
 
@@ -280,21 +286,26 @@ Function CreateFlopConsole.FlopConsole()
 	flop\inputBoxHeight = flop\consoleHeight * 0.15
 	
 	flop\inputText = ""
+	flop\storedInputText = ""
 	flop\consolePadding = width * 0.01
 	
 	flop\cursorIndex  = 0
 	flop\cursorWidth  = StringWidth("A") / 5
 	flop\cursorHeight = StringHeight("A")
 	
+	flop\commandAmount = 0
+	
+	flop\historyIndex = 0
+	
 	Return flop
 
 End Function
 
-Function DeleteFlopConsole(flop.FlopConsole)
+Function DeleteFlopConsole(f.FlopConsole)
 
-	ClearConsoleCommands()
+	ClearConsoleCommands(f)
 	
-	Delete flop
+	Delete f
 
 End Function
 
@@ -340,12 +351,13 @@ Function UpdateFlopConsole(f.FlopConsole)
 			Local tempCommand.ConsoleCommands = New ConsoleCommands
 			tempCommand\command = f\inputText
 			f\inputText = ""			
+			f\storedInputText = ""
 			If DEBUG_MODE Then
 				FPrint("ENTER Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
 			EndIf
 			f\cursorIndex = 0
 			
-			DoConsoleCommand(tempCommand)
+			DoConsoleCommand(flop, tempCommand)
 			
 			Delete tempCommand
 		EndIf
@@ -381,6 +393,12 @@ Function UpdateFlopConsole(f.FlopConsole)
 			EndIf
 		EndIf
 		
+		If DEBUG_MODE Then
+			If KeyHit(57) Then
+				FPrint("History Index: " + Str(f\historyIndex) + " History Amount: " + Str(f\commandAmount))
+			EndIf
+		EndIf
+		
 		;Delete
 		If KeyHit(211) And f\inputText <> "" Then
 			
@@ -412,6 +430,55 @@ Function UpdateFlopConsole(f.FlopConsole)
 		If KeyHit(205) Then
 			f\cursorIndex = f\cursorIndex + 1
 			If f\cursorIndex > Len(f\inputText) Then f\cursorIndex = Len(f\inputText)
+		EndIf
+		
+		;Arrow Up
+		If KeyHit(200) Then
+			f\historyIndex = f\historyIndex + 1
+			If f\historyIndex > f\commandAmount Then
+				f\historyIndex = f\commandAmount
+			EndIf
+			If f\storedInputText = "" And f\historyIndex = 0 Then
+				f\storedInputText = f\inputText
+			EndIf
+			
+			Local tempIndex% = f\commandAmount
+			For f\commandHistory = Each ConsoleCommands
+				If tempIndex = f\historyIndex Then
+					f\inputText = f\commandHistory\command
+					f\cursorIndex = Len(f\commandHistory\command)
+					Exit					
+				EndIf
+				tempIndex = tempIndex - 1
+			Next
+			FPrint("UP History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex))
+
+		EndIf
+		
+		;Arrow Down
+		If KeyHit(208) Then
+			f\historyIndex = f\historyIndex - 1
+			If f\historyIndex < 0 Then
+				f\historyIndex = 0
+			EndIf												
+			
+			If f\historyIndex = 0 Then
+				f\inputText = f\storedInputText
+				f\cursorIndex = Len(f\inputText)
+				f\storedInputText = ""
+			Else
+				Local tempIndex2% = f\commandAmount
+				For f\commandHistory = Each ConsoleCommands
+					If tempIndex2 = f\historyIndex Then
+						f\inputText = f\commandHistory\command					
+						f\cursorIndex = Len(f\commandHistory\command)
+						Exit					
+					EndIf
+					tempIndex2 = tempIndex2 - 1
+				Next
+			EndIf		
+			
+			FPrint("DOWN History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex2))
 		EndIf
 		
 		;Home
@@ -450,6 +517,7 @@ Function DrawFlopConsole(f.FlopConsole)
 	Local c.ConsoleCommands = Last ConsoleCommands
 	
 	;Command history
+	Local commandIndex% = 1
 	While c <> Null
 		Local s$ = c\command
 		
@@ -457,54 +525,68 @@ Function DrawFlopConsole(f.FlopConsole)
 		
 		startY = startY - sHeight
 		
+		If commandIndex = f\historyIndex Then
+			Color(30, 30, 30)
+			Rect(0, startY, Width, sHeight)
+			Color(255, 255, 255)
+		EndIf
+		
 		Text(startX, startY, s)
 		
 		c = Before c
+
+		commandIndex = commandIndex + 1
 
 	Wend
 
 	;Cursor
 	Color(173, 216, 230)
 	Local sub$ = Left(f\inputText, f\cursorIndex)
-	Rect(startX + StringWidth(sub), inputTextY, f\cursorWidth, f\cursorHeight)
+	Rect(startX + StringWidth(sub), inputTextY + ((f\inputBoxHeight - f\cursorHeight) / 2), f\cursorWidth, f\cursorHeight)
 	
 	Color(255, 255, 255)
 
 End Function
 
-Function ClearConsoleCommands()
+Function ClearConsoleCommands(f.FlopConsole)
 
-	For c.ConsoleCommands = Each ConsoleCommands
-		Delete c
+	For f\commandHistory = Each ConsoleCommands
+		Delete f\commandHistory
 	Next
+	
+	f\commandAmount = 0
+	f\historyIndex = 0
 	
 End Function
 
-Function PrintToConsole(s$)
+Function PrintToConsole(f.FlopConsole, s$)
 
-	Local newCommand.ConsoleCommands = New ConsoleCommands
-	newCommand\command = s
+	f\commandHistory = New ConsoleCommands
+	f\commandHistory\command = s
+	f\commandAmount = f\commandAmount + 1	
 
 End Function
 
-Function DoConsoleCommand(command.ConsoleCommands)
+Function DoConsoleCommand(f.flopConsole, command.ConsoleCommands)
 
 	Local one.Split = SplitString(command\command, " ")	
 	Local actualCommand$ = one\arr[0]
 	actualCommand = Lower(actualCommand)
 	Delete one
 
-	For c.ConsoleCommands = Each ConsoleCommands
+	f\historyIndex = 0
+	
+	For f\commandHistory.ConsoleCommands = Each ConsoleCommands
 	
 		Select(actualCommand)
 		Case "hello"
-			Command_Hello()
+			Command_Hello(f)
 			Return
 		Case "clear"
-			Command_Clear_Console()
+			Command_Clear_Console(f)
 			Return
 		Case "date"
-			Command_Date()
+			Command_Date(f)
 			Return
 		Default
 			;Nothing		
@@ -513,31 +595,30 @@ Function DoConsoleCommand(command.ConsoleCommands)
 		
 	Next
 	
-	Command_Unknown(actualCommand)
+	Command_Unknown(f, actualCommand)
 
 End Function
 
-Function Command_Unknown(command$)
-	PrintToConsole("Unknown command: " + command)
+Function Command_Unknown(f.FlopConsole, command$)
+	PrintToConsole(f, command + ": Unknown command")
 End Function
 
-Function Command_Clear_Console()
-	ClearConsoleCommands()
+Function Command_Clear_Console(f.FlopConsole)
+	ClearConsoleCommands(f)
 End Function
 
-Function Command_Hello()
+Function Command_Hello(f.FlopConsole)
 
 	Local time$ = CurrentTime()
-	PrintToConsole("Hello. Current time is " + time)
+	PrintToConsole(f, "Hello. Current time is " + time)
 
 End Function
 
-Function Command_Date()
+Function Command_Date(f.FlopConsole)
 	Local date$ = CurrentDate()
-	PrintToConsole("Current date is: " + date)
+	PrintToConsole(f, "Current date is: " + date)
 End Function
 	
-
 
 
 
