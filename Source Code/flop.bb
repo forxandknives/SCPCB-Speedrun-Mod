@@ -33,8 +33,6 @@ End Function
 
 Global UseFlopConsole = False
 
-Function 
-
 Type SplitStrings
 	
 	Field s$
@@ -47,7 +45,7 @@ Function Split(s$, delimiter$)
 	
 	If s = 0 Then Return
 	
-	For i = 1 To length
+	;For i = 1 To length
 	
 	
 
