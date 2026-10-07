@@ -1,6 +1,6 @@
 Graphics 1280,720,32,2
 
-Const DEBUG_MODE% = True
+Const DEBUG_MODE% = false
 
 If DEBUG_MODE Then AllocConsole()
 
@@ -10,7 +10,7 @@ Type Split
 
 	Field length%
 	Field arr$[SplitStringMaxAmount] ;100 just to be safe
-	
+
 End Type
 
 Function SplitString.Split(s$, delimiter$)
@@ -266,6 +266,7 @@ End Type
 Type ConsoleCommands
 
 	Field command$
+	field firstWord$
 	Field displayText$
 
 End Type
@@ -358,8 +359,9 @@ Function UpdateFlopConsole(f.FlopConsole)
 			f\cursorIndex = 0
 			
 			DoConsoleCommand(flop, tempCommand)
-			
-			Delete tempCommand
+
+			delete(tempCommand)
+					
 		EndIf
 		
 		;Backspace
@@ -434,12 +436,13 @@ Function UpdateFlopConsole(f.FlopConsole)
 		
 		;Arrow Up
 		If KeyHit(200) Then
+			If f\storedInputText = "" And f\historyIndex = 0 Then
+				f\storedInputText = f\inputText
+			EndIf
+
 			f\historyIndex = f\historyIndex + 1
 			If f\historyIndex > f\commandAmount Then
 				f\historyIndex = f\commandAmount
-			EndIf
-			If f\storedInputText = "" And f\historyIndex = 0 Then
-				f\storedInputText = f\inputText
 			EndIf
 			
 			Local tempIndex% = f\commandAmount
@@ -451,7 +454,9 @@ Function UpdateFlopConsole(f.FlopConsole)
 				EndIf
 				tempIndex = tempIndex - 1
 			Next
-			FPrint("UP History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex))
+			If DEBUG_MODE then
+				FPrint("UP History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex) + " " + f\storedInputText)
+			endif
 
 		EndIf
 		
@@ -478,9 +483,11 @@ Function UpdateFlopConsole(f.FlopConsole)
 				Next
 			EndIf		
 			
-			FPrint("DOWN History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex2))
-		EndIf
-		
+			If DEBUG_MODE then
+				FPrint("DOWN History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex2) + " " + f\storedInputText)
+			endif
+		EndIf				
+
 		;Home
 		If KeyHit(199) Then
 			f\cursorIndex = 0
@@ -519,7 +526,7 @@ Function DrawFlopConsole(f.FlopConsole)
 	;Command history
 	Local commandIndex% = 1
 	While c <> Null
-		Local s$ = c\command
+		Local s$ = c\displayText
 		
 		Local sHeight% = StringHeight(s)
 		
@@ -559,34 +566,35 @@ Function ClearConsoleCommands(f.FlopConsole)
 	
 End Function
 
-Function PrintToConsole(f.FlopConsole, s$)
+Function PrintToConsole(f.FlopConsole, command.ConsoleCommands, displayText$)
 
 	f\commandHistory = New ConsoleCommands
-	f\commandHistory\command = s
+	f\commandHistory\command = command\command
+	f\commandHistory\firstWord = command\firstWord
+	f\commandHistory\displayText = displayText
 	f\commandAmount = f\commandAmount + 1	
 
 End Function
 
 Function DoConsoleCommand(f.flopConsole, command.ConsoleCommands)
 
-	Local one.Split = SplitString(command\command, " ")	
-	Local actualCommand$ = one\arr[0]
-	actualCommand = Lower(actualCommand)
+	Local one.Split = SplitString(command\command, " ")		
+	command\firstWord = Lower(one\arr[0])
 	Delete one
 
 	f\historyIndex = 0
 	
 	For f\commandHistory.ConsoleCommands = Each ConsoleCommands
 	
-		Select(actualCommand)
+		Select(command\firstWord)
 		Case "hello"
-			Command_Hello(f)
+			Command_Hello(f, command)
 			Return
 		Case "clear"
-			Command_Clear_Console(f)
+			Command_Clear_Console(f, command)
 			Return
 		Case "date"
-			Command_Date(f)
+			Command_Date(f, command)
 			Return
 		Default
 			;Nothing		
@@ -595,28 +603,28 @@ Function DoConsoleCommand(f.flopConsole, command.ConsoleCommands)
 		
 	Next
 	
-	Command_Unknown(f, actualCommand)
+	Command_Unknown(f, command)
 
 End Function
 
-Function Command_Unknown(f.FlopConsole, command$)
-	PrintToConsole(f, command + ": Unknown command")
+Function Command_Unknown(f.FlopConsole, command.ConsoleCommands)	
+	PrintToConsole(f, command, command\firstWord + ": Unknown command")
 End Function
 
-Function Command_Clear_Console(f.FlopConsole)
+Function Command_Clear_Console(f.FlopConsole, command.ConsoleCommands)
 	ClearConsoleCommands(f)
 End Function
 
-Function Command_Hello(f.FlopConsole)
+Function Command_Hello(f.FlopConsole, command.ConsoleCommands)
 
 	Local time$ = CurrentTime()
-	PrintToConsole(f, "Hello. Current time is " + time)
+	PrintToConsole(f, command, "Hello. Current time is " + time)
 
 End Function
 
-Function Command_Date(f.FlopConsole)
+Function Command_Date(f.FlopConsole, command.ConsoleCommands)
 	Local date$ = CurrentDate()
-	PrintToConsole(f, "Current date is: " + date)
+	PrintToConsole(f, command, "Current date is: " + date)
 End Function
 	
 
