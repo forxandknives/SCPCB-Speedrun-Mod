@@ -160,13 +160,15 @@ SetBuffer(BackBuffer())
 Function StartMainLoop()
 End Function
 
+Global ShouldQuitGame = false
+
 Repeat 
 	
 	FlopTimerSetStartTimeToNow()
 	
 	;;;;;;;;;;;;;;;;;;;;;;;;LOGIC START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
-	If KeyHit(1) Then Exit
+	If KeyHit(1) Then ShouldQuitGame = true
 
 	;If KeyDown(203) Then rectX = rectX - (moveSpeed * dt)
 	;If KeyDown(205) Then rectX = rectX + (moveSpeed * dt)
@@ -222,7 +224,7 @@ Repeat
 		fps = Int(1000.0 / frameTime)
 	EndIf
 
-Forever
+until ShouldQuitGame = true
 
 DeleteFlopConsole(Flop)
 FreeImage(Floppa)
@@ -596,6 +598,9 @@ Function DoConsoleCommand(f.flopConsole, command.ConsoleCommands)
 		Case "date"
 			Command_Date(f, command)
 			Return
+		case "quit", "exit"
+			Command_Quit(f, command)
+			return
 		Default
 			;Nothing		
 		
@@ -627,7 +632,9 @@ Function Command_Date(f.FlopConsole, command.ConsoleCommands)
 	PrintToConsole(f, command, "Current date is: " + date)
 End Function
 	
-
+Function Command_Quit(f.FlopConsole, command.ConsoleCommands)
+	ShouldQuitGame = true
+end function
 
 
 
