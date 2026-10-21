@@ -329,9 +329,10 @@ Function UpdateMainMenu()
 						;FMOD_CloseStream(CurrMusicStream)
 						;FMOD_Close()
 						;FMOD_StopStream(CurrMusicStream)
-						FSOUND_Stream_Stop(CurrMusicStream)
+						;FSOUND_Stream_Stop(CurrMusicStream)
 						;FSOUND_Close()
-						End
+						;End
+						QuitGame()
 					EndIf
 			End Select
 			
@@ -1858,7 +1859,11 @@ Function UpdateMainMenu()
 	AASetFont Font1
 	
 	UpdateConsole()
-	
+
+	If PracticeMenu Then
+		DrawPracticeMenu(menu)
+	EndIf
+
 End Function
 
 Function UpdateLauncher()

@@ -22,7 +22,8 @@ Include "Source Code/StrictLoads.bb"
 Include "Source Code/fullscreen_window_fix.bb"
 Include "Source Code/KeyName.bb"
 
-Include "Source Code/flop.bb"
+Include "Source Code/Flop/flop.bb"
+Include "Source Code/Flop/practice.bb"
 
 Global OptionFile$ = "options.ini"
 
@@ -481,8 +482,15 @@ Global blue%  = 0
 Global rainbowIndex% = 0
 
 Global RainbowMode% = GetINIInt(OptionFile, "options", "rainbow mode")
-
 ;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;PRACTICE MODE;;;;;;;;;;;;;;;;;;;;;;
+
+Global PracticeMenu = true
+Global menu.PracticeMenu = CreatePracticeMenu(MonitorWidth / 5, MonitorHeight / 4, MonitorWidth/3, MonitorHeight/3)
+
+
+;;;;;;;;;;;;;;PRACTICE MODE;;;;;;;;;;;;;;;;;;;;;;
 
 Const DEBUG_MODE% = True
 
@@ -491,7 +499,12 @@ If DEBUG_MODE Then
 	AllocConsole()
 EndIf
 
-FlopFunction()
+;FlopFunction()
+Function QuitGame()
+	FSOUND_Stream_Stop(CurrMusicStream)
+	DeletePracticeMenu(menu)
+	End
+end Function
 
 Function ResetSpeedrunVariables()
 
@@ -1086,7 +1099,7 @@ Function UpdateConsole()
 							CreateConsoleMsg("******************************")
 							CreateConsoleMsg("Will play tracks in .ogg/.wav format")
 							CreateConsoleMsg("from "+Chr(34)+"SFX\Music\Custom\"+Chr(34)+".")
-							CreateConsoleMsg("******************************")
+							CreateConsoleMsg("******************************")						
 						Case "e"
 							CreateConsoleMsg("HELP - e")
 							CreateConsoleMsg("******************************")
@@ -1218,8 +1231,9 @@ Function UpdateConsole()
 					;[End Block]
 				Case "quit", "exit"
 					;[Block]
-					FSOUND_Stream_Stop(CurrMusicStream)
-					End
+					;FSOUND_Stream_Stop(CurrMusicStream)
+					;End
+					QuitGame()
 					;[End Block]	
 				Case "omni"
 					;[Block]
@@ -3421,6 +3435,10 @@ Repeat
 		Input_ResetTime = Max(Input_ResetTime-FPSfactor,0.0)
 	EndIf
 	
+	If PracticeMenu Then
+		UpdatePracticeMenu(menu)
+	EndIF
+
 	UpdateMusic()
 	If EnableSFXRelease Then AutoReleaseSounds()
 	
@@ -8027,6 +8045,10 @@ Function DrawGUI()
 		AASetFont FontMono
 		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
 	EndIf
+
+	;If PracticeMenu Then
+	;	DrawPracticeMenu(menu)
+	;EndIf
 
 	
 	If PrevInvOpen And (Not InvOpen) Then MoveMouse viewport_center_x, viewport_center_y
