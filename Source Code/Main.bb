@@ -42,7 +42,7 @@ Wend
 ErrorFile = ErrorFile+Str(ErrorFileInd)+".txt"
 
 Global UpdaterFont%
-Global Font1%, Font2%, Font3%, Font4%, Font5%, FontMono%
+Global Font1%, Font2%, Font3%, Font4%, Font5%, FontMono%, FontMonoSmall
 Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
@@ -240,6 +240,7 @@ Font3%    = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(22 * (GraphicHeigh
 Font4%    = AALoadFont("GFX\font\DS-DIGI\DS-Digital.ttf", Int(60 * (GraphicHeight / 1024.0)), 0,0,0)
 Font5%    = AALoadFont("GFX\font\Journal\Journal.ttf", Int(58 * (GraphicHeight / 1024.0)), 0,0,0)
 FontMono% = AALoadFont("GFX\font\mono\mono.tff", Int(58 * (GraphicHeight / 1024.0)), 0, 0, 0)
+FontMonoSmall% = AALoadFont("GFX\font\mono\mono.tff", Int(30 * (GraphicHeight / 1024.0)), 0, 0, 0)
  
 Global CreditsFont%,CreditsFont2%
 

@@ -11,7 +11,7 @@ Type PracticeMenu
     field b%
 
     field headerRect.Rectangle
-    field headerText$        
+    field headerText$
     field headerR%
     field headerG%
     field headerB%
@@ -25,81 +25,85 @@ Type PracticeMenu
 end type
 
 Function CreatePracticeMenu.PracticeMenu(x%, y%, width%, height%)
-    Local menu.PracticeMenu = new PracticeMenu
-    menu\rect = new Rectangle
-    menu\headerRect = new Rectangle
+    Local m.PracticeMenu = new PracticeMenu
+    m\rect = new Rectangle
+    m\headerRect = new Rectangle
 
-    menu\rect\x = x
-    menu\rect\y = y
-    menu\rect\width = width
-    menu\rect\height = height
+    m\rect\x = x
+    m\rect\y = y
+    m\rect\width = width
+    m\rect\height = height
 
-    menu\r = 30
-    menu\g = 100
-    menu\b = 90
+    m\r = 30
+    m\g = 100
+    m\b = 90
 
-    menu\headerRect\x = menu\rect\x
-    menu\headerRect\y = menu\rect\y
-    menu\headerRect\width = menu\rect\width
-    menu\headerRect\height = menu\rect\height / 10
-    menu\headerText = "Here is the header text yippee!"
+    m\headerRect\x = m\rect\x
+    m\headerRect\y = m\rect\y
+    m\headerRect\width = m\rect\width
+    m\headerRect\height = m\rect\height / 10
+    m\headerText = "Here is the header text yippee!"
 
-    return menu
+    return m
 end function
 
-Function DeletePracticeMenu(menu.PracticeMenu)
-    delete menu\rect
-    delete menu\headerRect
-    delete menu
+Function DeletePracticeMenu(m.PracticeMenu)
+    delete m\rect
+    delete m\headerRect
+    delete m
 end function
 
-Function UpdatePracticeMenu(menu.PracticeMenu)
-    menu\menuIsHot = MouseInRect(menu\rect)
-    menu\headerIsHot = MouseInRect(menu\headerRect)
+Function UpdatePracticeMenu(m.PracticeMenu)
+    m\menuIsHot = MouseInRect(m\rect)
+    m\headerIsHot = MouseInRect(m\headerRect)
 
     ;REMOVE THIS
-    If menu\menuIsHot Then
-        menu\r = 255    
+    If m\menuIsHot Then
+        m\r = 255    
     Else
-        menu\r = 30
+        m\r = 30
     EndIf    
 
-    If menu\headerIsHot and MouseHit1 Then
+    If m\headerIsHot and MouseHit1 Then
         ;Click on header
-        menu\headerIsActive = true
-        menu\headerMX = MouseX()
-        menu\headerMY = MouseY()    
-        menu\storedX = menu\rect\x
-        menu\storedY = menu\rect\y
-    else if menu\headerIsActive and MouseDown1 then
+        m\headerIsActive = true
+        m\headerMX = MouseX()
+        m\headerMY = MouseY()    
+        m\storedX = m\rect\x
+        m\storedY = m\rect\y
+    else if m\headerIsActive and MouseDown1 then
         ;Dragging header around
         Local mx% = MouseX()
         Local my% = MouseY()
 
         ;Distance mouse moved since first click
-        Local mdx% = mx - menu\headerMX
-        Local mdy% = my - menu\headerMY
+        Local mdx% = mx - m\headerMX
+        Local mdy% = my - m\headerMY
 
-        menu\rect\x = menu\storedX + mdx
-        menu\rect\y = menu\storedY + mdy
-        menu\headerRect\x = menu\rect\x
-        menu\headerRect\y = menu\rect\y
-    elseif menu\headerIsActive and (Not MouseDown1) Then
+        m\rect\x = m\storedX + mdx
+        m\rect\y = m\storedY + mdy
+        m\headerRect\x = m\rect\x
+        m\headerRect\y = m\rect\y
+    elseif m\headerIsActive and (Not MouseDown1) Then
         ;Released header    
-        menu\headerIsActive = false
+        m\headerIsActive = false
     endif
 
 End Function
 
-Function DrawPracticeMenu(menu.PracticeMenu)
+Function DrawPracticeMenu(m.PracticeMenu)
 
     ;Menu base rectangle
-    Color(menu\r, menu\g, menu\b)
-    Rect(menu\rect\x, menu\rect\y, menu\rect\width, menu\rect\height)
+    Color(m\r, m\g, m\b)
+    Rect(m\rect\x, m\rect\y, m\rect\width, m\rect\height)
 
     ;Header outlined rectangle
     Color(255, 0, 0)
-    Rect(menu\headerRect\x, menu\headerRect\y, menu\headerRect\width, menu\headerRect\height, menu\headerIsHot)
+    Rect(m\headerRect\x, m\headerRect\y, m\headerRect\width, m\headerRect\height, m\headerIsHot)
+
+    ;Header Text
+    AASetFont(FontMonoSmall)
+    AAText(m\headerRect\x + (m\headerRect\width/2), m\headerRect\y + (m\headerRect\height / 2), m\headerText, true, true)
 
     ;Reset back to white
     Color 255, 255, 255
