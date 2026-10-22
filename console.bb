@@ -2,7 +2,7 @@ Graphics 1280,720,32,2
 
 Const DEBUG_MODE% = false
 
-If DEBUG_MODE Then AllocConsole()
+;If DEBUG_MODE Then AllocConsole()
 
 Const SplitStringMaxAmount = 100
 
@@ -138,7 +138,7 @@ DeleteSplitStrings()
 Global Width% = GraphicsWidth()
 Global Height% = GraphicsHeight()
 
-Global FontMono% = LoadFont("GFX\font\mono\mono.tff", Width * 0.025)
+Global FontMono% = LoadFont("GFX\font\mono\mono.ttf", Width * 0.025)
 SetFont(FontMono)
 
 Global TargetFPS% = 60
@@ -228,7 +228,7 @@ until ShouldQuitGame = true
 
 DeleteFlopConsole(Flop)
 FreeImage(Floppa)
-FreeFont(FontMono)
+;FreeFont(FontMono)
 
 Local leak% = CheckForMemoryLeaks()
 If leak Then
@@ -345,7 +345,7 @@ Function UpdateFlopConsole(f.FlopConsole)
 		
 			f\cursorIndex = f\cursorIndex + 1
 			If DEBUG_MODE Then
-				FPrint("Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
+				;FPrint("Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
 			EndIf
 		EndIf		
 		
@@ -356,7 +356,7 @@ Function UpdateFlopConsole(f.FlopConsole)
 			f\inputText = ""			
 			f\storedInputText = ""
 			If DEBUG_MODE Then
-				FPrint("ENTER Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
+				;FPrint("ENTER Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
 			EndIf
 			f\cursorIndex = 0
 			
@@ -393,13 +393,13 @@ Function UpdateFlopConsole(f.FlopConsole)
 			
 			End Select
 			If DEBUG_MODE Then
-				FPrint("BACKSPACE Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
+				;FPrint("BACKSPACE Text: " + f\inputText + " CursorIndex: " + Str(f\cursorIndex))
 			EndIf
 		EndIf
 		
 		If DEBUG_MODE Then
 			If KeyHit(57) Then
-				FPrint("History Index: " + Str(f\historyIndex) + " History Amount: " + Str(f\commandAmount))
+				;FPrint("History Index: " + Str(f\historyIndex) + " History Amount: " + Str(f\commandAmount))
 			EndIf
 		EndIf
 		
@@ -457,7 +457,7 @@ Function UpdateFlopConsole(f.FlopConsole)
 				tempIndex = tempIndex - 1
 			Next
 			If DEBUG_MODE then
-				FPrint("UP History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex) + " " + f\storedInputText)
+				;FPrint("UP History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex) + " " + f\storedInputText)
 			endif
 
 		EndIf
@@ -486,7 +486,7 @@ Function UpdateFlopConsole(f.FlopConsole)
 			EndIf		
 			
 			If DEBUG_MODE then
-				FPrint("DOWN History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex2) + " " + f\storedInputText)
+				;FPrint("DOWN History Index: " + Str(f\historyIndex) + " Temp: " + Str(tempIndex2) + " " + f\storedInputText)
 			endif
 		EndIf				
 
@@ -635,7 +635,6 @@ End Function
 Function Command_Quit(f.FlopConsole, command.ConsoleCommands)
 	ShouldQuitGame = true
 end function
-
 
 
 
