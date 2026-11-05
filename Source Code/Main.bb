@@ -8099,11 +8099,24 @@ Function DrawInputs()
 		EndIf	
 		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*2 - barHeight - boxSize, boxSize, boxSize, sPressed)
 		
+		Local escapePressed% = False
+		If KeyDown(1) Then ;1 is escape key
+			escapePressed = True
+		EndIf
+		Rect(MonitorWidth - (padding1 * 3) - (boxSize * 3) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, escapePressed)
+		
 		Local wPressed% = False	
 		If KeyDown(KEY_UP) Then
 			wPressed = True				
 		EndIf
-		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, wPressed)
+		Rect(MonitorWidth - (padding1 * 2) - (boxSize * 2) - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, wPressed)			
+		
+		Local savePressed% = False
+		If KeyDown(KEY_SAVE) Then
+			savePressed = True
+		EndIf
+		Rect(MonitorWidth - padding1 - boxSize - mouseWidth, MonitorHeight - padding1*3 - barHeight - boxSize*2, boxSize, boxSize, savePressed)
+
 		
 		Local aPressed% = False
 		If KeyDown(KEY_LEFT) Then
