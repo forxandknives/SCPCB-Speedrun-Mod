@@ -1860,9 +1860,9 @@ Function UpdateMainMenu()
 	
 	UpdateConsole()
 
-	If PracticeMenu Then
-		DrawPracticeMenu(menu)
-	EndIf
+	;If PracticeMenu Then
+	;	DrawPracticeMenu(menu)
+	;EndIf
 
 End Function
 

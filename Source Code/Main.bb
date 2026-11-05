@@ -488,13 +488,13 @@ Global RainbowMode% = GetINIInt(OptionFile, "options", "rainbow mode")
 
 ;;;;;;;;;;;;;;PRACTICE MODE;;;;;;;;;;;;;;;;;;;;;;
 
-Global PracticeMenu = true
-Global menu.PracticeMenu = CreatePracticeMenu(MonitorWidth / 5, MonitorHeight / 4, MonitorWidth/3, MonitorHeight/3)
+;Global PracticeMenu = true
+;Global menu.PracticeMenu = CreatePracticeMenu(MonitorWidth / 5, MonitorHeight / 4, MonitorWidth/3, MonitorHeight/3)
 
 
 ;;;;;;;;;;;;;;PRACTICE MODE;;;;;;;;;;;;;;;;;;;;;;
 
-Const DEBUG_MODE% = True
+Const DEBUG_MODE% = False
 
 
 If DEBUG_MODE Then
@@ -504,7 +504,7 @@ EndIf
 ;FlopFunction()
 Function QuitGame()
 	FSOUND_Stream_Stop(CurrMusicStream)
-	DeletePracticeMenu(menu)
+	;DeletePracticeMenu(menu)
 	End
 end Function
 
@@ -3437,9 +3437,9 @@ Repeat
 		Input_ResetTime = Max(Input_ResetTime-FPSfactor,0.0)
 	EndIf
 	
-	If PracticeMenu Then
-		UpdatePracticeMenu(menu)
-	EndIF
+	;If PracticeMenu Then
+	;	UpdatePracticeMenu(menu)
+	;EndIF
 
 	UpdateMusic()
 	If EnableSFXRelease Then AutoReleaseSounds()
@@ -5346,15 +5346,22 @@ Function DrawGUI()
 		EndIf
 	EndIf
 	
-	;If (GuaranteedOmni) Then 
-	;	
-	;	AASetFont ConsoleFont
-	;	Color 255, 255, 255
-	;	
-	;	Local omniText$ = "Guaranteed omni enabled"
-	;	AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
-	;	
-	;EndIf
+	If (GuaranteedOmni) Then 
+		
+		AASetFont ConsoleFont
+		Color 255, 255, 255
+		
+		Local omniText$ = "Guaranteed omni enabled"
+		AAText(MonitorWidth / 2, MonitorHeight - 2*AAStringHeight(omniText), omniText, True, False)
+		
+	EndIf
+	
+	If (GuaranteedPD) Then
+		AASetFont ConsoleFont
+		Color 255, 255, 255
+		Local pdText$ = "Guaranteed PD exit enabled"
+		AAText(MonitorWidth/2, MonitorHeight - AAStringHeight(pdText), pdText, True, False)
+	EndIf
 	
 	If ShowInputs Then			
 		
