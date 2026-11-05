@@ -3932,7 +3932,6 @@ Repeat
 		
 		DrawQuickLoading()
 		
-		UpdateAchievementMsg()
 		;UpdateSaveMSG()
 	End If
 	
@@ -5361,12 +5360,12 @@ Function DrawGUI()
 		Color 255, 255, 255
 		Local pdText$ = "Guaranteed PD exit enabled"
 		AAText(MonitorWidth/2, MonitorHeight - AAStringHeight(pdText), pdText, True, False)
-	EndIf
+	EndIf		
 	
-	If ShowInputs Then			
-		
-		DrawInputs()
-		
+	UpdateAchievementMsg()
+	
+	If ShowInputs Then					
+		DrawInputs()			
 	EndIf	
 	
 	If ESP Then
