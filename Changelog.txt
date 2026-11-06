@@ -1,4 +1,19 @@
-﻿Speedrun Mod v0.0.8
+﻿Speedrun Mod v0.0.9
+- SEED REROLLING
+  - This feature allows you to reroll for specific seeds.
+    - Currently allows you to reroll for beatable, 99%able, and 100%able seeds.
+    - This reroll happens before the map loads, so you don't have to load a map to see it is not what you want.
+  - Works for vanilla and direct rng seeds.
+
+- Made console useable in the main menu.
+- Added a console command "pd" which guarantees pd entrance from strange bottle, and exit from pd.
+- SCP-500 no longer has gravity.
+  - This will prevent it from falling through the map in the maintenance tunnel.
+- Achievement popups now appear below the input visualizer.
+- Added visualizations for escape and save keys in the input visualizer.
+- Mod now specifies GameTime, RealTime, and shows achievement count when a run is over (during the cutscene).
+
+Speedrun Mod v0.0.8
 - Fixed bug where timer would disappear.
 - Timer now shows in loading screen.
 - Speedrun stats now show in the end-game menu.
