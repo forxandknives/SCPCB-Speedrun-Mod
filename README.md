@@ -27,6 +27,9 @@ Requirements:
 10. Console command "showmap" which draws a 2D version of the map on screen.<br>
 11. Updated functionality for text boxes.<br>
 12. Added ability to generate more possible random seeds.<br>
-13. Added an input shower in-game.
+13. Added an input visualizer in-game.<br>
+14. Ability to re-roll for certain seeds.<br>
+15. Console command "omni", which guarantees an omni card from SCP-914.<br>
+16. Console command "pd", which guarantees instant entrance/exit to pocket dimension.<br>
 
 Read the changelog for a full list of changes for each version.<br>
