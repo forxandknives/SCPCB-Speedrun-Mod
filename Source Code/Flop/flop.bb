@@ -23,6 +23,17 @@ Const CHECK_FOR_100      = 14
 
 Const DO_NOT_REROLL      = 15
 
+; A small note about the CPUGenerator Function
+; Make sure the CPUSeedGenerator.exe program is in the same folder as the speedrun mode .exe.
+;
+;	If using for your own project, first give credit :), then import flop.decls and flop.dll.
+;
+; Usage:
+;	CPUGenerator(seed (direct only), check to perform)
+;
+; If using on vanilla seed, Input seed as GenerateSeedNumber(seed)
+; Return value will be either SEED_IS_BEATABLE (4), SEED_CAN_BE_99 (6), or SEED_CAN_BE_100 (8)
+
 Function FlopFunction()
 
 	Local cpuReturn% = CPUGenerator(Abs(MilliSecs()), CHECK_FOR_BEATABLE);2536653)

@@ -536,6 +536,32 @@ Function ResetSpeedrunVariables()
 	
 End Function
 
+Function FormatTimerString$(time%)
+	Local ms% = Int(time Mod 1000)
+	Local seconds% = (Time / 1000) Mod 60
+	Local minutes% = Int((time / 1000) / 60)
+		
+	Local secondsString$ = Str(seconds)
+		
+	If seconds < 10 Then
+		secondsString = "0" + secondsString
+	EndIf
+	
+	Local msString$ = Str(ms)
+	
+	If ms < 10 Then
+		msString = "00" + msString
+	EndIf 
+	
+	If ms < 100 Then
+		msString = "0" + msString		
+	EndIf
+
+	Local finalString$ = Str(minutes) + ":" + secondsString + "." + Left(msString, 3)
+	
+	Return finalString
+End Function
+
 Function CopyTextToClipBoard%(inputText$)
 
 	Local seedLength% = Len(inputText)
@@ -4511,39 +4537,22 @@ Function DrawEnding()
 		
 		Color 0, 255, 0
 		
-		AAText(GraphicWidth * 0.01, GraphicHeight * 0.40, "Ending " + SpeedrunEnding, False, True)
-		Local ms% = Int(Gametime Mod 1000)
-		Local seconds% = (GameTime / 1000) Mod 60
-		Local minutes% = Int((Gametime / 1000) / 60)
-			
-		Local secondsString$ = Str(seconds)
-			
-		If seconds < 10 Then
-			secondsString = "0" + secondsString
-		EndIf
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.40, "Ending " + SpeedrunEnding, False, True)		
 		
-		Local msString$ = Str(ms)
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Game Time: " + FormatTimerString(GameTime), False, True)
 		
-		If ms < 10 Then
-			msString = "00" + msString
-		EndIf 
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.50, "Real Time: " + FormatTimerString(PlayTime), False, True)
 		
-		If ms < 100 Then
-			msString = "0" + msString		
-		EndIf
-		
-		AAText(GraphicWidth * 0.01, GraphicHeight * 0.45, "Finished in: " + Str(minutes) + ":" + Str(secondsString) + "." + Left(msString, 3), False, True)
-		
-		AAText(GraphicWidth * 0.01, GraphicHeight * 0.50, "Seed: " + RandomSeed, False, True)
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.55, "Seed: " + RandomSeed, False, True)
 		
 		Local achievementCount% = 0
 		For i = 0 To MAXACHIEVEMENTS-1
 			achievementCount = achievementCount+ Achievements(i)
 		Next		
-		AAText(GraphicWidth * 0.01, GraphicHeight * 0.55, "Achievements: " + Str(achievementCount) + "/" + Str(MAXACHIEVEMENTS), False, True)
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.60, "Achievements: " + Str(achievementCount) + "/" + Str(MAXACHIEVEMENTS), False, True)
 
 		If SeedRNGDirectly Then
-			AAText(GraphicWidth * 0.01, GraphicHeight * 0.60, "RNG Seeded Directly", False, True)
+			AAText(GraphicWidth * 0.01, GraphicHeight * 0.65, "RNG Seeded Directly", False, True)
 		EndIf
 		
 		Color 255, 255, 255
@@ -5313,29 +5322,7 @@ Function DrawGUI()
 	Else
 		HidePointer()
 		ShowSeed = False
-	EndIf 		
-
-
-	; The code to actually show the timer is at the bottom of DrawGUI().	
-	Local ms% = Int(Gametime Mod 1000)
-	Local seconds% = (GameTime / 1000) Mod 60
-	Local minutes% = Int((Gametime / 1000) / 60)
-		
-	Local secondsString$ = Str(seconds)
-		
-	If seconds < 10 Then
-		secondsString = "0" + secondsString
-	EndIf
-	
-	Local msString$ = Str(ms)
-	
-	If ms < 10 Then
-		msString = "00" + msString
-	EndIf 
-	
-	If ms < 100 Then
-		msString = "0" + msString		
-	EndIf	
+	EndIf 			
 	
 	If ShowSeedIsBeatable Then
 		If Not(IsSeedBeatable) Then
@@ -5457,7 +5444,7 @@ Function DrawGUI()
 	If RunFinished Then
 		Color 0, 255, 0
 		AASetFont Font2
-		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True
+		AAText (GraphicWidth/2), (GraphicHeight/2), "Ending " + SpeedrunEnding + " Finished In: " + FormatTimerString(GameTime), True, True
 		AAText (GraphicWidth/2), (GraphicHeight * 0.55), "Seed: " + RandomSeed, True, True
 		If SeedRNGDirectly Then
 			AAText (GraphicWidth/2), (GraphicHeight * 0.60), "RNG Seeded Directly", True, True
@@ -8057,7 +8044,7 @@ Function DrawGUI()
 			Color TimerR, TimerG, TimerB
 		EndIf
 		AASetFont FontMono
-		AAText TimerX, TimerY, Str(minutes) + ":" + secondsString + "." + Left(msString, 3), True, True						
+		AAText TimerX, TimerY, FormatTimerString(GameTime), True, True						
 	EndIf
 
 	;If PracticeMenu Then
