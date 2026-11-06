@@ -47,8 +47,8 @@ Global ConsoleFont%
 
 Global VersionNumber$ = "1.3.11"
 Global CompatibleNumber$ = "1.3.11" ;Only change this if the version given isn't working with the current build version - ENDSHN
-Global SpeedrunVersion$ = "0.0.8"
-Global VersionDate$ = "CHANGE THIS"
+Global SpeedrunVersion$ = "0.0.9"
+Global VersionDate$ = "November 5 8:40 PM EST"
 
 Global MenuWhite%, MenuBlack%
 Global ButtonSFX%
@@ -215,7 +215,7 @@ Global GameSaved%
 
 Global CanSave% = True
 
-AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion + " Fast53"
+AppTitle "SCP - Containment Breach v"+ VersionNumber + " Speedrun Mod v" + SpeedrunVersion
 
 PlayStartupVideos()
 
