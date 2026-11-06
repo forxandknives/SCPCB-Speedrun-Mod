@@ -4536,8 +4536,14 @@ Function DrawEnding()
 		
 		AAText(GraphicWidth * 0.01, GraphicHeight * 0.50, "Seed: " + RandomSeed, False, True)
 		
+		Local achievementCount% = 0
+		For i = 0 To MAXACHIEVEMENTS-1
+			achievementCount = achievementCount+ Achievements(i)
+		Next		
+		AAText(GraphicWidth * 0.01, GraphicHeight * 0.55, "Achievements: " + Str(achievementCount) + "/" + Str(MAXACHIEVEMENTS), False, True)
+
 		If SeedRNGDirectly Then
-			AAText(GraphicWidth * 0.01, GraphicHeight * 0.55, "RNG Seeded Directly", False, True)
+			AAText(GraphicWidth * 0.01, GraphicHeight * 0.60, "RNG Seeded Directly", False, True)
 		EndIf
 		
 		Color 255, 255, 255
