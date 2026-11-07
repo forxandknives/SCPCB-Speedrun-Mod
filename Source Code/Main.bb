@@ -5354,12 +5354,13 @@ Function DrawGUI()
 		Local pdText$ = "Guaranteed PD exit enabled"
 		AAText(MonitorWidth/2, MonitorHeight - AAStringHeight(pdText), pdText, True, False)
 	EndIf		
-	
-	UpdateAchievementMsg()
+
 	
 	If ShowInputs Then					
 		DrawInputs()			
 	EndIf	
+	
+	UpdateAchievementMsg()
 	
 	If ESP Then
 		CameraProject(Camera, EntityX(Curr173\Collider), EntityY(Curr173\Collider), EntityZ(Curr173\Collider))				
